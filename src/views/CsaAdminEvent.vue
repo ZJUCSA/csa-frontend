@@ -13,11 +13,11 @@ const size = ref(10)
 
 const operator = ref(null)
 
-const ConfirmDelete = (event, nid) => {
+const ConfirmDelete = (event, eid) => {
     console.log(event)
     confirm.require({
         target: event.currentTarget,
-        message: '确认删除该新闻？',
+        message: '确认删除该活动？',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
             label: '取消',
@@ -30,8 +30,8 @@ const ConfirmDelete = (event, nid) => {
         },
         accept: () => {
             axios
-                .post('/news/delete', {
-                    nid: nid,
+                .post('/event/delete', {
+                    eid: eid,
                 })
                 .then(() => {
                     fetchContent()
@@ -43,7 +43,7 @@ const ConfirmDelete = (event, nid) => {
 
 const fetchContent = () => {
     axios
-        .get('/news/list', {
+        .get('/event/list', {
             params: {
                 page: page.value,
                 size: size.value,
@@ -55,7 +55,7 @@ const fetchContent = () => {
 }
 
 axios
-    .get('/news/count')
+    .get('/event/count')
     .then(res => {
         total.value = res.data.count
     })
@@ -65,16 +65,16 @@ axios
 </script>
 
 <template>
-    <csa-edit-news
+    <csa-edit-event
         v-model:show="show"
         @finish="fetchContent"
-        :nid="operator"
-    ></csa-edit-news>
+        :eid="operator"
+    ></csa-edit-event>
     <ConfirmPopup></ConfirmPopup>
     <div class="main-part-lg mx-auto">
-        <div class="text-3xl font-bold mb-6">新闻管理</div>
+        <div class="text-3xl font-bold mb-6">活动管理</div>
         <Button
-            label="创建新闻"
+            label="创建活动"
             class="mb-4"
             @click="
                 () => {
@@ -84,17 +84,21 @@ axios
             "
         ></Button>
         <DataTable :value="data" class="mb-4">
-            <Column field="nid" header="编号"></Column>
+            <Column field="eid" header="编号"></Column>
             <Column field="title" header="标题">
                 <template #body="{ data }">
                     <div class="min-w-48">{{ data.title }}</div>
                 </template>
             </Column>
-            <Column field="tag" header="标签">
+            <Column field="tag" header="活动时间">
                 <template #body="{ data }">
                     <div class="flex flex-col gap-y-1">
-                        <div v-for="tag in data.tag.split(' ')" :key="tag">
-                            <Tag :value="tag" class="text-nowrap"></Tag>
+                        <div>
+                            {{
+                                new Date(
+                                    data.start_time * 1000
+                                ).toLocaleString()
+                            }}
                         </div>
                     </div>
                 </template>
@@ -115,7 +119,7 @@ axios
                             class="whitespace-nowrap"
                             @click="
                                 () => {
-                                    operator = data.nid
+                                    operator = data.eid
                                     show = true
                                 }
                             "
@@ -131,7 +135,7 @@ axios
                             severity="danger"
                             size="small"
                             class="whitespace-nowrap"
-                            @click="$event => ConfirmDelete($event, data.nid)"
+                            @click="$event => ConfirmDelete($event, data.eid)"
                         ></Button>
                     </div>
                 </template>

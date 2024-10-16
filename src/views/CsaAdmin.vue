@@ -47,12 +47,12 @@ const items = ref([
 
 <template>
     <div class="flex">
-        <div class="shrink-0">
-            <div class="card flex justify-center m-8">
+        <div class="grow-0">
+            <div class="card flex justify-center m-4 lg:m-8">
                 <Menu :model="items" />
             </div>
         </div>
-        <div class="grow my-16">
+        <div class="grow min-w-0 my-16">
             <router-view />
         </div>
     </div>

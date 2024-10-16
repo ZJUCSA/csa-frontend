@@ -88,6 +88,14 @@ const router = createRouter({
                         title: '新闻管理',
                     },
                 },
+                {
+                    path: 'event',
+                    name: 'admin-event',
+                    component: () => import('../views/CsaAdminEvent.vue'),
+                    meta: {
+                        title: '活动管理',
+                    },
+                },
             ],
         },
     ],
