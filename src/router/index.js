@@ -47,10 +47,18 @@ const router = createRouter({
                 },
                 {
                     path: 'events',
-                    name: 'events',
+                    name: 'event_list',
                     component: () => import('../views/CsaEvents.vue'),
                     meta: {
                         title: '活动',
+                    },
+                },
+                {
+                    path: 'news',
+                    name: 'news_list',
+                    component: () => import('../views/CsaNews.vue'),
+                    meta: {
+                        title: '新闻',
                     },
                 },
                 {

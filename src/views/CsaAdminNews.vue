@@ -62,6 +62,10 @@ axios
     .then(() => {
         fetchContent()
     })
+
+watch([page, size], () => {
+    fetchContent()
+})
 </script>
 
 <template>

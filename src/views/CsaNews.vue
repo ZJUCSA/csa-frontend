@@ -9,7 +9,7 @@ const size = ref(10)
 
 const fetchContent = () => {
     axios
-        .get('/event/list', {
+        .get('/news/list', {
             params: {
                 page: page.value,
                 size: size.value,
@@ -21,7 +21,7 @@ const fetchContent = () => {
 }
 
 axios
-    .get('/event/count')
+    .get('/news/count')
     .then(res => {
         total.value = res.data.count
     })
@@ -36,15 +36,15 @@ watch([page, size], () => {
 
 <template>
     <div class="main-part mx-auto py-12">
-        <div class="text-2xl font-bold">精彩活动</div>
-        <div class="text-xl mb-6">Events</div>
+        <div class="text-2xl font-bold">最新动态</div>
+        <div class="text-xl mb-6">Latest News</div>
         <DataTable :value="data" class="mb-4">
             <Column field="title" header="标题">
                 <template #body="{ data }">
                     <div class="min-w-48">
                         <router-link
                             class="link"
-                            :to="{ name: 'event', params: { id: data.eid } }"
+                            :to="{ name: 'news', params: { id: data.nid } }"
                             >{{ data.title }}</router-link
                         >
                     </div>
@@ -59,20 +59,19 @@ watch([page, size], () => {
                     </div>
                 </template>
             </Column>
-            <Column field="start_time" header="活动时间">
+            <Column field="tag" header="发布日期">
                 <template #body="{ data }">
                     <div class="flex flex-col gap-y-1">
                         <div>
                             {{
                                 new Date(
-                                    data.start_time * 1000
-                                ).toLocaleString()
+                                    data.first_publish * 1000
+                                ).toLocaleDateString()
                             }}
                         </div>
                     </div>
                 </template>
             </Column>
-            <Column field="place" header="地点"></Column>
         </DataTable>
         <div class="flex justify-end">
             <Paginator

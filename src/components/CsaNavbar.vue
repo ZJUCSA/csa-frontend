@@ -6,9 +6,14 @@ const items = ref([
         jump: 'home',
     },
     {
+        label: 'News',
+        icon: 'pi pi-book',
+        jump: 'news_list',
+    },
+    {
         label: 'Events',
         icon: 'pi pi-star',
-        jump: 'events',
+        jump: 'event_list',
     },
     {
         label: 'Contact',
