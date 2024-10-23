@@ -14,7 +14,6 @@ const size = ref(10)
 const operator = ref(null)
 
 const ConfirmDelete = (event, nid) => {
-    console.log(event)
     confirm.require({
         target: event.currentTarget,
         message: '确认删除该新闻？',

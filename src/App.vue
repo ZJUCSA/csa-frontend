@@ -1,9 +1,7 @@
 <template>
-    <div id="app">
-        <csa-navbar />
-        <router-view />
-        <csa-footer />
-    </div>
+    <csa-navbar />
+    <router-view />
+    <csa-footer />
 </template>
 
 <style>

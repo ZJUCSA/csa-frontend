@@ -1,4 +1,7 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const axios = inject('axios')
 
 const data = ref([])
@@ -29,6 +32,15 @@ axios
         fetchContent()
     })
 
+const handleClick = item => {
+    router.push({
+        name: 'news',
+        params: {
+            id: item.nid,
+        },
+    })
+}
+
 watch([page, size], () => {
     fetchContent()
 })
@@ -36,43 +48,44 @@ watch([page, size], () => {
 
 <template>
     <div class="main-part mx-auto py-12">
-        <div class="text-2xl font-bold">最新动态</div>
-        <div class="text-xl mb-6">Latest News</div>
-        <DataTable :value="data" class="mb-4">
-            <Column field="title" header="标题">
-                <template #body="{ data }">
-                    <div class="min-w-48">
-                        <router-link
-                            class="link"
-                            :to="{ name: 'news', params: { id: data.nid } }"
-                            >{{ data.title }}</router-link
-                        >
-                    </div>
-                </template>
-            </Column>
-            <Column field="tag" header="标签">
-                <template #body="{ data }">
-                    <div class="flex flex-col gap-y-1">
-                        <div v-for="tag in data.tag.split(' ')" :key="tag">
-                            <Tag :value="tag" class="text-nowrap"></Tag>
+        <div class="text-3xl font-bold mb-0.5">最新动态</div>
+        <div class="text-2xl mb-8">Latest News</div>
+        <div class="mb-10">
+            <div class="flex flex-col gap-y-8">
+                <div v-for="(item, index) in data" :key="index">
+                    <div
+                        class="py-6 px-8 rounded-xl border border-neutral-200 dark:border-0 dark:bg-neutral-100/5 shadow-xl hover:scale-105 transition-transform cursor-pointer"
+                        @click="() => handleClick(item)"
+                    >
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="text-xl font-bold">
+                                {{ item.title }}
+                            </div>
+                            <div class="text-sm text-neutral-500">
+                                {{
+                                    new Date(
+                                        item.first_publish * 1000
+                                    ).toLocaleDateString()
+                                }}
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex gap-1">
+                                <div
+                                    v-for="tag in item.tag.split(' ')"
+                                    :key="tag"
+                                >
+                                    <Tag :value="tag" class="text-nowrap"></Tag>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-neutral-600">
+                            {{ item.summary }}
                         </div>
                     </div>
-                </template>
-            </Column>
-            <Column field="tag" header="发布日期">
-                <template #body="{ data }">
-                    <div class="flex flex-col gap-y-1">
-                        <div>
-                            {{
-                                new Date(
-                                    data.first_publish * 1000
-                                ).toLocaleDateString()
-                            }}
-                        </div>
-                    </div>
-                </template>
-            </Column>
-        </DataTable>
+                </div>
+            </div>
+        </div>
         <div class="flex justify-end">
             <Paginator
                 v-model:page="page"

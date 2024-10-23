@@ -39,7 +39,7 @@ onMounted(() => {
         id="home"
     >
         <p class="text-2xl mb-1">欢迎来到</p>
-        <p class="text-2xl mb-10 font-bold">浙江大学学生网络空间协会</p>
+        <p class="text-2xl mb-10 font-bold">浙江大学学生网络空间安全协会</p>
         <div class="text-6xl font-bold">
             <span id="typing"></span>
         </div>
