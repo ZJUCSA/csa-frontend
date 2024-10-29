@@ -1,11 +1,13 @@
 <script setup>
+import { newsCategory } from '@/const'
+
 const axios = inject('axios')
 
 const props = defineProps(['show', 'nid'])
 const emits = defineEmits(['update:show', 'finish'])
 
 const loading = ref(false)
-const rendering = ref(false)
+const rendering = ref(true)
 
 const options = {
     height: 500,
@@ -30,6 +32,15 @@ const data = reactive({
     content: '',
     title: '',
     tag: '',
+    category: 1,
+    image: '',
+})
+
+const cateOptions = newsCategory.slice(1).map((item, index) => {
+    return {
+        label: item,
+        value: index + 1,
+    }
 })
 
 const submit = () => {
@@ -39,6 +50,8 @@ const submit = () => {
             title: data.title,
             content: data.content,
             tag: data.tag,
+            category: data.category,
+            image: data.image,
         })
         .then(() => {
             visible.value = false
@@ -60,6 +73,8 @@ watch(visible, value => {
                 data.title = res.data.title
                 data.content = res.data.content
                 data.tag = res.data.tag
+                data.category = res.data.category
+                data.image = res.data.image
                 loading.value = false
             })
     }
@@ -97,6 +112,27 @@ watch(visible, value => {
                         width="100%"
                         height="200px"
                     ></Skeleton>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>分类</label>
+                    <Select
+                        v-model="data.category"
+                        optionLabel="label"
+                        optionValue="value"
+                        :options="cateOptions"
+                    ></Select>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>头图</label>
+                    <InputText
+                        id="image"
+                        class="flex-auto"
+                        placeholder="头图 URL"
+                        autocomplete="off"
+                        v-model="data.image"
+                    />
                 </div>
 
                 <div class="flex items-center gap-4 mb-4">

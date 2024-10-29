@@ -1,11 +1,12 @@
 <script setup>
+import { eventCategory } from '@/const'
 const axios = inject('axios')
 
 const props = defineProps(['show', 'eid'])
 const emits = defineEmits(['update:show', 'finish'])
 
 const loading = ref(false)
-const rendering = ref(false)
+const rendering = ref(true)
 
 const visible = computed({
     get() {
@@ -31,8 +32,10 @@ const data = reactive({
     description: '',
     start_time: 0,
     end_time: 0,
+    category: 1,
     place: '',
     tag: '',
+    image: '',
 })
 
 const submit = () => {
@@ -43,8 +46,10 @@ const submit = () => {
             description: data.description,
             start_time: Date.parse(data.start_time) / 1000,
             end_time: Date.parse(data.end_time) / 1000,
+            category: data.category,
             place: data.place,
             tag: data.tag,
+            image: data.image,
         })
         .then(() => {
             visible.value = false
@@ -52,6 +57,13 @@ const submit = () => {
             emits('finish')
         })
 }
+
+const cateOptions = eventCategory.slice(1).map((item, index) => {
+    return {
+        label: item,
+        value: index + 1,
+    }
+})
 
 watch(visible, value => {
     if (value && props.eid) {
@@ -68,8 +80,10 @@ watch(visible, value => {
                 data.description = res.data.description
                 data.start_time = new Date(res.data.start_time * 1000)
                 data.end_time = new Date(res.data.end_time * 1000)
+                data.category = res.data.category
                 data.place = res.data.place
                 data.tag = res.data.tag
+                data.image = res.data.image
                 loading.value = false
             })
     }
@@ -146,9 +160,30 @@ watch(visible, value => {
                 </div>
 
                 <div class="flex items-center gap-4 mb-4">
+                    <label>分类</label>
+                    <Select
+                        v-model="data.category"
+                        optionLabel="label"
+                        optionValue="value"
+                        :options="cateOptions"
+                    ></Select>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>头图</label>
+                    <InputText
+                        id="image"
+                        class="flex-auto"
+                        placeholder="头图 URL"
+                        autocomplete="off"
+                        v-model="data.image"
+                    />
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
                     <label>地点</label>
                     <InputText
-                        id="tag"
+                        id="place"
                         class="flex-auto"
                         placeholder="地点"
                         autocomplete="off"
