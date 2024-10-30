@@ -66,26 +66,38 @@ const cateOptions = eventCategory.slice(1).map((item, index) => {
 })
 
 watch(visible, value => {
-    if (value && props.eid) {
-        loading.value = true
-        rendering.value = true
-        axios
-            .get('/event/detail', {
-                params: {
-                    eid: props.eid,
-                },
-            })
-            .then(res => {
-                data.title = res.data.title
-                data.description = res.data.description
-                data.start_time = new Date(res.data.start_time * 1000)
-                data.end_time = new Date(res.data.end_time * 1000)
-                data.category = res.data.category
-                data.place = res.data.place
-                data.tag = res.data.tag
-                data.image = res.data.image
-                loading.value = false
-            })
+    if (value) {
+        console.log(props.eid)
+        if (props.eid) {
+            loading.value = true
+            rendering.value = true
+            axios
+                .get('/event/detail', {
+                    params: {
+                        eid: props.eid,
+                    },
+                })
+                .then(res => {
+                    data.title = res.data.title
+                    data.description = res.data.description
+                    data.start_time = new Date(res.data.start_time * 1000)
+                    data.end_time = new Date(res.data.end_time * 1000)
+                    data.category = res.data.category
+                    data.place = res.data.place
+                    data.tag = res.data.tag
+                    data.image = res.data.image
+                    loading.value = false
+                })
+        } else {
+            data.title = ''
+            data.description = ''
+            data.start_time = 0
+            data.end_time = 0
+            data.category = 1
+            data.place = ''
+            data.tag = ''
+            data.image = ''
+        }
     }
 })
 </script>

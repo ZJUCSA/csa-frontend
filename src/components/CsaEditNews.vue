@@ -61,22 +61,30 @@ const submit = () => {
 }
 
 watch(visible, value => {
-    if (value && props.nid) {
-        loading.value = true
-        axios
-            .get('/news/detail', {
-                params: {
-                    nid: props.nid,
-                },
-            })
-            .then(res => {
-                data.title = res.data.title
-                data.content = res.data.content
-                data.tag = res.data.tag
-                data.category = res.data.category
-                data.image = res.data.image
-                loading.value = false
-            })
+    if (value) {
+        if (props.nid) {
+            loading.value = true
+            axios
+                .get('/news/detail', {
+                    params: {
+                        nid: props.nid,
+                    },
+                })
+                .then(res => {
+                    data.title = res.data.title
+                    data.content = res.data.content
+                    data.tag = res.data.tag
+                    data.category = res.data.category
+                    data.image = res.data.image
+                    loading.value = false
+                })
+        } else {
+            data.title = ''
+            data.content = ''
+            data.tag = ''
+            data.category = 1
+            data.image = ''
+        }
     }
 })
 </script>

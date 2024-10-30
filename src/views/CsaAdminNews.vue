@@ -1,5 +1,6 @@
 <script setup>
 import { useConfirm } from 'primevue/useconfirm'
+import { newsCategory } from '@/const'
 
 const confirm = useConfirm()
 const axios = inject('axios')
@@ -16,7 +17,7 @@ const operator = ref(null)
 const ConfirmDelete = (event, nid) => {
     confirm.require({
         target: event.currentTarget,
-        message: '确认删除该新闻？',
+        message: '确认删除该信息？',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
             label: '取消',
@@ -75,9 +76,9 @@ watch([page, size], () => {
     ></csa-edit-news>
     <ConfirmPopup></ConfirmPopup>
     <div class="main-part-lg mx-auto">
-        <div class="text-3xl font-bold mb-6">新闻管理</div>
+        <div class="text-3xl font-bold mb-6">信息管理</div>
         <Button
-            label="创建新闻"
+            label="创建信息"
             class="mb-4"
             @click="
                 () => {
@@ -91,6 +92,11 @@ watch([page, size], () => {
             <Column field="title" header="标题">
                 <template #body="{ data }">
                     <div class="min-w-48">{{ data.title }}</div>
+                </template>
+            </Column>
+            <Column field="category" header="类型">
+                <template #body="{ data }">
+                    <div>{{ newsCategory[data.category] }}</div>
                 </template>
             </Column>
             <Column field="tag" header="标签">
