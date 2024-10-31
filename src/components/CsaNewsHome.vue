@@ -5,7 +5,7 @@ const data = ref([])
 
 axios
     .get('/news/list', {
-        params: { page: 1, size: 8 },
+        params: { page: 1, size: 8, category: 1 },
     })
     .then(res => {
         data.value = res.data

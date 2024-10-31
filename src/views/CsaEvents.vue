@@ -62,7 +62,7 @@ watch([page, size], () => {
                                 <div class="text-xl font-bold mb-1">
                                     {{ item.title }}
                                 </div>
-                                <div class="flex gap-1">
+                                <div class="flex gap-1" v-if="item.tag">
                                     <div
                                         v-for="tag in item.tag.split(' ')"
                                         :key="tag"

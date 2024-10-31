@@ -101,7 +101,7 @@ watch([page, size], () => {
             </Column>
             <Column field="tag" header="标签">
                 <template #body="{ data }">
-                    <div class="flex flex-col gap-y-1">
+                    <div class="flex flex-col gap-y-1" v-if="data.tag">
                         <div v-for="tag in data.tag.split(' ')" :key="tag">
                             <Tag :value="tag" class="text-nowrap"></Tag>
                         </div>

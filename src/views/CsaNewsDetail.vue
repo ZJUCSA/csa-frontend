@@ -25,7 +25,7 @@ axios
     <div class="main-part mx-auto py-16">
         <div v-if="data">
             <div class="text-3xl font-bold mb-2">{{ data.title }}</div>
-            <div class="flex flex-col gap-x-1 mb-3">
+            <div class="flex flex-col gap-x-1 mb-3" v-if="data.tag">
                 <div v-for="tag in data.tag.split(' ')" :key="tag">
                     <Tag :value="tag" class="text-nowrap"></Tag>
                 </div>

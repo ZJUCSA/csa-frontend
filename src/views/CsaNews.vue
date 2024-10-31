@@ -16,6 +16,7 @@ const fetchContent = () => {
             params: {
                 page: page.value,
                 size: size.value,
+                category: 1,
             },
         })
         .then(res => {
@@ -70,7 +71,7 @@ watch([page, size], () => {
                             </div>
                         </div>
                         <div class="mb-2">
-                            <div class="flex gap-1">
+                            <div class="flex gap-1" v-if="item.tag">
                                 <div
                                     v-for="tag in item.tag.split(' ')"
                                     :key="tag"
