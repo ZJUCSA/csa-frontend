@@ -11,6 +11,12 @@ importers:
       '@primevue/themes':
         specifier: ^4.1.0
         version: 4.1.0
+      '@tsparticles/engine':
+        specifier: ^3.6.0
+        version: 3.6.0
+      '@tsparticles/vue3':
+        specifier: ^3.0.1
+        version: 3.0.1
       axios:
         specifier: ^1.7.7
         version: 1.7.7
@@ -604,6 +610,12 @@ packages:
   '@sindresorhus/merge-streams@2.3.0':
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
+
+  '@tsparticles/engine@3.6.0':
+    resolution: {integrity: sha512-iDBD0ZTTtoI5WwZkcjAgMVP2oCK2GkNgO7/Eipsfb8ZWKxtD/niGI14ynVQ31sBzp/weARwTxc4BTpbMeQHCGg==}
+
+  '@tsparticles/vue3@3.0.1':
+    resolution: {integrity: sha512-BxaSZ0wtxq33SDsrqLkLWoV88Jd5BnBoYjyVhKSNzOLOesCiG8Z5WQC1QZGTez79l/gBe0xaCDF0ng1e2iKJvA==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -2458,6 +2470,15 @@ snapshots:
     optional: true
 
   '@sindresorhus/merge-streams@2.3.0': {}
+
+  '@tsparticles/engine@3.6.0': {}
+
+  '@tsparticles/vue3@3.0.1':
+    dependencies:
+      '@tsparticles/engine': 3.6.0
+      vue: 3.5.12
+    transitivePeerDependencies:
+      - typescript
 
   '@types/estree@1.0.6': {}
 
