@@ -46,5 +46,37 @@ axios
             <Skeleton height="2rem" class="mb-4"></Skeleton>
             <Skeleton height="2rem" class="mb-4"></Skeleton>
         </div>
+
+        <div class="flex justify-between gap-8 mt-8">
+            <!-- 培训课程 -->
+            <div class="flex-1">
+                <div class="text-2xl font-bold">培训课程</div>
+                <div class="mb-6">training course</div>
+                <!-- index-->
+                <div v-for="i in 3" :key="i">
+                    <Skeleton height="2rem" class="mb-4"></Skeleton>
+                </div>
+            </div>
+
+            <!-- 论坛 -->
+            <div class="flex-1">
+                <div class="text-2xl font-bold">网安论坛</div>
+                <div class="mb-6">Cyber Security Forum</div>
+                <!-- index -->
+                <div v-for="i in 3" :key="i">
+                    <Skeleton height="2rem" class="mb-4"></Skeleton>
+                </div>
+            </div>
+
+            <!-- 工具资源 -->
+            <div class="flex-1">
+                <div class="text-2xl font-bold">工具资源</div>
+                <div class="mb-6">Tools&Resourse</div>
+                <!-- index -->
+                <div v-for="i in 3" :key="i">
+                    <Skeleton height="2rem" class="mb-4"></Skeleton>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
