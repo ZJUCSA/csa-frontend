@@ -140,7 +140,7 @@ const isAboutPage = computed(() => route.name === 'about')
     align-items: center;
     justify-content: center;
 }
-.nav-content {
+.about-nav {
     transition: all 0.3s ease; /* 添加过渡效果 */
 }
 .nav-collapsed {
