@@ -18,6 +18,7 @@ import { Notyf } from 'notyf'
 import VueVditor from 'vue-vditor'
 import ConfirmationService from 'primevue/confirmationservice'
 
+
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
