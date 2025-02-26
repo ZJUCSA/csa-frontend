@@ -187,6 +187,7 @@ onMounted(() => {
   padding: 2rem;
   position: relative;
   z-index: 1;
+  padding-bottom: 5rem; /*防止最后一个section紧贴底部 */
 }
 
 .parallax-bg {
@@ -200,7 +201,7 @@ onMounted(() => {
   /*但是100% auto对变化大小的窗口表现更好，对手机端的表现应该也更好，考虑是否要优化 */
   background-position: center top; /*水平方向居中对齐，垂直方向顶部对齐*/
   transform: translateZ(0);
-  z-index: 0;
+  z-index: -1;
   will-change: transform;
 }
 .parallax-overlay {
