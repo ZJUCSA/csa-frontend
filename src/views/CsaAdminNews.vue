@@ -30,7 +30,7 @@ const ConfirmDelete = (event, nid) => {
         },
         accept: () => {
             axios
-                .post('/news/delete', {
+                .post('/delete/news', {
                     nid: nid,
                 })
                 .then(() => {
