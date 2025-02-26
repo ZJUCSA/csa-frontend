@@ -16,6 +16,30 @@
       </div>
     </section>
 
+    <!-- 协会愿景板块 -->
+    <section id="vision" class="section">
+      <div class="content-wrapper">
+        <h2 class="fade-in">协会愿景</h2>
+        <div class="vision-grid">
+          <div class="vision-card fade-in">
+            <i class="vision-icon">🔬</i>
+            <h3>技术创新</h3>
+            <p>致力于网络安全前沿技术研究，培养具有创新思维和实践能力的技术人才，引领网络安全技术发展。</p>
+          </div>
+          <div class="vision-card fade-in">
+            <i class="vision-icon">🎯</i>
+            <h3>人才培养</h3>
+            <p>打造系统化的技术培训体系，通过实战演练、竞赛训练等方式，培养高水平网络空间安全专业人才。</p>
+          </div>
+          <div class="vision-card fade-in">
+            <i class="vision-icon">🌟</i>
+            <h3>行业影响</h3>
+            <p>搭建产学研交流平台，促进校企合作，为网络安全行业输送优秀人才，提升协会在业界的影响力。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 发展历程时间线 -->
     <section id="timeline" class="section">
       <div class="content-wrapper">
@@ -135,6 +159,44 @@ h2 {
   margin-bottom: 2rem;
 }
 
+/* 愿景板块样式 */
+.vision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.vision-card {
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vision-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.vision-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.vision-card h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.vision-card p {
+  color: #34495e;
+  line-height: 1.6;
+}
+
 /* 时间线样式 */
 .timeline {
   position: relative;
@@ -214,7 +276,7 @@ h2 {
 .fade-in {
   animation: fadeIn_ani 2s ease-out forwards; /*使用CSS动画，保持最后一帧的状态*/
 }
-.keyframes fadeIn_ani {
+@keyframes fadeIn_ani {
   from {
     opacity: 0;
     transform: translateY(20px);
