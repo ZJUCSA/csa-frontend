@@ -29,7 +29,7 @@ const ConfirmDelete = (event, eid) => {
         },
         accept: () => {
             axios
-                .post('/event/delete', {
+                .post('/delete/event', {
                     eid: eid,
                 })
                 .then(() => {

@@ -18,7 +18,7 @@ const submitLogin = () => {
     axios
         .post('/user/login', {
             uid: loginForm.uid,
-            password: sha256(loginForm.passwd).toString(),
+            passwd: sha256(loginForm.passwd).toString(),
         })
         .catch(() => {
             loading.value = false
