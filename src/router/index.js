@@ -30,6 +30,14 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'register',
+                    name: 'register',
+                    component: () => import('../views/CsaRegister.vue'),
+                    meta: {
+                        title: '注册',
+                    },
+                },
+                {
                     path: 'about',
                     name: 'about',
                     component: () => import('../views/CsaAbout.vue'),
