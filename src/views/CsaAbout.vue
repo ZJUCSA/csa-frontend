@@ -62,7 +62,7 @@ onMounted(() => {
       <div class="content-wrapper">
         <h2 class="fade-in">关于我们</h2>
         <p class="fade-in description">
-          浙江大学学生网络空间安全协会（CSA）成立于2023年，是一个致力于培养网络空间安全人才、促进网络安全技术交流与创新的学生组织。我们通过举办各类技术讲座、实践演练、竞赛培训等活动，为对网络安全感兴趣的同学提供学习和交流的平台。
+          浙江大学学生网络空间安全协会（CSA）成立于2023年，是浙江大学网络空间安全领域的重要育苗基地。我们致力于培养对网络安全感兴趣的学生，通过举办各类技术讲座、实践演练、竞赛培训等活动，为同学们提供全方位的学习和交流平台，助力他们在网络空间安全领域的成长与发展。
         </p>
       </div>
     </section>
@@ -73,19 +73,24 @@ onMounted(() => {
         <h2 class="fade-in">协会愿景</h2>
         <div class="vision-grid">
           <div class="vision-card fade-in">
-            <i class="vision-icon">🔬</i>
-            <h3>技术创新</h3>
-            <p>致力于网络安全前沿技术研究，培养具有创新思维和实践能力的技术人才，引领网络安全技术发展。</p>
+            <i class="vision-icon">🎮</i>
+            <h3>培养兴趣爱好</h3>
+            <p>激发对网络安全的热情，通过有趣的活动和项目，让每位成员在探索中找到乐趣，培养持久的学习动力。</p>
           </div>
           <div class="vision-card fade-in">
-            <i class="vision-icon">🎯</i>
-            <h3>人才培养</h3>
-            <p>搭建系统化的技术培训体系，通过实战演练、竞赛训练等方式，培养高水平网络空间安全专业人才。</p>
+            <i class="vision-icon">💪</i>
+            <h3>提高学习与实践能力</h3>
+            <p>通过系统化的培训体系和实战演练，帮助成员掌握专业技能，提升实践能力，打造过硬的技术本领。</p>
           </div>
           <div class="vision-card fade-in">
-            <i class="vision-icon">🌟</i>
-            <h3>行业影响</h3>
-            <p>搭建产学研交流平台，促进校企合作，为网络安全行业输送优秀人才，提升协会在业界的影响力。</p>
+            <i class="vision-icon">🔭</i>
+            <h3>开拓知识视野</h3>
+            <p>定期举办技术讲座和交流活动，邀请业内专家分享经验，帮助成员了解行业动态，拓展专业视野。</p>
+          </div>
+          <div class="vision-card fade-in">
+            <i class="vision-icon">🌈</i>
+            <h3>拓宽就业渠道</h3>
+            <p>搭建校企合作平台，培养成员从业技能，为成员提供优质的就业资源，助力职业发展。</p>
           </div>
         </div>
       </div>
@@ -172,23 +177,65 @@ onMounted(() => {
     <!-- 活动展示 -->
     <section id="activities" class="section">
       <div class="content-wrapper">
-        <h2 class="fade-in">活动展示</h2>
+        <h2 class="fade-in">社团活动</h2>
         <div class="activities-grid">
           <div class="activity-card fade-in">
-            <h3>技术讲座</h3>
-            <p>定期邀请业内专家分享前沿技术</p>
+            <h3>网安知识培训</h3>
+            <p>
+              密码与数据安全<br>
+              硬件与物联网安全<br>
+              软件与系统安全<br>
+              人工智能安全
+            </p>
           </div>
           <div class="activity-card fade-in">
-            <h3>实践演练</h3>
-            <p>组织模拟攻防战，动手实践，提升实战能力</p>
+            <h3>攻防技术培训</h3>
+            <p>
+              CTF竞赛、数据安全 <br>
+              系统安全、AI安全 <br>
+              车安全
+            </p>
           </div>
           <div class="activity-card fade-in">
-            <h3>竞赛培训</h3>
-            <p>系统的竞赛知识培训和计算机技能培训</p>
+            <h3>参加竞赛</h3>
+            <p>
+              组织竞赛<br>
+              提供报名费、车旅费
+            </p>
           </div>
           <div class="activity-card fade-in">
-            <h3>项目孵化</h3>
-            <p>支持创新项目开发</p>
+            <h3>攻防演练</h3>
+            <p>
+              校级攻防演练<br>
+              省部级攻防演练
+            </p>
+          </div>
+          <div class="activity-card fade-in">
+            <h3>训练OJ</h3>
+            <p>
+              各类安全竞赛练习题
+            </p>
+          </div>
+          <div class="activity-card fade-in">
+            <h3>承办竞赛</h3>
+            <p>
+              举办校级安全竞赛
+            </p>
+          </div>
+          <div class="activity-card fade-in">
+            <h3>网安知识宣传科普</h3>
+            <p>
+              网络安全知识与技术宣讲会 <br>
+              网络安全暑期summer school
+            </p>
+          </div>
+          <div class="activity-card fade-in">
+            <h3>科研人才培养</h3>
+            <p>
+              联系导师科研 <br>
+              定期师生见面交流会 <br>
+              学术沙龙
+            </p>
           </div>
         </div>
       </div>
@@ -469,6 +516,12 @@ h2 {
   transition: transform 0.3s ease;
 }
 
+.team-member h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
 .team-member:hover {
   transform: translateY(-5px);
 }
@@ -495,6 +548,11 @@ h2 {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
+}
+.activity-card h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
 }
 
 .activity-card:hover {
