@@ -42,15 +42,18 @@ const isAboutPage = computed(() => route.name === 'about')
 <template>
 
     <!-- 收起导航栏的按钮，点击翻转isCollapsed的值， 目前只适用于about，没对其它页面做测试 -->
-    <Button
-      v-if="isAboutPage"
-      icon="pi pi-bars"
-      @click="toggleNav"
-      class="nav-toggle-btn"
-      severity="secondary"
-      text
-      rounded
-    />
+    <div class="nav-button-container">
+        <Button
+            v-if="isAboutPage"
+            icon="pi pi-bars"
+            @click="toggleNav"
+            class="nav-toggle-btn"
+            severity="secondary"
+            text
+            rounded
+        />
+    </div>
+
 
     <div class="card" :class="[isAboutPage ? 'about-nav' : 'fixed-nav', isCollapsed ? 'nav-collapsed' : '']">
     <!-- 不确定其它页面是否也要采取position:absolute(这会带来一些问题)或者其他设置, 所以仅对about页面进行特殊处理，但navbar的z-index所有页面都设置得高一点应该是合理的，需要的话直接把about的判断去掉，全部用about-nav就行了(( -->
@@ -110,7 +113,7 @@ const isAboutPage = computed(() => route.name === 'about')
 }
 
 .about-nav {
-    position: fixed; /* absolute改成相对页面的绝对定位，那么屏幕向下滚动navbar就会隐藏 */
+    position: fixed; /* 改用absolute，那么屏幕向下滚动navbar就会隐藏； 现在会和导航栏收起的功能冲突了 */
     /*或许只要给navbar一个透明效果，fixed也不是不能接受 */
     top: 0;
     left: 0;
@@ -125,11 +128,17 @@ const isAboutPage = computed(() => route.name === 'about')
 }
 
 /*折叠导航栏的按钮*/
-.nav-toggle-btn {
+.nav-button-container {
     position: fixed;
     right: 1rem;
     top: 1rem;
-    z-index: 1001; /* 确保按钮在导航栏上方 */
+    z-index: 1001;
+}
+.nav-toggle-btn {
+    /* 移除position: fixed，因为现在由容器控制位置 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .nav-content {
     transition: all 0.3s ease; /* 添加过渡效果 */
