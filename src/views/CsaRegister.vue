@@ -5,6 +5,8 @@ const route = useRoute()
 
 const axios = inject('axios')
 
+const CAS_CLIENT_ID = import.meta.env.VITE_CAS_CLIENT_ID
+
 if (!route.query.code) {
     const REDIRECT_URI = encodeURIComponent(window.location.host + '/register')
     let url = `https://zjuam.zju.edu.cn/cas/oauth2.0/authorize?response_type=code&client_id=${CAS_CLIENT_ID}&redirect_uri=${REDIRECT_URI}`
