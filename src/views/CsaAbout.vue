@@ -1,5 +1,37 @@
 <!--  关于我们  -->
 
+<script setup>
+import { onMounted, onUnmounted } from 'vue'
+
+onMounted(() => {
+  const sections = document.querySelectorAll('.section')
+  
+  const handleScroll = () => {
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      
+      // 计算section在视口中的可见比例
+      const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0)
+      const sectionHeight = rect.height
+      const visibleRatio = Math.max(0, Math.min(1, visibleHeight / sectionHeight))
+      
+      // 根据可见比例设置透明度和模糊效果
+      section.style.opacity = 0.3 + (visibleRatio * 0.7)
+      section.style.backdropFilter = `blur(${5 - (visibleRatio * 5)}px)`
+      section.style.transform = `translateY(${20 - (visibleRatio * 20)}px)`
+    })
+  }
+  
+  window.addEventListener('scroll', handleScroll)
+  handleScroll() // 初始化时执行一次
+  
+  onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+  })
+})
+</script>
+
 <template>
   <head>
     <title>关于我们-CSA-网络空间安全协会</title>
@@ -29,7 +61,7 @@
           <div class="vision-card fade-in">
             <i class="vision-icon">🎯</i>
             <h3>人才培养</h3>
-            <p>打造系统化的技术培训体系，通过实战演练、竞赛训练等方式，培养高水平网络空间安全专业人才。</p>
+            <p>搭建系统化的技术培训体系，通过实战演练、竞赛训练等方式，培养高水平网络空间安全专业人才。</p>
           </div>
           <div class="vision-card fade-in">
             <i class="vision-icon">🌟</i>
@@ -137,8 +169,26 @@
 }
 
 .section {
-  margin-bottom: 10rem;
+  min-height: 100vh;
   text-align: center;
+  position: relative;
+  margin-bottom: 8rem;
+  padding: 4rem 0;
+  opacity: 0.3;
+  backdrop-filter: blur(5px);
+  transform: translateY(20px);
+}
+
+.section.active {
+  opacity: 1;
+  backdrop-filter: blur(0);
+  transform: translateY(0);
+}
+
+.section.inactive {
+  opacity: 0.3;
+  backdrop-filter: blur(5px);
+  transform: translateY(20px);
 }
 
 .content-wrapper {
@@ -239,6 +289,7 @@ h2 {
   gap: 2rem;
   margin-top: 2rem;
 }
+
 .team-member {
   padding: 1.5rem;
   background: #fff;
@@ -246,9 +297,11 @@ h2 {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
 }
+
 .team-member:hover {
   transform: translateY(-5px);
 }
+
 .member-avatar {
   width: 100px;
   height: 100px;
@@ -256,6 +309,7 @@ h2 {
   border-radius: 50%;
   object-fit: cover;
 }
+
 /* 活动卡片样式 */
 .activities-grid {
   display: grid;
@@ -263,6 +317,7 @@ h2 {
   gap: 2rem;
   margin-top: 2rem;
 }
+
 .activity-card {
   padding: 2rem;
   background: #fff;
@@ -270,14 +325,17 @@ h2 {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
 }
+
 .activity-card:hover {
   transform: translateY(-5px);
 }
+
 /* 淡入动画 */
 .fade-in {
   animation: fadeIn_ani 1.5s ease-out; /*使用CSS动画*/
   /* 这里不要用forwards，不然animation会让元素强制保持最后一帧状态，导致其他过渡效果失效 */
 }
+
 @keyframes fadeIn_ani {
   from {
     opacity: 0;
@@ -288,6 +346,7 @@ h2 {
     transform: translateY(0);  /* Y偏移+透明度变化 */
   }
 }
+
 /* 响应式适配 */
 @media (max-width: 768px) {
   .about-container {
