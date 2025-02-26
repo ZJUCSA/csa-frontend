@@ -47,28 +47,29 @@
         <h2 class="fade-in">核心团队</h2>
         <div class="team-grid">
 
+          <!-- 在jsconfig.json中看到@定义为src -->
           <div class="team-member fade-in">
-            <div class="member-avatar"></div>
+            <img src="@/assets/about/team-avatar/competition.jpg" class="member-avatar" alt="竞赛部头像"/>
             <h3>竞赛部</h3>
             <p>负责技术培训、竞赛指导</p>
           </div>
           <div class="team-member fade-in">
-            <div class="member-avatar"></div>
+            <img src="@/assets/about/team-avatar/research.jpg" class="member-avatar" alt="科研部头像"/>
             <h3>科研部</h3>
             <p>负责组织讲座和科研活动</p>
           </div>
           <div class="team-member fade-in">
-            <div class="member-avatar"></div>
+            <img src="@/assets/about/team-avatar/activity.jpg" class="member-avatar" alt="活动部头像">
             <h3>活动部</h3>
             <p>负责活动策划与执行</p>
           </div>
           <div class="team-member fade-in">
-            <div class="member-avatar"></div>
+            <img src="@/assets/about/team-avatar/publicity.png" class="member-avatar" alt="宣传部头像">
             <h3>宣传部</h3>
             <p>负责宣传活动</p>
           </div>
           <div class="team-member fade-in">
-            <div class="member-avatar"></div>
+            <img src="@/assets/about/team-avatar/secretary.png" class="member-avatar" alt="秘书部头像">
             <h3>秘书部</h3>
             <p>负责协会运营的大小事宜</p>
           </div>
@@ -175,7 +176,6 @@ h2 {
   gap: 2rem;
   margin-top: 2rem;
 }
-
 .team-member {
   padding: 1.5rem;
   background: #fff;
@@ -183,19 +183,16 @@ h2 {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
 }
-
 .team-member:hover {
   transform: translateY(-5px);
 }
-
 .member-avatar {
   width: 100px;
   height: 100px;
   margin: 0 auto 1rem;
-  background: #e0e0e0;
   border-radius: 50%;
+  object-fit: cover;
 }
-
 /* 活动卡片样式 */
 .activities-grid {
   display: grid;
@@ -203,7 +200,6 @@ h2 {
   gap: 2rem;
   margin-top: 2rem;
 }
-
 .activity-card {
   padding: 2rem;
   background: #fff;
@@ -211,17 +207,14 @@ h2 {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
 }
-
 .activity-card:hover {
   transform: translateY(-5px);
 }
-
 /* 淡入动画 */
 .fade-in {
   animation: fadeIn_ani 2s ease-out forwards; /*使用CSS动画，保持最后一帧的状态*/
 }
-
-@keyframes fadeIn_ani {
+.keyframes fadeIn_ani {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -231,7 +224,6 @@ h2 {
     transform: translateY(0);  /* Y偏移+透明度变化 */
   }
 }
-
 /* 响应式适配 */
 @media (max-width: 768px) {
   .about-container {
