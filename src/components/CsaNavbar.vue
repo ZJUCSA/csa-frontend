@@ -29,7 +29,7 @@ const items = ref([
 </script>
 
 <template>
-    <div class="card">
+    <div class="card fixed-nav fixed-nav-opacity">
         <Menubar :model="items">
             <template #start>
                 <span class="my-3 mx-5 text-xl">ZJUCSA</span>
@@ -71,3 +71,17 @@ const items = ref([
         </Menubar>
     </div>
 </template>
+
+<style>
+.fixed-nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.1); /*想设一个透明度但是失败了？可能下面的东西也设了这个覆盖了,试着穿透也穿透不下去，虽然丑了点但是应该不影响使用..*/
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+</style>

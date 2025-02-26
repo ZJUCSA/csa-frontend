@@ -18,7 +18,6 @@ import { Notyf } from 'notyf'
 import VueVditor from 'vue-vditor'
 import ConfirmationService from 'primevue/confirmationservice'
 
-import Particles from 'particles.vue3'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -34,7 +33,6 @@ app.use(PrimeVue, {
         preset: Aura,
     },
 })
-app.use(Particles)
 
 window.notyf = new Notyf({
     position: {
