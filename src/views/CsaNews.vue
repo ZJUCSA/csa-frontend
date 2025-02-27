@@ -61,14 +61,17 @@ watch([page, size], () => {
                         <div
                             class="flex flex-col md:flex-row gap-x-4 items-center"
                         >
-                            <div class="w-full" v-if="item.image">
+                            <div
+                                class="w-full md:w-64 shrink-0"
+                                v-if="item.image"
+                            >
                                 <img
                                     :src="item.image"
                                     alt="cover"
                                     class="w-full h-48 object-cover rounded-xl"
                                 />
                             </div>
-                            <div class="p-4">
+                            <div class="p-4 self-start mt-4 md:mt-0">
                                 <div class="mb-4">
                                     <div class="text-xl font-bold mb-1">
                                         {{ item.title }}
