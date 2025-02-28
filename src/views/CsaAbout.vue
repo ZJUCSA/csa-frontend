@@ -43,6 +43,123 @@ onMounted(() => {
     window.removeEventListener('scroll', handleScroll)
   })
 })
+
+
+// 场地数据， 并不强制要求5个，随便几个都行，至少一个
+const venues = [
+  {
+    image: '@/assets/about/venue/main_room1.png',
+    title: '网络空间安全协会活动室',
+    description: '位于浙江大学紫金港校区，是我们开展日常活动、技术交流和团队协作的主要场所。配备完善的网络设施和安全设备，为成员提供良好的学习环境。'
+  },
+  {
+    image: '@/assets/about/venue/main_room2.png',
+    title: '网安实验室',
+    description: '配备专业的网络安全设备和工具，为成员提供实践环境。'
+  },
+  {
+    image: '@/assets/about/venue/meeting_room.png',
+    title: '会议室',
+    description: '用于举办技术分享会、学术讨论和小组会议的专属空间。'
+  }
+]
+
+//const currentIndex = ref(0)  //这个以活动场所的单位为模，用来管理不同场景的偏移
+const position = ref(0)  //用来表示card的位置；这个以卡片数量为模，处于性能优化的考量，卡片只有五张，所以只能模5
+const isDragging = ref(false)
+const startX = ref(0)
+const dragThreshold = 100 // 拖动阈值，超过这个值才会触发切换
+
+// 计算当前显示的五个卡片索引
+const displayCards = computed(() => {
+  const len = 5
+  return [
+    (position.value) % len,  // 确保不会出现负数
+    (position.value + 1) % len,
+    (position.value + 2) % len,
+    (position.value + 3) % len,
+    (position.value + 4) % len
+  ]
+})
+
+const handleMouseDown = (e) => {
+  isDragging.value = true
+  startX.value = e.clientX
+}
+
+const handleMouseMove = (e) => {
+  if (!isDragging.value) return
+  const deltaX = e.clientX - startX.value
+
+  if (Math.abs(deltaX) > dragThreshold) {
+    if (deltaX > 0) {
+      // 向右拖动，每个card的位置向右移动，position增加
+      position.value = (position.value + 1) % 5
+      //currentIndex.value = (currentIndex.value - 1 + venues.length) % venues.length
+    } else {
+      // 向左拖动
+      position.value = (position.value - 1 + 5) % 5
+      //currentIndex.value = (currentIndex.value + 1) % venues.length
+    }
+    isDragging.value = false  //保证一次只能滑动一块
+  }
+}
+
+const handleMouseUp = () => {
+  isDragging.value = false
+}
+
+const getCardStyle = (position) => {
+
+  let transform = ''
+  let opacity = 1
+  let zIndex = 1
+
+  switch(position) {
+    case 0: // 最左边屏幕外
+      transform = 'translateX(-200%) scale(0.8)'
+      opacity = 0.5
+      zIndex = 0
+      break
+    case 1: // 左边
+      transform = 'translateX(-100%) scale(0.9)'
+      opacity = 0.8
+      zIndex = 1
+      break
+    case 2: // 中间
+      transform = 'translateX(0) scale(1)'
+      opacity = 1
+      zIndex = 2
+      break
+    case 3: // 右边
+      transform = 'translateX(100%) scale(0.9)'
+      opacity = 0.8
+      zIndex = 1
+      break
+    case 4: // 最右边
+      transform = 'translateX(200%) scale(0.8)'
+      opacity = 0.5
+      zIndex = 0
+      break
+  }
+
+  return {
+    transform,
+    opacity,
+    zIndex,
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('mouseup', handleMouseUp)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mouseup', handleMouseUp)
+})
+
 </script>
 
 
@@ -236,6 +353,29 @@ onMounted(() => {
               定期师生见面交流会 <br>
               学术沙龙
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 活动场所 -->
+    <section id="venue" class="section">
+      <div class="content-wrapper">
+        <h2 class="fade-in">活动场所</h2>
+        <div class="venue-carousel" @mousedown="handleMouseDown">
+          <div class="venue-stage">
+            <div
+              v-for="(position,index) in displayCards"
+              :key="index"
+              class="venue-card"
+              :style="getCardStyle(position)"
+            >
+              <img :src="venues[0].image" :alt="venues[0].title" class="venue-image">
+              <div class="venue-info">
+                <h3>{{ venues[0].title }}</h3>
+                <p>{{ venues[0].description }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -589,6 +729,144 @@ h2 {
   .team-grid,
   .activities-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 活动场所样式 */
+.venue-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.venue-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.venue-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.venue-image {
+  width: 100%;
+  height: 40rem;
+  object-fit: cover;
+}
+
+.venue-info {
+  padding: 2rem;
+}
+
+.venue-info h3 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.venue-info p {
+  color: #34495e;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .venue-image {
+    height: 300px;
+  }
+
+  .venue-info h3 {
+    font-size: 1.5rem;
+  }
+}
+
+
+
+.venue-carousel {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  perspective: 1000px;
+  user-select: none;
+}
+
+.venue-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.venue-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 500px;
+  margin-left: -200px;
+  margin-top: -250px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.5s ease;
+  cursor: grab;
+  transform-origin: center center;
+}
+
+.venue-card:active {
+  cursor: grabbing;
+}
+
+.venue-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.venue-info {
+  padding: 1.5rem;
+}
+
+.venue-info h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.venue-info p {
+  color: #34495e;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .venue-carousel {
+    height: 500px;
+  }
+
+  .venue-card {
+    width: 300px;
+    height: 400px;
+    margin-left: -150px;
+    margin-top: -200px;
+  }
+
+  .venue-image {
+    height: 200px;
+  }
+
+  .venue-info h3 {
+    font-size: 1.2rem;
+  }
+
+  .venue-info p {
+    font-size: 0.9rem;
   }
 }
 </style>
