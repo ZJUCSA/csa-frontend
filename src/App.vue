@@ -1,6 +1,8 @@
 <template>
     <csa-navbar />
-    <router-view />
+    <div class="main-content-area">
+        <router-view />
+    </div>
     <csa-footer />
 </template>
 
@@ -19,5 +21,10 @@ html {
 
 body {
     margin: 0 0 3.5rem;
+}
+
+.main-content-area {
+    padding-top: 70px;
+    padding-bottom: 56px;
 }
 </style>

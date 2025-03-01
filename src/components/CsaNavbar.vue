@@ -40,7 +40,6 @@ const isAboutPage = computed(() => route.name === 'about')
 </script>
 
 <template>
-
     <!-- 收起导航栏的按钮，点击翻转isCollapsed的值， 目前只适用于about，没对其它页面做测试 -->
     <div class="nav-button-container">
         <Button
@@ -54,9 +53,14 @@ const isAboutPage = computed(() => route.name === 'about')
         />
     </div>
 
-
-    <div class="card" :class="[isAboutPage ? 'about-nav' : 'fixed-nav', isCollapsed ? 'nav-collapsed' : '']">
-    <!-- 不确定其它页面是否也要采取position:absolute(这会带来一些问题)或者其他设置, 所以仅对about页面进行特殊处理，但navbar的z-index所有页面都设置得高一点应该是合理的，需要的话直接把about的判断去掉，全部用about-nav就行了(( -->
+    <div
+        class="card"
+        :class="[
+            isAboutPage ? 'about-nav' : 'fixed-nav',
+            isCollapsed ? 'nav-collapsed' : '',
+        ]"
+    >
+        <!-- 不确定其它页面是否也要采取position:absolute(这会带来一些问题)或者其他设置, 所以仅对about页面进行特殊处理，但navbar的z-index所有页面都设置得高一点应该是合理的，需要的话直接把about的判断去掉，全部用about-nav就行了(( -->
 
         <Menubar :model="items" class="nav-content">
             <template #start>
@@ -102,12 +106,14 @@ const isAboutPage = computed(() => route.name === 'about')
 
 <style>
 .fixed-nav {
-    /* position: fixed; */
+    position: absolute;
+    /* 不使用absolute会导致部分页面层叠顺序出错 */
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.9); /*想设一个透明度但是失败了？可能下面的东西也设了这个覆盖了,试着穿透也穿透不下去，虽然丑了点但是应该不影响使用..*/
+    background-color: rgba(255, 255, 255, 0.9);
+    /*想设一个透明度但是失败了？可能下面的东西也设了这个覆盖了,试着穿透也穿透不下去，虽然丑了点但是应该不影响使用..*/
     backdrop-filter: blur(10px);
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 阴影*/
 }
@@ -123,7 +129,16 @@ const isAboutPage = computed(() => route.name === 'about')
     backdrop-filter: blur(6px);
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
-.about-nav .p-menubar { /*使用deep失败了，但是这样似乎可行，透明度穿下来了 */
+
+/* darkmode */
+@media (prefers-color-scheme: dark) {
+    .about-nav {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+}
+
+.about-nav .p-menubar {
+    /*使用deep失败了，但是这样似乎可行，透明度穿下来了 */
     background: transparent !important;
 }
 

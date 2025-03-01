@@ -7,6 +7,8 @@ const axios = inject('axios')
 const data = ref([])
 
 const show = ref(false)
+const show1 = ref(false)
+
 const page = ref(1)
 const total = ref(0)
 const size = ref(10)
@@ -73,6 +75,7 @@ watch([page, size], () => {
         @finish="fetchContent"
         :eid="operator"
     ></csa-edit-event>
+    <csa-edit-signin v-model:show="show1" :eid="operator"></csa-edit-signin>
     <ConfirmPopup></ConfirmPopup>
     <div class="main-part-lg mx-auto">
         <div class="text-3xl font-bold mb-6">活动管理</div>
@@ -124,6 +127,24 @@ watch([page, size], () => {
                                 () => {
                                     operator = data.eid
                                     show = true
+                                }
+                            "
+                        ></Button>
+                    </div>
+                </template>
+            </Column>
+            <Column field="edit" header="签到管理">
+                <template #body="{ data }">
+                    <div>
+                        <Button
+                            label="签到"
+                            size="small"
+                            severity="info"
+                            class="whitespace-nowrap"
+                            @click="
+                                () => {
+                                    operator = data.eid
+                                    show1 = true
                                 }
                             "
                         ></Button>
