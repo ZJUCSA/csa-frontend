@@ -57,38 +57,56 @@ watch([page, size], () => {
                         class="py-6 px-8 rounded-xl border border-neutral-200 dark:border-0 dark:bg-neutral-100/5 shadow-xl hover:scale-105 transition-transform cursor-pointer"
                         @click="() => handleClick(item)"
                     >
-                        <div class="flex justify-between items-start mb-1">
-                            <div>
-                                <div class="text-xl font-bold mb-1">
-                                    {{ item.title }}
+                        <div
+                            class="flex flex-col md:flex-row items-center gap-x-8"
+                        >
+                            <div
+                                class="w-full md:w-64 shrink-0"
+                                v-if="item.image"
+                            >
+                                <img
+                                    :src="item.image"
+                                    alt="cover"
+                                    class="w-full h-48 object-cover rounded-xl"
+                                />
+                            </div>
+                            <div
+                                class="p-4 w-full flex grow justify-between items-start my-1"
+                            >
+                                <div>
+                                    <div class="text-xl font-bold mb-1">
+                                        {{ item.title }}
+                                    </div>
+                                    <div class="flex gap-1" v-if="item.tag">
+                                        <div
+                                            v-for="tag in item.tag.split(' ')"
+                                            :key="tag"
+                                        >
+                                            <Tag
+                                                :value="tag"
+                                                class="text-nowrap"
+                                            ></Tag>
+                                        </div>
+                                    </div>
+                                    <div class="text-neutral-600 mt-3">
+                                        {{ item.summary }}
+                                    </div>
                                 </div>
-                                <div class="flex gap-1" v-if="item.tag">
-                                    <div
-                                        v-for="tag in item.tag.split(' ')"
-                                        :key="tag"
-                                    >
-                                        <Tag
-                                            :value="tag"
-                                            class="text-nowrap"
-                                        ></Tag>
+                                <div
+                                    class="text-right font-bold text-neutral-400"
+                                >
+                                    <div class="text-2xl">
+                                        {{
+                                            new Date(
+                                                item.first_publish * 1000
+                                            ).toLocaleDateString()
+                                        }}
+                                    </div>
+                                    <div class="text-xl">
+                                        {{ item.place }}
                                     </div>
                                 </div>
                             </div>
-                            <div class="text-right font-bold text-neutral-400">
-                                <div class="text-2xl">
-                                    {{
-                                        new Date(
-                                            item.first_publish * 1000
-                                        ).toLocaleDateString()
-                                    }}
-                                </div>
-                                <div class="text-xl">
-                                    {{ item.place }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-neutral-600 mt-3">
-                            {{ item.summary }}
                         </div>
                     </div>
                 </div>

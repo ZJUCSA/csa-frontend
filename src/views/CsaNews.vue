@@ -58,30 +58,51 @@ watch([page, size], () => {
                         class="py-6 px-8 rounded-xl border border-neutral-200 dark:border-0 dark:bg-neutral-100/5 shadow-xl hover:scale-105 transition-transform cursor-pointer"
                         @click="() => handleClick(item)"
                     >
-                        <div class="flex justify-between items-center mb-1">
-                            <div class="text-xl font-bold">
-                                {{ item.title }}
+                        <div
+                            class="flex flex-col md:flex-row gap-x-4 items-center"
+                        >
+                            <div
+                                class="w-full md:w-64 shrink-0"
+                                v-if="item.image"
+                            >
+                                <img
+                                    :src="item.image"
+                                    alt="cover"
+                                    class="w-full h-48 object-cover rounded-xl"
+                                />
                             </div>
-                            <div class="text-sm text-neutral-500">
-                                {{
-                                    new Date(
-                                        item.first_publish * 1000
-                                    ).toLocaleDateString()
-                                }}
-                            </div>
-                        </div>
-                        <div class="mb-2">
-                            <div class="flex gap-1" v-if="item.tag">
-                                <div
-                                    v-for="tag in item.tag.split(' ')"
-                                    :key="tag"
-                                >
-                                    <Tag :value="tag" class="text-nowrap"></Tag>
+                            <div class="p-4 self-start mt-4 md:mt-0">
+                                <div class="mb-4">
+                                    <div class="text-xl font-bold mb-1">
+                                        {{ item.title }}
+                                    </div>
+                                    <div
+                                        class="text-sm text-neutral-500 self-start"
+                                    >
+                                        {{
+                                            new Date(
+                                                item.first_publish * 1000
+                                            ).toLocaleDateString()
+                                        }}
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="flex gap-1" v-if="item.tag">
+                                        <div
+                                            v-for="tag in item.tag.split(' ')"
+                                            :key="tag"
+                                        >
+                                            <Tag
+                                                :value="tag"
+                                                class="text-nowrap"
+                                            ></Tag>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-neutral-600">
+                                    {{ item.summary }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="text-neutral-600">
-                            {{ item.summary }}
                         </div>
                     </div>
                 </div>

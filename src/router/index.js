@@ -29,6 +29,14 @@ const router = createRouter({
                         title: '登录',
                     },
                 },
+                /* {
+                    path: 'register',
+                    name: 'register',
+                    component: () => import('../views/CsaRegister.vue'),
+                    meta: {
+                        title: '注册',
+                    },
+                }, */
                 {
                     path: 'about',
                     name: 'about',

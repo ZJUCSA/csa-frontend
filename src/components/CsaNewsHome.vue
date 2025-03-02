@@ -1,4 +1,4 @@
-<script setup>//将格式修改为边框好看版
+<script setup>
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
 

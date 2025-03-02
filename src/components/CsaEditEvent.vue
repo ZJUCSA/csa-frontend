@@ -32,6 +32,8 @@ const data = reactive({
     description: '',
     start_time: 0,
     end_time: 0,
+    start_signup_time: 0,
+    end_signup_time: 0,
     category: 1,
     place: '',
     tag: '',
@@ -46,6 +48,8 @@ const submit = () => {
             description: data.description,
             start_time: Date.parse(data.start_time) / 1000,
             end_time: Date.parse(data.end_time) / 1000,
+            start_signup_time: Date.parse(data.start_signup_time) / 1000,
+            end_signup_time: Date.parse(data.end_signup_time) / 1000,
             category: data.category,
             place: data.place,
             tag: data.tag,
@@ -82,6 +86,12 @@ watch(visible, value => {
                     data.description = res.data.description
                     data.start_time = new Date(res.data.start_time * 1000)
                     data.end_time = new Date(res.data.end_time * 1000)
+                    data.start_signup_time = new Date(
+                        res.data.start_signup_time * 1000
+                    )
+                    data.end_signup_time = new Date(
+                        res.data.end_signup_time * 1000
+                    )
                     data.category = res.data.category
                     data.place = res.data.place
                     data.tag = res.data.tag
@@ -93,6 +103,8 @@ watch(visible, value => {
             data.description = ''
             data.start_time = 0
             data.end_time = 0
+            data.start_signup_time = 0
+            data.end_signup_time = 0
             data.category = 1
             data.place = ''
             data.tag = ''
@@ -149,7 +161,7 @@ watch(visible, value => {
                 </div>
                 <div class="flex gap-x-8">
                     <div class="flex items-center gap-4 mb-4">
-                        <label>开始时间</label>
+                        <label>活动开始时间</label>
                         <DatePicker
                             showTime
                             hourFormat="24"
@@ -160,13 +172,36 @@ watch(visible, value => {
                     </div>
 
                     <div class="flex items-center gap-4 mb-4">
-                        <label>结束时间</label>
+                        <label>活动结束时间</label>
                         <DatePicker
                             showTime
                             hourFormat="24"
                             fluid
                             dateFormat="yy-mm-dd"
                             v-model="data.end_time"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-x-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>开始报名时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.start_signup_time"
+                        />
+                    </div>
+
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>结束报名时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.end_signup_time"
                         />
                     </div>
                 </div>

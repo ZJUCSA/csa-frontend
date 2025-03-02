@@ -1,5 +1,6 @@
 <script setup>
 import sha256 from 'crypto-js/sha256'
+
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
@@ -16,9 +17,9 @@ const loginForm = reactive({
 const submitLogin = () => {
     loading.value = true
     axios
-        .post('/user/login', {
+        .post('/user/login/admin', {
             uid: loginForm.uid,
-            password: sha256(loginForm.passwd).toString(),
+            passwd: sha256(loginForm.passwd).toString(),
         })
         .catch(() => {
             loading.value = false
