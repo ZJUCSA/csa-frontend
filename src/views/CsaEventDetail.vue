@@ -91,5 +91,6 @@ axios
     max-width: 40rem;
     max-height: 30rem;
     height: auto;
+    width: 100%;
 }
 </style>
