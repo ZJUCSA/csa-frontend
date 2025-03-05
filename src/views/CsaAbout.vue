@@ -11,7 +11,7 @@ import Team from './CsaAbout/AboutTeam.vue'
 import Activities from './CsaAbout/AboutActivities.vue'
 // import Venue from './CsaAbout/AboutVenue.vue'
 
-import '@/assets/styles/about.css' //引入公有样式
+import '@/assets/about/styles/about.css' //引入公有样式
 
 const parallaxBg = ref(null)
 
@@ -56,7 +56,7 @@ onMounted(() => {
       section.style.backdropFilter = `blur(${8 - (visibleRatio * 8)}px)`
       // section.style.transform = `translateY(${20 - (visibleRatio * 20)}px)` //或许可以优化视觉效果(更流畅)，但上滑和下滑的表现不可兼得,可能起到反效果
     })
-  }, 8) // 约120fps的更新频率
+  }, 8) // 125fps的更新频率
 
   window.addEventListener('scroll', throttledScroll)
   throttledScroll() // 初始化
