@@ -15,10 +15,23 @@ import '@/assets/styles/about.css' //引入公有样式
 
 const parallaxBg = ref(null)
 
+// 添加节流函数， 原始函数+延迟时间(ms)
+function throttle(fn, delay) {
+  let timer = null
+  return function() {
+    if (timer) return //计时器如果已存在，则直接返回
+    timer = setTimeout(() => {
+      fn.apply(this, arguments)
+      timer = null
+    }, delay)
+  }
+}
+
 onMounted(() => {
   const sections = document.querySelectorAll('.section')
 
-  const handleScroll = () => {
+  // 使用节流包装 handleScroll
+  const throttledScroll = throttle(() => {
     // 视差滚动效果
     if (parallaxBg.value) {
       const scrolled = window.scrollY
@@ -43,13 +56,13 @@ onMounted(() => {
       section.style.backdropFilter = `blur(${8 - (visibleRatio * 8)}px)`
       // section.style.transform = `translateY(${20 - (visibleRatio * 20)}px)` //或许可以优化视觉效果(更流畅)，但上滑和下滑的表现不可兼得,可能起到反效果
     })
-  }
+  }, 8) // 约120fps的更新频率
 
-  window.addEventListener('scroll', handleScroll)
-  handleScroll() // 初始化时执行一次
+  window.addEventListener('scroll', throttledScroll)
+  throttledScroll() // 初始化
 
   onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
+    window.removeEventListener('scroll', throttledScroll)
   })
 })
 </script>
@@ -98,15 +111,15 @@ onMounted(() => {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 300%; /* 这里也不可以随便填，用来调整容器尺寸，图片自适应cover容器，故而调整背景图的显示尺寸，现在的滚动逻辑会受到这个参数的影响，但是好改，改一下倍率即可，背景图一旦选定则长期不改，可以接受。去handleScroll()里找视差效果实现的代码 */
+  width: 100%; /*使背景宽度占满整个视口宽度*/
+  height: 300%; /* 背景高度为3倍视口高度 ;这里也不可以随便填，用来调整容器尺寸，图片自适应cover容器，故而调整背景图的显示尺寸，现在的滚动逻辑会受到这个参数的影响，但是好改，改一下倍率即可，背景图一旦选定则长期不改，可以接受。去handleScroll()里找视差效果实现的代码 */
   background-image: url('@/assets/about/background/bg.jpg');
   background-size: cover;  /* 如果使用100% auto的话，如果图片尺寸和容器大小没调好...那么图片会反复，还是别了 */
   /*但是100% auto对变化大小的窗口表现更好，对手机端的表现应该也更好，考虑是否要优化 */
   background-position: center top; /*水平方向居中对齐，垂直方向顶部对齐*/
-  transform: translateZ(0);
+  transform: translate3d(0,0,0); /* 独立的图层，触发GPU加速，防止页面重排 */
   z-index: -1;
-  will-change: transform;
+  will-change: transform; /* 提前告知，优化性能 */
 }
 /* 定义遮罩 */
 .parallax-overlay {
