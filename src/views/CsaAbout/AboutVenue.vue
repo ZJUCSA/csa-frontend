@@ -133,7 +133,7 @@ onUnmounted(() => {
 <template>
   <section id="venue" class="section">
     <div class="content-wrapper">
-      <h2 class="fade-in">活动场所</h2>
+      <h2>活动场所</h2>
       <div class="venue-carousel" @mousedown="handleMouseDown">
         <div class="venue-stage">
           <div

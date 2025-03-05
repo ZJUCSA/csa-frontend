@@ -9,7 +9,7 @@ import Vision from './CsaAbout/AboutVision.vue'
 import Timeline from './CsaAbout/AboutTimeline.vue'
 import Team from './CsaAbout/AboutTeam.vue'
 import Activities from './CsaAbout/AboutActivities.vue'
-// import Venue from './CsaAbout/AboutVenue.vue'
+import Venue from './CsaAbout/AboutVenue.vue'
 
 import '@/assets/about/styles/about.css' //引入公有样式
 
