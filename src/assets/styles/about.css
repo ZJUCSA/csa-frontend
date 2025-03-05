@@ -1,0 +1,73 @@
+/* 默认配置， 具体到每个组件，可以根据情况进行调整 */
+.content-wrapper {
+  max-width: 70vw;
+  margin: 0 auto;
+  padding: 2vh 0;
+}
+
+/* About 页面的共享样式 */
+.section {
+  min-height: 100vh;
+  text-align: center;
+  position: relative;
+  margin-bottom: 10vh;
+  padding: 4vh 0;
+  opacity: 0.3;
+  backdrop-filter: blur(5px);
+  transform: translateY(20px);
+  overflow-x: hidden;
+}
+
+.about-container {
+  max-width: 90vw;
+  margin: 0 auto;
+  padding: 2vh 3vw;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 5vh; /*防止最后一个section紧贴底部 */
+  overflow-x: hidden;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+/* 淡入动画 */
+.fade-in {
+  animation: fadeIn_ani 1.5s ease-out; /*使用CSS动画*/
+  /* 这里不要用forwards，不然animation会让元素强制保持最后一帧状态，导致其他过渡效果失效 */
+}
+
+@keyframes fadeIn_ani {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);  /* Y偏移+透明度变化 */
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) { /* 768px 以下的屏幕，对容器尺寸进行一些小小的修改，扩大内容显示区域 */
+  .about-container {
+    max-width: 100vw;
+    padding: 1vh 4vw;
+  }
+
+  .content-wrapper {
+    max-width: 95vw;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  .section {
+    margin-bottom: 8vh;
+    padding: 3vh 0;
+  }
+}
