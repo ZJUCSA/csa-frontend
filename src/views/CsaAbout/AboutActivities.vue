@@ -70,6 +70,12 @@
 </template>
 
 <style scoped>
+.content-wrapper {
+  max-width: 70vw;
+  margin: 0 auto;
+  padding: 2vh 0;
+}
+
 .activities-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

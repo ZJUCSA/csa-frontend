@@ -4,19 +4,24 @@ import { ref, computed } from 'vue'
 // 场地数据， 并不强制要求5个，随便几个都行，至少一个
 const venues = [
   {
-    image: '@/assets/about/venue/main_room1.png',
+    image: new URL('@/assets/about/venue/main_room1.png', import.meta.url).href,
     title: '网络空间安全协会活动室',
-    description: '位于浙江大学紫金港校区，是我们开展日常活动、技术交流和团队协作的主要场所。配备完善的网络设施和安全设备，为成员提供良好的学习环境。'
+    description: '位于浙江大学紫金港校区蒙民伟楼226，是我们开展日常活动、技术交流和团队协作的主要场所。配备完善的网络设施和安全设备，为成员提供良好的学习环境。'
   },
   {
-    image: '@/assets/about/venue/main_room2.png',
-    title: '网安实验室',
-    description: '配备专业的网络安全设备和工具，为成员提供实践环境。'
+    image: new URL('@/assets/about/venue/main_room2.png', import.meta.url).href,
+    title: '活动室2',
+    description: '....'
   },
   {
-    image: '@/assets/about/venue/meeting_room.png',
-    title: '会议室',
-    description: '用于举办技术分享会、学术讨论和小组会议的专属空间。'
+    image: new URL('@/assets/about/venue/meeting_room1.jpg', import.meta.url).href,
+    title: '培训教室1',
+    description: '....'
+  },
+  {
+    image: new URL('@/assets/about/venue/meeting_room2.jpg', import.meta.url).href,
+    title: '培训教室2',
+    description: '....'
   }
 ]
 
@@ -87,12 +92,12 @@ const getCardStyle = (position) => {
   switch(position) {
     case 0: // 最左边屏幕外
       transform = 'translateX(-200%) scale(0.8)'
-      opacity = 0.5
+      opacity = 0
       zIndex = 0
       break
     case 1: // 左边
       transform = 'translateX(-100%) scale(0.9)'
-      opacity = 0.8
+      opacity = 0.6
       zIndex = 1
       break
     case 2: // 中间
@@ -102,12 +107,12 @@ const getCardStyle = (position) => {
       break
     case 3: // 右边
       transform = 'translateX(100%) scale(0.9)'
-      opacity = 0.8
+      opacity = 0.6
       zIndex = 1
       break
     case 4: // 最右边
       transform = 'translateX(200%) scale(0.8)'
-      opacity = 0.5
+      opacity = 0
       zIndex = 0
       break
   }
@@ -156,11 +161,17 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+
+.content-wrapper {
+  max-width: 100vw;
+  padding: 2vh 0;
+}
+
 .venue-carousel {
   position: relative;
   width: 100%;
   height: 600px;
-  perspective: 1000px;
+  perspective: 2000px;
   user-select: none;
 }
 
@@ -175,17 +186,18 @@ onUnmounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 400px;
-  height: 500px;
-  margin-left: -200px;
+  width: 50%;
+  height: 80%;
+  margin-left: -300px;
   margin-top: -250px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   overflow: hidden;
-  transition: all 0.5s ease;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); /*优化过渡动画*/
   cursor: grab;
   transform-origin: center center;
+  will-change: transform, opacity; /*优化性能*/
 }
 
 .venue-card:active {
@@ -201,6 +213,8 @@ onUnmounted(() => {
   width: 100%;
   height: 300px;
   object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .venue-info {
@@ -219,28 +233,5 @@ onUnmounted(() => {
   font-size: 1rem;
 }
 
-@media (max-width: 768px) {
-  .venue-carousel {
-    height: 500px;
-  }
 
-  .venue-card {
-    width: 300px;
-    height: 400px;
-    margin-left: -150px;
-    margin-top: -200px;
-  }
-
-  .venue-image {
-    height: 200px;
-  }
-
-  .venue-info h3 {
-    font-size: 1.2rem;
-  }
-
-  .venue-info p {
-    font-size: 0.9rem;
-  }
-}
 </style>

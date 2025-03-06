@@ -19,9 +19,8 @@
 }
 
 .about-container {
-  max-width: 90vw;
-  margin: 0 auto;
-  padding: 2vh 3vw;
+  max-width: 100vw;
+  padding: 2vh 0;
   position: relative;
   z-index: 1;
   padding-bottom: 5vh; /*防止最后一个section紧贴底部 */
