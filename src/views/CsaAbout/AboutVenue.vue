@@ -184,36 +184,26 @@ onUnmounted(() => {
 
 .venue-card {
   position: absolute;
-  left: 50%;
+  left: 26%;
   top: 50%;
   width: 50%;
-  height: 80%;
-  margin-left: -300px;
+  height: 90%;
   margin-top: -250px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   overflow: hidden;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); /*优化过渡动画*/
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /*优化过渡动画*/
   cursor: grab;
   transform-origin: center center;
   will-change: transform, opacity; /*优化性能*/
 }
 
-.venue-card:active {
-  cursor: grabbing;
-}
-
-.venue-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-}
-
 .venue-image {
   width: 100%;
-  height: 300px;
+  height: 65%;
   object-fit: cover;
-  user-select: none;
+  user-select: none;   /* 防止图片被选中 */
   -webkit-user-drag: none;
 }
 
@@ -221,17 +211,15 @@ onUnmounted(() => {
   padding: 1.5rem;
 }
 
-.venue-info h3 {
+/* .venue-info h3 {   用顶层定义的h3
   font-size: 1.5rem;
   color: #2c3e50;
   margin-bottom: 1rem;
-}
+} */
 
 .venue-info p {
   color: #34495e;
   line-height: 1.6;
   font-size: 1rem;
 }
-
-
 </style>

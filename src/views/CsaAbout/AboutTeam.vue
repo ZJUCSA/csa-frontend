@@ -76,6 +76,8 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+  user-select: none;   /* 防止图片被选中 */
+  -webkit-user-drag: none;
 }
 
 .team-member:hover .member-avatar {

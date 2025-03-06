@@ -176,6 +176,8 @@
   margin-bottom: 1.2rem;
   transition: transform 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  user-select: none;   /* 防止图片被选中 */
+  -webkit-user-drag: none;
 }
 
 

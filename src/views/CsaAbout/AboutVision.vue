@@ -116,6 +116,8 @@
   display: inline-block;
   position: relative;
   z-index: 1;
+  user-select: none;   /* 防止图片被选中 */
+  -webkit-user-drag: none;
 }
 
 .vision-card h3 {
