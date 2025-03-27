@@ -175,4 +175,31 @@ watch([page, size, category], () => {
 .p-datatable-column-title {
     white-space: nowrap;
 }
+
+.sidebar {
+    backdrop-filter: blur(10px);
+}
+
+.tab-button {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #1f2937;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 1.125rem;
+    transition:
+        background 0.3s ease,
+        transform 0.1s ease;
+    cursor: pointer;
+}
+
+.tab-button:hover {
+    background-color: #4b5563;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tab-button:active {
+    transform: scale(0.95);
+}
 </style>

@@ -219,12 +219,4 @@ watch([page, size, category], () => {
 .tab-button:active {
     transform: scale(0.95);
 }
-
-.news-link {
-    transition: color 0.3s ease;
-}
-
-.news-link:hover {
-    color: #f6e05e;
-}
 </style>
