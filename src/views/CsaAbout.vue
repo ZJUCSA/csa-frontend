@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 
-//引入各个section组件
+// 引入各个section组件
 import AboutUs from './CsaAbout/AboutUs.vue'
 import Vision from './CsaAbout/AboutVision.vue'
 import Timeline from './CsaAbout/AboutTimeline.vue'
@@ -16,61 +16,59 @@ const parallaxBg = ref(null)
 let sections = [] // 缓存sections元素
 let rafId = null // 存储requestAnimationFrame ID
 
-// 添加节流函数， 原始函数+延迟时间(ms)
-function throttle(fn, delay) {
-  let timer = null
-  return function() {
-    if (timer) return //计时器如果已存在，则直接返回
-    timer = setTimeout(() => {
-      fn.apply(this, arguments)
-      timer = null
-    }, delay)
+
+const handleScroll = () => {
+
+  // 视差滚动效果
+  if (parallaxBg.value) {
+    const scrolled = window.scrollY
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    // 计算滚动百分比，确保滚动到底部时图片底部对齐
+    const scrollPercentage = (scrolled / maxScroll) * 66.7 // 这里的倍率取决于.parallax-bg的高度
+    parallaxBg.value.style.transform = `translateY(-${scrollPercentage}%)`
   }
+
+
+  // section滚动效果
+  sections.forEach(section => {
+    const rect = section.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+
+    // 计算section在视口中的可见比例（相对于视口高度）
+    const visibleHeight =
+        Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0)
+    const visibleRatio = Math.max(
+        0,
+        Math.min(1, visibleHeight / windowHeight)
+    )
+
+    // 根据可见比例设置透明度和模糊效果
+    section.style.opacity = (visibleRatio > 0.9) ? 1 : visibleRatio/0.9
+    //可见比例占到屏幕的90%就让它完全不透明吧,占满的要求还是有点高了
+    section.style.backdropFilter = `blur(${8 - (visibleRatio * 8)}px)`
+    // section.style.transform = `translateY(${20 - (visibleRatio * 20)}px)` //或许可以优化视觉效果(更流畅)，但上滑和下滑的表现不可兼得,可能起到反效果
+  })
+}
+
+//代替之前的节流函数，使用requestAnimationFrame优化handleScroll的性能——应该是有更好的效果，好像说是能更好地配合浏览器的渲染周期
+const scrollHandler = () => {
+  // 取消之前的动画帧请求
+  if (rafId) cancelAnimationFrame(rafId)
+  // 使用requestAnimationFrame优化性能
+  rafId = requestAnimationFrame(handleScroll)
 }
 
 onMounted(() => {
-  const sections = document.querySelectorAll('.section')
+    // 缓存sections元素（假设挂载后结构不变）
+    sections = document.querySelectorAll('.section')
 
-  // 使用节流包装 handleScroll
-  const throttledScroll = throttle(() => {
-    // 视差滚动效果
-    if (parallaxBg.value) {
-      const scrolled = window.scrollY
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-      // 计算滚动百分比，确保滚动到底部时图片底部对齐
-      const scrollPercentage = (scrolled / maxScroll) * 66.7 // 这里的倍率取决于.parallax-bg的高度
-      parallaxBg.value.style.transform = `translateY(-${scrollPercentage}%)`
-    }
+    window.addEventListener('scroll', scrollHandler)
+    handleScroll() // 初始化
+})
 
-    // section滚动效果
-    sections.forEach(section => {
-        const rect = section.getBoundingClientRect()
-        const windowHeight = window.innerHeight
-        const visibleHeight =
-            Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0)
-        const visibleRatio = Math.max(
-            0,
-            Math.min(1, visibleHeight / windowHeight)
-        )
-
-      // 计算section在视口中的可见比例（相对于视口高度）
-      const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0)
-      const visibleRatio = Math.max(0, Math.min(1, visibleHeight / windowHeight))
-
-      // 根据可见比例设置透明度和模糊效果
-      section.style.opacity = (visibleRatio > 0.9) ? 1 : visibleRatio/0.9
-      //可见比例占到屏幕的90%就让它完全不透明吧,占满的要求还是有点高了
-      section.style.backdropFilter = `blur(${8 - (visibleRatio * 8)}px)`
-      // section.style.transform = `translateY(${20 - (visibleRatio * 20)}px)` //或许可以优化视觉效果(更流畅)，但上滑和下滑的表现不可兼得,可能起到反效果
-    })
-  }, 8) // 125fps的更新频率
-
-  window.addEventListener('scroll', throttledScroll)
-  throttledScroll() // 初始化
-
-  onUnmounted(() => {
-    window.removeEventListener('scroll', throttledScroll)
-  })
+onUnmounted(() => {
+    window.removeEventListener('scroll', scrollHandler)
+    if (rafId) cancelAnimationFrame(rafId) // 清除未执行的动画帧
 })
 </script>
 
