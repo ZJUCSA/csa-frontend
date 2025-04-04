@@ -13,6 +13,11 @@
 </template>
 
 <style scoped>
+.content-wrapper {
+  max-width: 70vw;
+  margin-top: 5rem;
+}
+
 .description {
   font-size: 1.2rem;
   line-height: 1.8;

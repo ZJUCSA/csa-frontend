@@ -10,6 +10,7 @@ import Timeline from './CsaAbout/AboutTimeline.vue'
 import Team from './CsaAbout/AboutTeam.vue'
 import Activities from './CsaAbout/AboutActivities.vue'
 import Venue from './CsaAbout/AboutVenue.vue'
+import Test from './CsaAbout/AboutTest.vue'
 
 import '@/assets/about/styles/about.css' //引入公有样式
 
@@ -98,6 +99,9 @@ onMounted(() => {
 
     <!-- 活动场所 -->
     <Venue />
+
+    <!-- 测试用 -->
+    <Test />
 
   </div>
 </template>
