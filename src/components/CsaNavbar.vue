@@ -41,6 +41,8 @@ watch(
         if (val !== 'about') {
             isAboutPage.value = false
             navbarStore.isCollapsed = false // 进入其他页面时收起导航栏
+        } else {
+            isAboutPage.value = true
         }
     }
 )
