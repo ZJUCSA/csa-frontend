@@ -199,7 +199,7 @@
               </td>
                               <td class="interviewer-cell">
                   <div class="interviewer-list">
-                    <span v-if="timeSlot.interview_formats.length === 0" class="no-interviewer">待分配</span>
+                    <span v-if="!timeSlot.interview_formats || timeSlot.interview_formats.length === 0" class="no-interviewer">待分配</span>
                     <span v-else v-for="format in timeSlot.interview_formats" :key="format" class="interviewer-tag">
                       {{ getInterviewFormatLabel(format) }}
                     </span>
@@ -207,7 +207,7 @@
                 </td>
               <td class="venue-cell">
                 <div class="venue-list">
-                  <span v-if="timeSlot.venues.length === 0" class="no-venue">待分配</span>
+                  <span v-if="!timeSlot.venues || timeSlot.venues.length === 0" class="no-venue">待分配</span>
                   <span v-else v-for="venue in timeSlot.venues" :key="venue" class="venue-tag">
                     {{ venue }}
                   </span>
@@ -215,7 +215,7 @@
               </td>
               <td class="candidates-cell">
                 <div class="candidates-list">
-                  <div v-if="timeSlot.scheduled.length === 0" class="empty-slot">
+                  <div v-if="!timeSlot.scheduled || timeSlot.scheduled.length === 0" class="empty-slot">
                     暂无排班
                   </div>
                   <div v-else class="candidate-item" v-for="person in timeSlot.scheduled" :key="person.uid">
@@ -264,18 +264,18 @@
                 </span>
                 <span class="stat-item">
                   <i class="pi pi-user"></i>
-                  面试形式: {{ selectedTimeSlotInfo.interview_formats.length > 0 ? selectedTimeSlotInfo.interview_formats.map(f => getInterviewFormatLabel(f)).join(', ') : '待分配' }}
+                  面试形式: {{ selectedTimeSlotInfo.interview_formats && selectedTimeSlotInfo.interview_formats.length > 0 ? selectedTimeSlotInfo.interview_formats.map(f => getInterviewFormatLabel(f)).join(', ') : '待分配' }}
                 </span>
                 <span class="stat-item">
                   <i class="pi pi-building"></i>
-                  场地: {{ selectedTimeSlotInfo.venues.length > 0 ? selectedTimeSlotInfo.venues.join(', ') : '待分配' }}
+                  场地: {{ selectedTimeSlotInfo.venues && selectedTimeSlotInfo.venues.length > 0 ? selectedTimeSlotInfo.venues.join(', ') : '待分配' }}
                 </span>
               </div>
             </div>
             
             <div class="scheduled-candidates">
               <h6>已排班面试者</h6>
-              <div v-if="selectedTimeSlotInfo.scheduled.length === 0" class="empty-candidates">
+              <div v-if="!selectedTimeSlotInfo.scheduled || selectedTimeSlotInfo.scheduled.length === 0" class="empty-candidates">
                 暂无排班
               </div>
               <div v-else class="candidate-list">
@@ -845,7 +845,7 @@ const showTimeSlotInfoDrawer = () => {
       slot: scheduleForm.selected_time_slot,
       count: 0,
       scheduled: [],
-      interviewers: [],
+      interview_formats: [],
       venues: []
     };
     showTimeSlotInfo.value = true;
@@ -889,7 +889,7 @@ const showEditTimeSlotInfoDrawer = () => {
       slot: scheduleForm.selected_time_slot,
       count: 0,
       scheduled: [],
-      interviewers: [],
+      interview_formats: [],
       venues: []
     };
     showTimeSlotInfo.value = true;
@@ -1261,9 +1261,9 @@ const calculateTimeSlotStats = () => {
     return {
       slot: slotInfo.display,
       count: scheduled.length,
-      scheduled,
-              interview_formats,
-      venues
+      scheduled: scheduled || [],
+      interview_formats: interview_formats || [],
+      venues: venues || []
     };
   });
 
