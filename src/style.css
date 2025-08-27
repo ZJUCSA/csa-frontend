@@ -17,6 +17,22 @@
     --accent-hover: #5a6fd8;
 }
 
+/* 防止浏览器自动应用深色模式 */
+@media (prefers-color-scheme: dark) {
+    :root:not(.dark) {
+        color-scheme: light;
+    }
+}
+
+/* 确保在iOS Safari中正确显示 */
+html {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
 /* 深色主题变量 */
 .dark {
     --bg-primary: #121212;

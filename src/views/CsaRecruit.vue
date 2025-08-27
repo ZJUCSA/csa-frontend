@@ -718,40 +718,48 @@ const submitForm = async () => {
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #fff;
+  background-color: var(--bg-surface);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-title {
   text-align: center;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 2rem;
+  transition: color 0.3s ease;
 }
 
 .description {
-  background-color: #e6f7ff;
-  border-left: 5px solid #1890ff;
+  background-color: rgba(102, 126, 234, 0.1);
+  border-left: 5px solid var(--accent-color);
   padding: 15px;
   margin-bottom: 2rem;
   border-radius: 4px;
   line-height: 1.6;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .input-format-guide {
-  background-color: #f0f9eb; /* Light green background */
-  border-left: 5px solid #67c23a; /* Green border */
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 5px solid #4caf50;
   padding: 15px;
   margin-bottom: 2rem;
   border-radius: 4px;
   line-height: 1.6;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .input-format-guide h4 {
-  color: #67c23a; /* Green color for heading */
+  color: #4caf50;
   margin-top: 0;
   margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
 }
 
 .input-format-guide ul {
@@ -770,7 +778,8 @@ label {
   display: block;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 input[type="text"],
@@ -778,17 +787,20 @@ textarea,
 select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   box-sizing: border-box;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 input[type="text"]:focus,
 textarea:focus,
 select:focus {
-  border-color: #4CAF50;
+  border-color: var(--accent-color);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .major-search-results {
@@ -797,17 +809,19 @@ select:focus {
 
 /* 面试时间段样式 */
 .time-slots-container {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
-  background-color: #f9f9f9;
+  background-color: var(--bg-secondary);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 .time-slots-header h4 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .weekday-slots, .weekend-slots {
@@ -821,20 +835,22 @@ select:focus {
 }
 
 .day-group {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
-  background-color: #fafafa;
+  background-color: var(--bg-surface);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 .day-group h5 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .time-slots-grid {
@@ -852,30 +868,31 @@ select:focus {
 }
 
 .time-slot {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   padding: 0.75rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  color: var(--text-primary);
 }
 
 .time-slot:hover {
-  border-color: #4CAF50;
+  border-color: var(--accent-color);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .time-slot.selected {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
   color: white;
 }
 
 .time-slot.selected:hover {
-  background: #45a049;
+  background: var(--accent-hover);
 }
 
 .slot-label {
@@ -887,13 +904,15 @@ select:focus {
 .selected-slots {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .selected-slots h5 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .selected-slots-list {
@@ -903,12 +922,13 @@ select:focus {
 }
 
 .selected-slot-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--accent-color);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
-  border: 1px solid #bbdefb;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .time-slots-hint {
@@ -917,31 +937,35 @@ select:focus {
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-  background: #e8f5e8;
-  border: 1px solid #c8e6c9;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.2);
   border-radius: 4px;
-  color: #2e7d32;
+  color: #4caf50;
   font-size: 0.9rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .time-slots-hint i {
   color: #4caf50;
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 
 .time-slots-counter {
   margin-top: 0.5rem;
   padding: 0.5rem;
-  background: #f5f5f5;
+  background: var(--bg-secondary);
   border-radius: 4px;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .time-slots-counter.warning {
-  background: #fff3e0;
-  border: 1px solid #ffcc02;
-  color: #e65100;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #ff9800;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .counter-warning {
@@ -953,21 +977,23 @@ select:focus {
   list-style-type: none;
   padding: 0;
   margin: 0.5rem 0 0;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--bg-surface);
   max-height: 150px;
   overflow-y: auto;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 .major-search-results li {
   padding: 10px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.3s ease;
+  color: var(--text-primary);
 }
 
 .major-search-results li:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-secondary);
 }
 
 .department-list-wrapper {
@@ -978,42 +1004,45 @@ select:focus {
   display: flex;
   align-items: center;
   padding: 12px 15px;
-  border: 1px solid #e0e0e0;
-  background-color: #fafafa;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
   margin-bottom: 10px;
   border-radius: 6px;
   cursor: grab;
-  transition: box-shadow 0.2s, background-color 0.2s;
+  transition: box-shadow 0.2s, background-color 0.2s, border-color 0.3s ease;
 }
 
 .drag-item:hover {
-  background-color: #f5f5f5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .sortable-chosen {
-  background-color: #e0f2e0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
 .rank-number {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #4CAF50;
+  color: var(--accent-color);
   margin-right: 15px;
+  transition: color 0.3s ease;
 }
 
 .department-name {
   flex-grow: 1;
   font-size: 1.1rem;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .drag-handle {
   font-size: 1.5rem;
-  color: #aaa;
+  color: var(--text-secondary);
   cursor: grab;
   line-height: 1;
+  transition: color 0.3s ease;
 }
 
 .checkbox-group {
@@ -1030,46 +1059,54 @@ select:focus {
 .submit-button {
   width: 100%;
   padding: 12px;
-  background-color: #4CAF50;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .submit-button:hover {
-  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .error-message {
-  color: #f44336; /* Red color for errors */
+  color: #f44336;
   font-size: 0.8rem;
   margin-top: 0.5rem;
+  transition: color 0.3s ease;
 }
 
 .required {
-  color: #f44336; /* Red color for required fields */
+  color: #f44336;
   margin-left: 0.2rem;
+  transition: color 0.3s ease;
 }
 
 .error-input {
-  border-color: #f44336; /* Red border for error inputs */
+  border-color: #f44336;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.1);
 }
 
 .validation-summary {
-  background-color: #ffebee;
-  border: 1px solid #f44336;
-  border-radius: 4px;
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .validation-summary h4 {
-  color: #d32f2f;
+  color: #f44336;
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 
 .validation-summary ul {
@@ -1078,8 +1115,9 @@ select:focus {
 }
 
 .validation-summary li {
-  color: #d32f2f;
+  color: #f44336;
   margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
 }
 
 .resume-upload-container {
@@ -1092,9 +1130,11 @@ select:focus {
 .file-input {
   flex: 1;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .upload-button {
@@ -1143,8 +1183,9 @@ select:focus {
 
 .upload-hint {
   margin-top: 0.5rem;
-  color: #666;
+  color: var(--text-secondary);
   font-style: italic;
+  transition: color 0.3s ease;
 }
 
 /* 成功页面样式 */
@@ -1153,18 +1194,21 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   padding: 2rem;
+  transition: background 0.3s ease;
 }
 
 .success-content {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 16px;
   padding: 3rem;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px var(--shadow-color);
   max-width: 500px;
   width: 100%;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .success-icon {
@@ -1190,10 +1234,11 @@ select:focus {
 }
 
 .success-title {
-  color: #333;
+  color: var(--text-primary);
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
 }
 
 .success-message {
@@ -1203,8 +1248,9 @@ select:focus {
 
 .success-message p {
   margin-bottom: 0.5rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
 .countdown-info {
@@ -1212,17 +1258,19 @@ select:focus {
 }
 
 .countdown-info p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1rem;
   margin-bottom: 1rem;
+  transition: color 0.3s ease;
 }
 
 .countdown-bar {
   width: 100%;
   height: 8px;
-  background: #f0f0f0;
+  background: var(--bg-secondary);
   border-radius: 4px;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .countdown-progress {
@@ -1237,7 +1285,7 @@ select:focus {
 }
 
 .btn-primary {
-  background: #4caf50;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -1248,12 +1296,12 @@ select:focus {
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
-  background: #45a049;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 /* 响应式设计 */

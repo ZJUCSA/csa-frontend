@@ -12,13 +12,23 @@ export const useThemeStore = defineStore('theme', {
   actions: {
     // 初始化主题
     initTheme() {
-      // 检查本地存储
+      // 检查用户是否已手动设置主题
+      const themeManualSet = localStorage.getItem('theme_manual_set')
       const savedTheme = localStorage.getItem('theme')
-      if (savedTheme) {
+      
+      if (savedTheme && themeManualSet === 'true') {
+        // 用户已手动设置过主题，使用保存的设置
         this.isDark = savedTheme === 'dark'
+      } else if (savedTheme) {
+        // 有保存的主题但没有手动设置标记，可能是旧版本数据
+        this.isDark = savedTheme === 'dark'
+        // 标记为手动设置，避免后续被系统偏好覆盖
+        localStorage.setItem('theme_manual_set', 'true')
       } else {
-        // 检查系统偏好
-        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        // 默认使用浅色主题，避免浏览器主题切换干扰
+        this.isDark = false
+        localStorage.setItem('theme', 'light')
+        localStorage.setItem('theme_manual_set', 'true')
       }
       this.applyTheme()
     },
@@ -28,6 +38,8 @@ export const useThemeStore = defineStore('theme', {
       this.isDark = !this.isDark
       this.applyTheme()
       localStorage.setItem('theme', this.currentTheme)
+      // 标记为手动设置
+      localStorage.setItem('theme_manual_set', 'true')
     },
     
     // 设置主题
@@ -35,6 +47,15 @@ export const useThemeStore = defineStore('theme', {
       this.isDark = theme === 'dark'
       this.applyTheme()
       localStorage.setItem('theme', this.currentTheme)
+    },
+    
+    // 强制设置主题（忽略系统偏好）
+    forceSetTheme(theme) {
+      this.isDark = theme === 'dark'
+      this.applyTheme()
+      localStorage.setItem('theme', this.currentTheme)
+      // 标记用户已手动设置主题
+      localStorage.setItem('theme_manual_set', 'true')
     },
     
     // 应用主题到DOM

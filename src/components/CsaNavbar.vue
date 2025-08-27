@@ -27,7 +27,8 @@ const items = ref([
     {
         label: 'Contact',
         icon: 'pi pi-envelope',
-        jump: 'contact',
+        jump: 'recruit',
+        // jump: 'contact'
     },
     {
         label: 'About',
@@ -138,23 +139,19 @@ watch(
     right: 0;
     z-index: 1000;
     background-color: rgba(255, 255, 255, 0.9);
-    /*想设一个透明度但是失败了？可能下面的东西也设了这个覆盖了,试着穿透也穿透不下去，虽然丑了点但是应该不影响使用..*/
     backdrop-filter: blur(10px);
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 阴影*/
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .about-nav {
-    position: fixed; /* 改用absolute，那么屏幕向下滚动navbar就会隐藏； 现在会和导航栏收起的功能冲突了 */
-    /*或许只要给navbar一个透明效果，fixed也不是不能接受 */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
     background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(6px);
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 深色模式下的导航栏样式 */
@@ -166,9 +163,60 @@ watch(
     background-color: rgba(0, 0, 0, 0.8);
 }
 
+/* 导航栏文字颜色适配主题 */
+.fixed-nav .p-menubar,
 .about-nav .p-menubar {
-    /*使用deep失败了，但是这样似乎可行，透明度穿下来了 */
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+/* 导航栏链接颜色适配主题 */
+.fixed-nav .p-menubar a,
+.about-nav .p-menubar a {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.fixed-nav .p-menubar a:hover,
+.about-nav .p-menubar a:hover {
+    color: var(--accent-color);
+}
+
+/* 导航栏品牌名称颜色 */
+.fixed-nav .my-3,
+.about-nav .my-3 {
+    color: var(--text-primary);
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.about-nav .p-menubar {
     background: transparent !important;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+/* 确保PrimeVue组件也适配主题 */
+.p-menubar {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.p-menubar .p-menuitem-link {
+    color: var(--text-primary) !important;
+    transition: color 0.3s ease;
+}
+
+.p-menubar .p-menuitem-link:hover {
+    color: var(--accent-color) !important;
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.p-menubar .p-menuitem.p-highlight .p-menuitem-link {
+    color: var(--accent-color) !important;
+    background-color: rgba(102, 126, 234, 0.1) !important;
 }
 
 /*折叠导航栏的按钮*/
@@ -178,14 +226,26 @@ watch(
     top: 1rem;
     z-index: 1001;
 }
+
 .nav-toggle-btn {
-    /* 移除position: fixed，因为现在由容器控制位置 */
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px var(--shadow-color) !important;
+}
+
+.nav-toggle-btn:hover {
+    background: var(--bg-secondary) !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--shadow-color) !important;
 }
 .about-nav {
     transition: all 0.3s ease; /* 添加过渡效果 */
+    /* z-index: 1001; */
 }
 .nav-collapsed {
     transform: translateY(-100%);
