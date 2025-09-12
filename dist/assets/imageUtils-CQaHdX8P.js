@@ -1,1 +1,0 @@
-function s(r){return r?r.startsWith("/uploads/images/")?`/api/images/${r.replace("/uploads/images/","")}`:(r.startsWith("/api/images/"),r):""}function i(r){return r?r.replace(/!\[([^\]]*)\]\(\/uploads\/images\/([^)]+)\)/g,(a,e,t)=>`![${e}](/api/images/${t})`):""}function n(r){return s(r)}export{n as a,i as p};

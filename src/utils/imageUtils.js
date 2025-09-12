@@ -14,12 +14,13 @@ export function convertImageUrlToApi(imageUrl) {
     if (imageUrl.startsWith('/uploads/images/')) {
         // 移除 /uploads/images/ 前缀，保留相对路径
         const relativePath = imageUrl.replace('/uploads/images/', '')
-        return `/api/images/${relativePath}`
+        return `/api/images?name=${encodeURIComponent(relativePath)}`
     }
     
     // 如果已经是API格式，直接返回
-    if (imageUrl.startsWith('/api/images/')) {
-        return imageUrl
+    if (imageUrl.startsWith('/api/images')) {
+        const relativePath = imageUrl.replace('/api/images', '')
+        return `/api/images?name=${encodeURIComponent(relativePath)}`
     }
     
     // 其他情况（外部链接）直接返回
@@ -38,7 +39,7 @@ export function processMarkdownImages(content) {
     return content.replace(
         /!\[([^\]]*)\]\(\/uploads\/images\/([^)]+)\)/g,
         (match, alt, path) => {
-            return `![${alt}](/api/images/${path})`
+            return `![${alt}](/api/images?name=${encodeURIComponent(path)})`
         }
     )
 }
