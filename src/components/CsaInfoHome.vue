@@ -166,7 +166,7 @@ onMounted(() => {
 }
 
 .info-section {
-    flex: 1;
+    flex: 1 1 0%;
     padding: 20px;
     background-color: var(--bg-surface);
     position: relative;
