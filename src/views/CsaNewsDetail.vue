@@ -73,7 +73,11 @@ onMounted(() => {
                 
                 <h1 class="news-title">{{ data.title }}</h1>
                 
-                
+                <div class="news-meta">
+                    <div class="meta-item">
+                        <i class="pi pi-user"></i>
+                        <span>发布者：{{ data.publisher }}</span>
+                    </div>
                     <div class="meta-item">
                         <i class="pi pi-calendar"></i>
                         <span>发布时间：{{ new Date(data.first_publish * 1000).toLocaleDateString('zh-CN', {
@@ -84,7 +88,10 @@ onMounted(() => {
                             minute: '2-digit'
                         }) }}</span>
                     </div>
-                    
+                    <div class="meta-item">
+                        <i class="pi pi-eye"></i>
+                        <span>阅读量：{{ data.views || 0 }}</span>
+                    </div>
                 </div>
 
                 <div class="news-tags" v-if="data.tag">
