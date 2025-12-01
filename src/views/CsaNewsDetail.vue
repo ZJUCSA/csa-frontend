@@ -132,18 +132,6 @@ onMounted(() => {
         </div>
 
         <!-- 错误状态 -->
-        <div v-else class="error-state">
-            <div class="error-icon">
-                <i class="pi pi-exclamation-triangle"></i>
-            </div>
-            <h3 class="error-title">新闻不存在</h3>
-            <p class="error-message">抱歉，您访问的新闻内容不存在或已被删除</p>
-            <router-link to="/news" class="back-btn">
-                <i class="pi pi-arrow-left"></i>
-                返回新闻列表
-            </router-link>
-        </div>
-    </div>
 </template>
 
 <style scoped>
