@@ -1,7 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
-// 场地数据， 并不强制要求5个，随便几个都行，至少一个
 const venues = [
   {
     image: new URL('@/assets/about/venue/main_room1.png', import.meta.url).href,
@@ -15,144 +14,57 @@ const venues = [
   },
   {
     image: new URL('@/assets/about/venue/meeting_room1.jpg', import.meta.url).href,
-    title: '培训教室1',
-    description: '....'
-  },
-  {
-    image: new URL('@/assets/about/venue/meeting_room2.jpg', import.meta.url).href,
-    title: '培训教室2',
-    description: '....'
+    title: '蒙民伟楼培训教室',
+    description: '用于开展各类技术培训和讲座活动'
   }
 ]
 
-const position = ref(0)  //用来表示card的位置；这个以卡片数量为模，处于性能优化的考量，卡片只有五张，所以只能模5
-const isDragging = ref(false)
-const startX = ref(0)
-const dragThreshold = 100 // 拖动阈值，超过这个值才会触发切换
-const imgID = [0%venues.length, 1%venues.length, 2%venues.length, 3%venues.length, 4%venues.length] //五张卡片对应显示的图片的初始索引
+const currentIndex = ref(0)
 
-const shiftLeft = () => { //imgID全体左移，position在中间的和最右边的显示的图片不变
-  //因为最左边的card被移到最右边了，所以显示的图片要更新
-  //因为position.value表示第一张卡片的position， 所以position=0的卡片是第index张卡片
-  const index = (5 - position.value) % 5 //枚举一下就知道了，直接推也可以
-  imgID[index] = (imgID[(index + 4) % 5] + 1) % venues.length
+const nextVenue = () => {
+  currentIndex.value = (currentIndex.value + 1) % venues.length
 }
 
-const shiftRight = () => { //imgID全体右移, position在中间的和最左边的显示的图片不变
-  //最右边的card的图片更新
-  //同理，计算出position最右边的卡片在imgID中的index
-  const index =(5 - position.value + 4) % 5 // 同理，实际上就是最左边的card的index-1
-  imgID[index] = (imgID[(index + 1) % 5] - 1 + venues.length) % venues.length
+const prevVenue = () => {
+  currentIndex.value = (currentIndex.value - 1 + venues.length) % venues.length
 }
-
-// 计算当前显示的五个卡片索引
-const displayCards = computed(() => {
-  const len = 5
-  return [
-    [(position.value) % len, imgID[0]],
-    [(position.value + 1) % len, imgID[1]],
-    [(position.value + 2) % len, imgID[2]],
-    [(position.value + 3) % len, imgID[3]],
-    [(position.value + 4) % len, imgID[4]]
-  ]
-})
-
-const handleMouseDown = (e) => {
-  isDragging.value = true
-  startX.value = e.clientX
-}
-
-const handleMouseMove = (e) => {
-  if (!isDragging.value) return
-  const deltaX = e.clientX - startX.value
-
-  if (Math.abs(deltaX) > dragThreshold) {
-    if (deltaX > 0) {
-      // 向右拖动，每个card的位置向右移动，position增加
-      shiftRight() //要在position更新前做
-      position.value = (position.value + 1) % 5
-    } else {
-      // 向左拖动
-      shiftLeft() //要在position更新前做
-      position.value = (position.value - 1 + 5) % 5
-    }
-    isDragging.value = false  //保证一次只能滑动一块
-  }
-}
-
-const handleMouseUp = () => {
-  isDragging.value = false
-}
-
-const getCardStyle = (position) => {
-  let transform = ''
-  let opacity = 1
-  let zIndex = 1
-
-  switch(position) {
-    case 0: // 最左边屏幕外
-      transform = 'translateX(-200%) scale(0.8)'
-      opacity = 0
-      zIndex = 0
-      break
-    case 1: // 左边
-      transform = 'translateX(-100%) scale(0.9)'
-      opacity = 0.6
-      zIndex = 1
-      break
-    case 2: // 中间
-      transform = 'translateX(0) scale(1)'
-      opacity = 1
-      zIndex = 2
-      break
-    case 3: // 右边
-      transform = 'translateX(100%) scale(0.9)'
-      opacity = 0.6
-      zIndex = 1
-      break
-    case 4: // 最右边
-      transform = 'translateX(200%) scale(0.8)'
-      opacity = 0
-      zIndex = 0
-      break
-  }
-
-  return {
-    transform,
-    opacity,
-    zIndex,
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
-  window.addEventListener('mouseup', handleMouseUp)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove)
-  window.removeEventListener('mouseup', handleMouseUp)
-})
 </script>
 
 <template>
   <section id="venue" class="section">
     <div class="content-wrapper">
       <h2>活动场所</h2>
-      <div class="venue-carousel" @mousedown="handleMouseDown">
-        <div class="venue-stage">
-          <div
-            v-for="([position, imgID],index) in displayCards"
-            :key="index"
-            class="venue-card"
-            :style="getCardStyle(position)"
-          >
-          <!-- key为index，共5张卡片，可见的三张卡牌不会变更内容，隐藏的两张卡片顺序切换图片 -->
-            <img :src="venues[imgID].image" :alt="venues[imgID].title" class="venue-image">
-            <div class="venue-info">
-              <h3>{{ venues[imgID].title }}</h3>
-              <p>{{ venues[imgID].description }}</p>
+      <div class="venue-container">
+        <div class="venue-card card">
+          <div class="venue-image-wrapper">
+            <img 
+              :src="venues[currentIndex].image" 
+              :alt="venues[currentIndex].title" 
+              class="venue-image"
+            >
+            <button class="nav-btn prev-btn" @click="prevVenue">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button class="nav-btn next-btn" @click="nextVenue">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <div class="venue-indicators">
+              <span 
+                v-for="(venue, index) in venues" 
+                :key="index"
+                class="indicator"
+                :class="{ active: index === currentIndex }"
+                @click="currentIndex = index"
+              ></span>
             </div>
+          </div>
+          <div class="venue-info">
+            <h3>{{ venues[currentIndex].title }}</h3>
+            <p>{{ venues[currentIndex].description }}</p>
           </div>
         </div>
       </div>
@@ -161,65 +73,124 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-
-.content-wrapper {
-  max-width: 100vw;
-  padding: 2vh 0;
-}
-
-.venue-carousel {
-  position: relative;
-  width: 100%;
-  height: 600px;
-  perspective: 2000px;
-  user-select: none;
-}
-
-.venue-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
+.venue-container {
+  max-width: 900px;
+  margin: 2rem auto 0;
 }
 
 .venue-card {
-  position: absolute;
-  left: 26%;
-  top: 50%;
-  width: 50%;
-  height: 90%;
-  margin-top: -250px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 0;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /*优化过渡动画*/
-  cursor: grab;
-  transform-origin: center center;
-  will-change: transform, opacity; /*优化性能*/
+}
+
+.venue-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: #f3f4f6;
 }
 
 .venue-image {
   width: 100%;
-  height: 65%;
+  height: 100%;
   object-fit: cover;
-  user-select: none;   /* 防止图片被选中 */
+  user-select: none;
   -webkit-user-drag: none;
 }
 
-.venue-info {
-  padding: 1.5rem;
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* .venue-info h3 {   用顶层定义的h3
-  font-size: 1.5rem;
-  color: #2c3e50;
+.nav-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.prev-btn {
+  left: 1rem;
+}
+
+.next-btn {
+  right: 1rem;
+}
+
+.venue-indicators {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background: #ffffff;
+  width: 24px;
+  border-radius: 4px;
+}
+
+.venue-info {
+  padding: 2rem;
+}
+
+.venue-info h3 {
   margin-bottom: 1rem;
-} */
+  color: #1f2937;
+}
 
 .venue-info p {
-  color: #34495e;
-  line-height: 1.6;
-  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.8;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .venue-image-wrapper {
+    height: 300px;
+  }
+
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .venue-info {
+    padding: 1.5rem;
+  }
 }
 </style>

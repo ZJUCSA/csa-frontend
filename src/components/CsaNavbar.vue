@@ -37,47 +37,19 @@ const items = ref([
     },
 ])
 
-const isAboutPage = ref(false)
-watch(
-    () => route.name,
-    val => {
-        if (val !== 'about') {
-            isAboutPage.value = false
-            navbarStore.isCollapsed = false // 进入其他页面时收起导航栏
-        } else {
-            isAboutPage.value = true
-        }
-    }
-)
+// 移除About页面的特殊处理，确保导航栏在所有页面保持一致
+// watch(
+//     () => route.name,
+//     () => {
+//         // 确保导航栏始终展开
+//         navbarStore.setCollapsed(false)
+//     },
+//     { immediate: true }
+// )
 </script>
 
 <template>
-    <!-- 收起导航栏的按钮，点击翻转isCollapsed的值， 目前只适用于about，没对其它页面做测试 -->
-    <div class="nav-button-container">
-        <Button
-            v-if="isAboutPage"
-            :icon="
-                navbarStore.isCollapsed
-                    ? 'pi pi-chevron-down'
-                    : 'pi pi-chevron-up'
-            "
-            @click="navbarStore.toggleNav"
-            class="nav-toggle-btn"
-            severity="secondary"
-            text
-            rounded
-        />
-    </div>
-
-    <div
-        class="card"
-        :class="[
-            isAboutPage ? 'about-nav' : 'fixed-nav',
-            navbarStore.isCollapsed ? 'nav-collapsed' : '',
-        ]"
-    >
-        <!-- 不确定其它页面是否也要采取position:absolute(这会带来一些问题)或者其他设置, 所以仅对about页面进行特殊处理，但navbar的z-index所有页面都设置得高一点应该是合理的，需要的话直接把about的判断去掉，全部用about-nav就行了(( -->
-
+    <div class="fixed-nav">
         <Menubar :model="items" class="nav-content">
             <template #start>
                 <span class="my-3 mx-5 text-xl">ZJUCSA</span>
@@ -132,67 +104,48 @@ watch(
 
 <style>
 .fixed-nav {
-    position: absolute;
-    /* 不使用absolute会导致部分页面层叠顺序出错 */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.about-nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(6px);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    margin: 0;
+    padding: 0;
+    border: none;
 }
+
+/* about-nav样式已移除，统一使用fixed-nav */
 
 /* 深色模式下的导航栏样式 */
 .dark .fixed-nav {
-    background-color: rgba(30, 30, 30, 0.9);
-}
-
-.dark .about-nav {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* 导航栏文字颜色适配主题 */
-.fixed-nav .p-menubar,
-.about-nav .p-menubar {
+.fixed-nav .p-menubar {
     color: var(--text-primary);
     transition: color 0.3s ease;
 }
 
 /* 导航栏链接颜色适配主题 */
-.fixed-nav .p-menubar a,
-.about-nav .p-menubar a {
+.fixed-nav .p-menubar a {
     color: var(--text-primary);
     transition: color 0.3s ease;
 }
 
-.fixed-nav .p-menubar a:hover,
-.about-nav .p-menubar a:hover {
+.fixed-nav .p-menubar a:hover {
     color: var(--accent-color);
 }
 
 /* 导航栏品牌名称颜色 */
-.fixed-nav .my-3,
-.about-nav .my-3 {
+.fixed-nav .my-3 {
     color: var(--text-primary);
     font-weight: bold;
-    transition: color 0.3s ease;
-}
-
-.about-nav .p-menubar {
-    background: transparent !important;
-    color: var(--text-primary);
     transition: color 0.3s ease;
 }
 
@@ -243,10 +196,7 @@ watch(
     transform: scale(1.05);
     box-shadow: 0 4px 12px var(--shadow-color) !important;
 }
-.about-nav {
-    transition: all 0.3s ease; /* 添加过渡效果 */
-    /* z-index: 1001; */
-}
+
 .nav-collapsed {
     transform: translateY(-100%);
     opacity: 0;
