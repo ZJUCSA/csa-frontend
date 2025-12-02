@@ -1,12 +1,14 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 
 import { useNavbarStore } from '@/stores/navbar'
 const navbarStore = useNavbarStore()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 
 const items = ref([
     {
@@ -123,7 +125,12 @@ watch(
                         <i v-if="themeStore.isDark" class="pi pi-sun"></i>
                         <i v-else class="pi pi-moon"></i>
                     </button>
-                    <csa-user class="mx-2" />
+                    <!-- 未登录时显示登录按钮 -->
+                    <router-link v-if="!userStore.uid" :to="{ name: 'login' }">
+                        <Button label="登录" severity="secondary" class="mx-2 min-w-40" />
+                    </router-link>
+                    <!-- 已登录时显示用户组件 -->
+                    <csa-user v-else class="mx-2" />
                 </div>
             </template>
         </Menubar>

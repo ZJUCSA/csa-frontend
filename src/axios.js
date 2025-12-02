@@ -38,6 +38,18 @@ instance.interceptors.response.use(
             const userStore = useUserStore()
             userStore.logout()
             router.push({ name: 'login' })
+        } else if (error.response?.status === 422) {
+            // 请求验证失败
+            const detail = error.response?.data?.detail
+            if (Array.isArray(detail)) {
+                // FastAPI 验证错误格式
+                const errors = detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join('; ')
+                window.notyf.error(`请求参数错误: ${errors}`)
+            } else if (typeof detail === 'string') {
+                window.notyf.error(detail)
+            } else {
+                window.notyf.error('请求参数验证失败')
+            }
         } else if (typeof error.response?.data?.detail === 'string') {
             window.notyf.error(error.response.data.detail)
         } else {

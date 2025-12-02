@@ -154,6 +154,24 @@ const router = createRouter({
                 },
             ],
         },
+        {
+            path: '/user',
+            name: 'user',
+            component: () => import('../views/CsaUserDashboard.vue'),
+            meta: {
+                requiresAuth: true,
+                title: '用户后台',
+            },
+        },
+        {
+            path: '/user/profile',
+            name: 'user-profile',
+            component: () => import('../views/CsaUserProfile.vue'),
+            meta: {
+                requiresAuth: true,
+                title: '个人资料',
+            },
+        },
     ],
 })
 
