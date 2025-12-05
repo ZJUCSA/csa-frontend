@@ -104,9 +104,9 @@ watch([page, size, category], () => {
 
 <template>
     <div class="news-container">
-        <!-- 页面标题 -->
+        <!-- 页面标题（渐变文字） -->
         <div class="page-header">
-            <h1 class="page-title">新闻资讯</h1>
+            <h1 class="page-title gradient-text">新闻资讯</h1>
             <p class="page-subtitle">Stay Updated with Latest News</p>
         </div>
 
@@ -114,7 +114,7 @@ watch([page, size, category], () => {
             <!-- 侧边栏 -->
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <h3 class="sidebar-title">内容分类</h3>
+                    <h3 class="sidebar-title gradient-text">内容分类</h3>
                     <p class="sidebar-subtitle">Content Categories</p>
                 </div>
                 
@@ -141,7 +141,8 @@ watch([page, size, category], () => {
             <div class="main-content">
                 <div class="content-header">
                     <div class="header-info">
-                        <h2 class="content-title">{{ table[category - 1].title }}</h2>
+                        <!-- 分类标题渐变文字 -->
+                        <h2 class="content-title gradient-text">{{ table[category - 1].title }}</h2>
                         <p class="content-subtitle">{{ table[category - 1].english }}</p>
                     </div>
                     <div class="header-stats">
@@ -180,7 +181,8 @@ watch([page, size, category], () => {
                         >
                             <div class="news-image" v-if="item.image || item.cover_image || item.thumbnail">
                                 <img :src="item.image || item.cover_image || item.thumbnail" :alt="item.title" />
-                                <div class="news-overlay">
+                                <!-- 图片覆盖层渐变背景 -->
+                                <div class="news-overlay gradient-primary">
                                     <i class="pi pi-arrow-right"></i>
                                 </div>
                             </div>
@@ -209,7 +211,8 @@ watch([page, size, category], () => {
                                 </p>
 
                                 <div class="news-footer">
-                                    <span class="view-more">
+                                    <!-- 阅读全文渐变文字 -->
+                                    <span class="view-more gradient-text">
                                         阅读全文
                                         <i class="pi pi-arrow-right"></i>
                                     </span>
@@ -234,31 +237,64 @@ watch([page, size, category], () => {
 </template>
 
 <style scoped>
+:root {
+    /* 浅色模式变量（默认） */
+    --color-accent: #667eea;
+    --color-accent-hover: #5a6fd8;
+    --bg-main: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-card: #ffffff;
+    --text-main: #333333;
+    --text-secondary: #666666;
+    --border-color: #e1e5e9;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --skeleton-bg: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    --gradient-text: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+    --gradient-primary: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+}
+
+.dark {
+    /* 暗黑模式变量 */
+    --color-accent: #42a5f5;
+    --color-accent-hover: #64b5f6;
+    --bg-main: #000000;
+    --bg-secondary: #121212;
+    --bg-card: #1e1e1e;
+    --text-main: #ffffff;
+    --text-secondary: #b0b0b0;
+    --border-color: #333333;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --skeleton-bg: linear-gradient(90deg, #1e1e1e 25%, #282828 50%, #1e1e1e 75%);
+    --gradient-text: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+    --gradient-primary: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+}
+
 .news-container {
     min-height: 100vh;
-    background: #f8f9fa;
+    background: linear-gradient(180deg, rgba(102, 126, 234, 0.05) 0%, var(--bg-secondary) 100%);
     padding: 0;
+    transition: all 0.3s ease;
 }
 
 .page-header {
     text-align: center;
     margin-bottom: 40px;
-    color: #333;
     padding: 40px 20px;
-    background: white;
-    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
 .page-title {
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 10px 0;
-    color: #333;
+    color: var(--text-main);
 }
 
 .page-subtitle {
     font-size: 1.2rem;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -268,34 +304,40 @@ watch([page, size, category], () => {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 0;
-    background: white;
+    background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
     min-height: calc(100vh - 200px);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
 }
 
 .sidebar {
-    background: #f8f9fa;
-    border-right: 1px solid #e9ecef;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    border-right: 1px solid var(--border-color);
     padding: 30px 25px;
     height: 100%;
+    transition: all 0.3s ease;
 }
 
 .sidebar-header {
     text-align: center;
     margin-bottom: 25px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .sidebar-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-main);
     margin: 0 0 5px 0;
 }
 
 .sidebar-subtitle {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -310,43 +352,45 @@ watch([page, size, category], () => {
     align-items: center;
     gap: 12px;
     padding: 15px;
-    background: #f8f9fa;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
     border: 2px solid transparent;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: left;
     width: 100%;
+    color: var(--text-main);
 }
 
 .category-button:hover {
-    background: white;
-    border-color: #667eea;
+    background: linear-gradient(135deg, var(--bg-card) 0%, #282828 100%);
+    border-color: var(--color-accent);
     transform: translateX(5px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 5px 15px rgba(66, 165, 245, 0.2);
 }
 
 .category-button.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-primary);
     color: white;
-    border-color: #667eea;
+    border-color: var(--color-accent);
 }
 
 .category-icon {
     width: 40px;
     height: 40px;
-    background: rgba(102, 126, 234, 0.1);
+    background: linear-gradient(135deg, rgba(66, 165, 245, 0.1) 0%, rgba(66, 165, 245, 0.05) 100%);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #667eea;
+    color: var(--color-accent);
     font-size: 1.2rem;
     flex-shrink: 0;
+    transition: all 0.3s ease;
 }
 
 .category-button.active .category-icon {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
     color: white;
 }
 
@@ -363,13 +407,15 @@ watch([page, size, category], () => {
 
 .category-english {
     font-size: 0.8rem;
+    color: var(--text-secondary);
     opacity: 0.7;
 }
 
 .main-content {
-    background: white;
+    background: var(--bg-card);
     padding: 30px;
     overflow-y: auto;
+    transition: all 0.3s ease;
 }
 
 .content-header {
@@ -378,29 +424,31 @@ watch([page, size, category], () => {
     align-items: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .content-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-main);
     margin: 0 0 5px 0;
 }
 
 .content-subtitle {
     font-size: 1rem;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0;
 }
 
 .stats-text {
     font-size: 0.9rem;
-    color: #667eea;
+    color: var(--color-accent);
     font-weight: 600;
     padding: 8px 16px;
-    background: rgba(102, 126, 234, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
     border-radius: 20px;
+    transition: all 0.3s ease;
 }
 
 .news-list {
@@ -416,17 +464,25 @@ watch([page, size, category], () => {
     display: flex;
     gap: 20px;
     padding: 20px;
-    background: #f8f9fa;
+    background: var(--bg-card);
     border-radius: 12px;
     animation: pulse 1.5s infinite;
+}
+
+.skeleton-image,
+.skeleton-title,
+.skeleton-date,
+.skeleton-tag,
+.skeleton-summary {
+    background: var(--skeleton-bg);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
 }
 
 .skeleton-image {
     width: 200px;
     height: 120px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
     border-radius: 8px;
     flex-shrink: 0;
 }
@@ -441,19 +497,11 @@ watch([page, size, category], () => {
 .skeleton-title {
     height: 20px;
     width: 80%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
 }
 
 .skeleton-date {
     height: 14px;
     width: 40%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
 }
 
 .skeleton-tags {
@@ -464,19 +512,12 @@ watch([page, size, category], () => {
 .skeleton-tag {
     height: 16px;
     width: 60px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
     border-radius: 4px;
 }
 
 .skeleton-summary {
     height: 16px;
     width: 100%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
 }
 
 @keyframes shimmer {
@@ -505,10 +546,12 @@ watch([page, size, category], () => {
     padding: 25px 0;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-color);
     animation: slideInUp 0.6s ease-out forwards;
     opacity: 0;
     transform: translateY(20px);
+    border-image: linear-gradient(90deg, transparent 0%, var(--color-accent) 50%, transparent 100%) 1;
+    background: var(--bg-card);
 }
 
 @keyframes slideInUp {
@@ -519,7 +562,7 @@ watch([page, size, category], () => {
 }
 
 .news-card:hover {
-    background: #f8f9fa;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
     transform: translateX(5px);
 }
 
@@ -530,12 +573,18 @@ watch([page, size, category], () => {
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(66, 165, 245, 0.1);
 }
 
 .news-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.news-card:hover .news-image img {
+    transform: scale(1.05);
 }
 
 .news-overlay {
@@ -544,7 +593,6 @@ watch([page, size, category], () => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(102, 126, 234, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -575,14 +623,14 @@ watch([page, size, category], () => {
 .news-title {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-main);
     margin: 0;
     line-height: 1.3;
 }
 
 .news-date {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -598,15 +646,16 @@ watch([page, size, category], () => {
 
 .news-tag {
     padding: 4px 12px;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    color: var(--color-accent);
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .news-summary {
-    color: #666;
+    color: var(--text-secondary);
     line-height: 1.5;
     margin: 0;
     display: -webkit-box;
@@ -620,7 +669,6 @@ watch([page, size, category], () => {
 }
 
 .view-more {
-    color: #667eea;
     font-weight: 600;
     font-size: 0.9rem;
     display: flex;
@@ -639,6 +687,18 @@ watch([page, size, category], () => {
     margin-top: 30px;
 }
 
+/* 通用渐变类 */
+.gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-primary {
+    background: var(--gradient-primary);
+}
+
 /* 响应式设计 */
 @media (max-width: 1024px) {
     .content-wrapper {
@@ -649,7 +709,7 @@ watch([page, size, category], () => {
     .sidebar {
         order: 2;
         border-right: none;
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid var(--border-color);
     }
     
     .main-content {
@@ -673,6 +733,7 @@ watch([page, size, category], () => {
     .content-wrapper {
         max-width: 100%;
         padding: 0 20px;
+        border-radius: 0;
     }
     
     .sidebar {
