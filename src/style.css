@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS变量定义（新增深色模式所需变量） */
+/* CSS变量定义 */
 :root {
     /* 浅色主题变量 */
     --bg-primary: #ffffff;
@@ -15,7 +15,16 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --accent-color: #667eea;
     --accent-hover: #5a6fd8;
-    --accent-color-rgb: 102, 126, 234; /* 新增：用于透明背景计算 */
+    /* 统一渐变变量 */
+    --gradient-primary: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --gradient-primary-reverse: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
+    --gradient-secondary: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    --gradient-success: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    --gradient-warning: linear-gradient(135deg, #f9ca24 0%, #f0932b 100%);
+    --gradient-scrollbar: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --gradient-scrollbar-hover: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
+    --gradient-text: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --skeleton-gradient: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
 }
 
 /* 防止浏览器自动应用深色模式 */
@@ -34,7 +43,7 @@ html.dark {
     color-scheme: dark;
 }
 
-/* 深色主题变量（完善所有适配项） */
+/* 深色主题变量 */
 .dark {
     --bg-primary: #121212;
     --bg-secondary: #1e1e1e;
@@ -46,10 +55,19 @@ html.dark {
     --shadow-color: rgba(0, 0, 0, 0.3);
     --accent-color: #42a5f5;
     --accent-hover: #64b5f6;
-    --accent-color-rgb: 66, 165, 245; /* 新增：用于透明背景计算 */
+    /* 暗黑主题渐变 */
+    --gradient-primary: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --gradient-primary-reverse: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
+    --gradient-secondary: linear-gradient(135deg, #c62828 0%, #e65100 100%);
+    --gradient-success: linear-gradient(135deg, #00695c 0%, #2e7d32 100%);
+    --gradient-warning: linear-gradient(135deg, #f57f17 0%, #ff6f00 100%);
+    --gradient-scrollbar: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --gradient-scrollbar-hover: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
+    --gradient-text: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    --skeleton-gradient: linear-gradient(90deg, #2d2d2d 25%, #383838 50%, #2d2d2d 75%);
 }
 
-/* 全局样式优化（确保深色模式继承） */
+/* 全局样式优化 */
 * {
     box-sizing: border-box;
 }
@@ -67,13 +85,7 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* 页面根容器强制继承深色背景（解决主体区域不变黑问题） */
-.app-container, .main-container, .content-wrapper { /* 覆盖常见根容器类名，根据实际HTML调整 */
-    background: var(--bg-secondary);
-    transition: background-color 0.3s ease;
-}
-
-/* 滚动条美化（深色模式适配） */
+/* 滚动条美化 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -85,21 +97,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    background: var(--gradient-scrollbar);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
+    background: var(--gradient-scrollbar-hover);
 }
 
-/* Firefox 滚动条（深色模式适配） */
+/* Firefox 滚动条 */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--accent-color) var(--bg-secondary);
 }
 
-/* 链接样式（深色模式适配） */
+/* 链接样式 */
 a {
     color: var(--accent-color);
     text-decoration: none;
@@ -110,7 +122,7 @@ a:hover {
     color: var(--accent-hover);
 }
 
-/* 按钮样式（深色模式适配） */
+/* 按钮样式 */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -123,14 +135,15 @@ a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 4px 15px rgba(var(--accent-color-rgb), 0.3);
+    box-shadow: 0 4px 15px rgba(var(--bg-surface-rgb), 0.1);
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(var(--accent-color-rgb), 0.4);
+    background: var(--gradient-primary-reverse);
+    box-shadow: 0 8px 25px rgba(var(--bg-surface-rgb), 0.2);
 }
 
 .btn-secondary {
@@ -175,10 +188,10 @@ a:hover {
 .input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--bg-surface-rgb), 0.1);
 }
 
-/* 标签样式（深色模式适配） */
+/* 标签样式 */
 .tag {
     display: inline-flex;
     align-items: center;
@@ -192,7 +205,7 @@ a:hover {
 }
 
 .tag-primary {
-    background: rgba(var(--accent-color-rgb), 0.1);
+    background: rgba(var(--bg-surface-rgb), 0.1);
     color: var(--accent-color);
 }
 
@@ -209,19 +222,6 @@ a:hover {
 .tag-danger {
     background: rgba(231, 76, 60, 0.1);
     color: #e74c3c;
-}
-
-/* 深色模式下标签样式增强（提高对比度） */
-.dark .tag-success {
-    background: rgba(46, 204, 113, 0.2);
-}
-
-.dark .tag-warning {
-    background: rgba(241, 196, 15, 0.2);
-}
-
-.dark .tag-danger {
-    background: rgba(231, 76, 60, 0.2);
 }
 
 /* 动画效果 */
@@ -357,42 +357,73 @@ a:hover {
 
 /* 渐变背景 */
 .gradient-primary {
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    background: var(--gradient-primary);
 }
 
 .gradient-secondary {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    background: var(--gradient-secondary);
 }
 
 .gradient-success {
-    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    background: var(--gradient-success);
 }
 
 .gradient-warning {
-    background: linear-gradient(135deg, #f9ca24 0%, #f0932b 100%);
+    background: var(--gradient-warning);
+}
+
+/* 通用渐变标题类 */
+.gradient-title {
+    font-weight: 700;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+}
+
+.gradient-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
 }
 
 /* 阴影效果 */
 .shadow-sm {
-    box-shadow: 0 2px 4px var(--shadow-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .shadow-md {
-    box-shadow: 0 4px 8px var(--shadow-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .shadow-lg {
-    box-shadow: 0 8px 16px var(--shadow-color);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .shadow-xl {
-    box-shadow: 0 16px 32px var(--shadow-color);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
 }
 
 /* 响应式工具类 */
 @media (max-width: 768px) {
     .mobile-hidden {
         display: none !important;
+    }
+    
+    .gradient-title {
+        font-size: 2rem;
+    }
+    
+    .gradient-title::after {
+        width: 50px;
+        height: 2px;
     }
 }
 
@@ -402,11 +433,11 @@ a:hover {
     }
 }
 
-/* 加载动画（深色模式适配） */
+/* 加载动画 */
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid var(--border-color);
+    border: 4px solid var(--accent-hover);
     border-top: 4px solid var(--accent-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -417,23 +448,23 @@ a:hover {
     100% { transform: rotate(360deg); }
 }
 
-/* 骨架屏（深色模式适配） */
+/* 骨架屏 */
 .skeleton {
-    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--border-color) 50%, var(--bg-surface) 75%);
+    background: var(--skeleton-gradient);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
 }
 
-/* 文本渐变（深色模式适配） */
+/* 文本渐变 */
 .text-gradient {
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    background: var(--gradient-text);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-/* 毛玻璃效果（深色模式适配） */
+/* 毛玻璃效果 */
 .glass {
     background: rgba(var(--bg-surface-rgb), 0.25);
     backdrop-filter: blur(10px);
@@ -485,29 +516,14 @@ a:hover {
         box-shadow: none !important;
         border: 1px solid #106a59 !important;
     }
-}
-
-/* 覆盖Tailwind默认样式（防止固定颜色覆盖主题） */
-.dark .bg-white {
-    background: var(--bg-surface) !important;
-}
-
-.dark .bg-gray-100 {
-    background: var(--bg-secondary) !important;
-}
-
-.dark .text-gray-800,
-.dark .text-gray-700,
-.dark .text-gray-600 {
-    color: var(--text-primary) !important;
-}
-
-.dark .text-gray-500,
-.dark .text-gray-400 {
-    color: var(--text-secondary) !important;
-}
-
-.dark .border-gray-200,
-.dark .border-gray-300 {
-    border-color: var(--border-color) !important;
+    
+    .gradient-title {
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: #333 !important;
+        background-clip: text;
+    }
+    
+    .gradient-title::after {
+        background: #106a59;
+    }
 }
