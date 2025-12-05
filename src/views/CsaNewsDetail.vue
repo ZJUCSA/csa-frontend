@@ -73,7 +73,11 @@ onMounted(() => {
                 
                 <h1 class="news-title">{{ data.title }}</h1>
                 
-                
+                <div class="news-meta">
+                    <div class="meta-item">
+                        <i class="pi pi-user"></i>
+                        <span>发布者：{{ data.publisher }}</span>
+                    </div>
                     <div class="meta-item">
                         <i class="pi pi-calendar"></i>
                         <span>发布时间：{{ new Date(data.first_publish * 1000).toLocaleDateString('zh-CN', {
@@ -84,7 +88,10 @@ onMounted(() => {
                             minute: '2-digit'
                         }) }}</span>
                     </div>
-                    
+                    <div class="meta-item">
+                        <i class="pi pi-eye"></i>
+                        <span>阅读量：{{ data.views || 0 }}</span>
+                    </div>
                 </div>
 
                 <div class="news-tags" v-if="data.tag">
@@ -132,21 +139,66 @@ onMounted(() => {
         </div>
 
         <!-- 错误状态 -->
+        <div v-else class="error-state">
+            <div class="error-icon">
+                <i class="pi pi-exclamation-triangle"></i>
+            </div>
+            <h3 class="error-title">新闻不存在</h3>
+            <p class="error-message">抱歉，您访问的新闻内容不存在或已被删除</p>
+            <router-link to="/news" class="back-btn">
+                <i class="pi pi-arrow-left"></i>
+                返回新闻列表
+            </router-link>
+        </div>
+    </div>
 </template>
 
 <style scoped>
+/* 基础变量（浅色模式） */
+:deep(:root) {
+    --accent-color: #667eea;
+    --accent-hover: #764ba2;
+    --bg-primary: #f8f9fa;
+    --bg-surface: #ffffff;
+    --bg-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #e9ecef;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --skeleton-bg: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    --divider-bg: linear-gradient(90deg, transparent, #667eea, transparent);
+}
+
+/* 暗黑模式变量（纯黑/深灰基调） */
+:deep(.dark) {
+    --accent-color: #42a5f5;
+    --accent-hover: #64b5f6;
+    --bg-primary: #000000; /* 纯黑背景 */
+    --bg-surface: #121212; /* 深灰模块背景 */
+    --bg-header: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); /* 深灰渐变头部 */
+    --text-primary: #ffffff; /* 白色文字 */
+    --text-secondary: #b0b0b0; /* 浅灰文字 */
+    --border-color: #333333; /* 深灰边框 */
+    --shadow-color: rgba(0, 0, 0, 0.5); /* 深色阴影 */
+    --skeleton-bg: linear-gradient(90deg, #1e1e1e 25%, #282828 50%, #1e1e1e 75%); /* 暗黑骨架屏 */
+    --divider-bg: linear-gradient(90deg, transparent, #42a5f5, transparent); /* 暗黑分割线 */
+}
+
+/* 全局容器 */
 .news-detail-container {
     min-height: 100vh;
-    background: #f8f9fa;
+    background: var(--bg-primary);
     padding: 0;
+    transition: all 0.3s ease;
 }
 
 /* 加载状态 */
 .loading-state {
     max-width: 1000px;
     margin: 0 auto;
-    background: white;
+    background: var(--bg-surface);
     padding: 40px;
+    transition: all 0.3s ease;
 }
 
 .skeleton-header {
@@ -155,7 +207,7 @@ onMounted(() => {
 
 .skeleton-title {
     height: 40px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: var(--skeleton-bg);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 8px;
@@ -172,7 +224,7 @@ onMounted(() => {
 .skeleton-date {
     height: 16px;
     width: 120px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: var(--skeleton-bg);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
@@ -186,7 +238,7 @@ onMounted(() => {
 .skeleton-tag {
     height: 24px;
     width: 80px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: var(--skeleton-bg);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 12px;
@@ -200,7 +252,7 @@ onMounted(() => {
 
 .skeleton-paragraph {
     height: 16px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: var(--skeleton-bg);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
@@ -223,15 +275,17 @@ onMounted(() => {
 .news-detail {
     max-width: 1000px;
     margin: 0 auto;
-    background: white;
+    background: var(--bg-surface);
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .news-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--bg-header);
+    color: var(--text-primary);
     padding: 40px;
     text-align: center;
+    transition: all 0.3s ease;
 }
 
 .news-category {
@@ -244,6 +298,10 @@ onMounted(() => {
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 20px;
+    /* 暗黑模式分类背景 */
+    :deep(.dark) & {
+        background: rgba(255, 255, 255, 0.1);
+    }
 }
 
 .news-title {
@@ -252,6 +310,7 @@ onMounted(() => {
     line-height: 1.3;
     margin: 0 0 30px 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
 }
 
 .news-meta {
@@ -268,10 +327,12 @@ onMounted(() => {
     gap: 6px;
     font-size: 0.95rem;
     opacity: 0.9;
+    color: var(--text-primary);
 }
 
 .meta-item i {
     font-size: 1rem;
+    color: var(--accent-color);
 }
 
 .news-tags {
@@ -283,29 +344,39 @@ onMounted(() => {
 
 .news-tag {
     background: rgba(255, 255, 255, 0.2);
-    color: white;
+    color: var(--text-primary);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    /* 暗黑模式标签样式 */
+    :deep(.dark) & {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
 }
 
 .news-content {
     padding: 40px;
+    color: var(--text-primary);
+    /* 适配Markdown渲染器的暗黑模式文字 */
+    :deep(.dark) & {
+        color: var(--text-primary);
+    }
 }
 
-/* Markdown渲染器样式已移至MarkdownRenderer组件 */
-
+/* 新闻底部 */
 .news-footer {
-    background: #f8f9fa;
+    background: var(--bg-surface);
     padding: 30px 40px;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
 .footer-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, #667eea, transparent);
+    background: var(--divider-bg);
     margin-bottom: 25px;
 }
 
@@ -321,12 +392,12 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
 .info-item i {
-    color: #667eea;
+    color: var(--accent-color);
 }
 
 .share-buttons {
@@ -339,8 +410,9 @@ onMounted(() => {
     align-items: center;
     gap: 5px;
     padding: 6px 12px;
-    border: 1px solid #e9ecef;
-    background: white;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
     border-radius: 20px;
     font-size: 0.85rem;
     cursor: pointer;
@@ -360,14 +432,14 @@ onMounted(() => {
 }
 
 .back-link {
-    color: #667eea;
+    color: var(--accent-color);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .back-link:hover {
-    color: #764ba2;
+    color: var(--accent-hover);
 }
 
 /* 错误状态 */
@@ -375,10 +447,11 @@ onMounted(() => {
     max-width: 500px;
     margin: 100px auto;
     text-align: center;
-    background: white;
+    background: var(--bg-surface);
     padding: 60px 40px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px var(--shadow-color);
+    transition: all 0.3s ease;
 }
 
 .error-icon {
@@ -390,12 +463,12 @@ onMounted(() => {
 .error-title {
     font-size: 1.8rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin: 0 0 15px 0;
 }
 
 .error-message {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 1rem;
     margin: 0 0 30px 0;
     line-height: 1.6;
@@ -406,18 +479,25 @@ onMounted(() => {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     color: white;
     text-decoration: none;
     border-radius: 25px;
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    /* 暗黑模式按钮阴影 */
+    :deep(.dark) & {
+        box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+    }
 }
 
 .back-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    :deep(.dark) & {
+        box-shadow: 0 8px 25px rgba(66, 165, 245, 0.4);
+    }
 }
 
 /* 响应式设计 */
