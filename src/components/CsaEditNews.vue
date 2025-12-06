@@ -42,6 +42,10 @@ const uploadFile = ref(null)
 const isUploading = ref(false)
 const uploadMode = ref(false)
 
+// Local state for draft handling
+const draftNid = ref(null)
+const saved = ref(false)
+
 const cateOptions = newsCategory.slice(1).map((item, index) => {
     return {
         label: item,
@@ -52,7 +56,7 @@ const cateOptions = newsCategory.slice(1).map((item, index) => {
 const submit = () => {
     axios
         .post('/edit/news', {
-            nid: props.nid,
+            nid: props.nid || draftNid.value,
             title: data.title,
             content: data.content,
             tag: data.tag,
@@ -60,6 +64,7 @@ const submit = () => {
             image: data.image,
         })
         .then(() => {
+            saved.value = true // Mark as saved so we don't delete it
             visible.value = false
             window.notyf.success('操作成功')
             emits('finish')
@@ -88,6 +93,11 @@ const uploadAndParse = () => {
     const formData = new FormData()
     formData.append('file', uploadFile.value)
     formData.append('type', 'news')
+    // Send nid if available (for draft or edit)
+    const currentNid = props.nid || draftNid.value
+    if (currentNid) {
+        formData.append('nid', currentNid)
+    }
     
     axios
         .post('/upload/parse', formData, {
@@ -134,12 +144,39 @@ watch(visible, value => {
                     loading.value = false
                 })
         } else {
-            data.title = ''
-            data.content = ''
-            data.tag = ''
-            data.category = 1
-            data.image = ''
+            // Create a draft first to get nid
+            loading.value = true
+            axios.post('/create/news/draft')
+                .then(res => {
+                    draftNid.value = res.data.nid
+                    
+                    data.title = ''
+                    data.content = ''
+                    data.tag = ''
+                    data.category = 1
+                    data.image = ''
+                    loading.value = false
+                })
+                .catch(err => {
+                    window.notyf.error('无法创建草稿: ' + err.message)
+                    visible.value = false
+                })
         }
+    } else {
+        // If closed without saving, and we have a draftNid, we should delete it?
+        // But user might just have clicked outside.
+        // If we want "Cancel" to delete, we need to handle "Cancel" button or close event.
+        // But the Dialog just has a close button.
+        
+        // If we have a draftNid and we are closing NOT because of success submit...
+        // But 'visible' changes to false on submit success too.
+        
+        // Let's add a `saved` flag.
+        if (draftNid.value && !saved.value) {
+             axios.post('/delete/news', { nid: draftNid.value })
+             draftNid.value = null
+        }
+        saved.value = false
     }
 })
 </script>

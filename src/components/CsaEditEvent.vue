@@ -9,6 +9,8 @@ const emits = defineEmits(['update:show', 'finish'])
 
 const loading = ref(false)
 const rendering = ref(true)
+const draftEid = ref(null)
+const saved = ref(false)
 
 const visible = computed({
     get() {
@@ -48,9 +50,10 @@ const isUploading = ref(false)
 const uploadMode = ref(false)
 
 const submit = () => {
+    const currentEid = props.eid || draftEid.value
     axios
         .post('/edit/event', {
-            eid: props.eid,
+            eid: currentEid,
             title: data.title,
             description: data.description,
             start_time: Date.parse(data.start_time) / 1000,
@@ -63,6 +66,7 @@ const submit = () => {
             image: data.image,
         })
         .then(() => {
+            saved.value = true
             visible.value = false
             window.notyf.success('操作成功')
             emits('finish')
@@ -88,9 +92,13 @@ const uploadAndParse = () => {
     }
     
     isUploading.value = true
+    const currentEid = props.eid || draftEid.value
     const formData = new FormData()
     formData.append('file', uploadFile.value)
     formData.append('type', 'event')
+    if (currentEid) {
+        formData.append('eid', currentEid)
+    }
     
     axios
         .post('/upload/parse', formData, {
@@ -127,6 +135,7 @@ const cateOptions = eventCategory.slice(1).map((item, index) => {
 
 watch(visible, value => {
     if (value) {
+        saved.value = false
         if (props.eid) {
             loading.value = true
             rendering.value = true
@@ -154,6 +163,9 @@ watch(visible, value => {
                     loading.value = false
                 })
         } else {
+            axios.post('/create/event/draft').then(res => {
+                draftEid.value = res.data.eid
+            })
             data.title = ''
             data.description = ''
             data.start_time = 0
@@ -165,6 +177,11 @@ watch(visible, value => {
             data.tag = ''
             data.image = ''
         }
+    } else {
+        if (draftEid.value && !saved.value) {
+            axios.post('/delete/event', { eid: draftEid.value })
+        }
+        draftEid.value = null
     }
 })
 </script>
