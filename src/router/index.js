@@ -102,6 +102,7 @@ const router = createRouter({
             redirect: { name: 'admin-news' },
             meta: {
                 requiresAuth: true,
+                requiresAdmin: true,
             },
             children: [
                 {
@@ -172,6 +173,14 @@ const router = createRouter({
                 title: '个人资料',
             },
         },
+        {
+            path: '/forbidden',
+            name: 'forbidden',
+            component: () => import('../views/VsaForbidden.vue'),
+            meta: {
+                title: '访问被拒绝',
+            },
+        },
     ],
 })
 
@@ -181,6 +190,7 @@ router.beforeEach(to => {
     }
     const userStore = useUserStore()
 
+    // 检查token是否过期
     if (
         to.meta.requiresAuth &&
         userStore.uid &&
@@ -189,9 +199,21 @@ router.beforeEach(to => {
         userStore.logout()
         return { name: 'login' }
     }
-    if (to.meta.requiresAuth && !userStore.uid) return { name: 'login' }
-    if (userStore.uid && ['login', 'reg'].includes(to.name))
+    
+    // 检查是否需要登录
+    if (to.meta.requiresAuth && !userStore.uid) {
+        return { name: 'login' }
+    }
+    
+    // 检查是否需要管理员权限
+    if (to.meta.requiresAdmin && !userStore.isAdmin) {
+        return { name: 'forbidden' }
+    }
+    
+    // 已登录用户不能访问登录页
+    if (userStore.uid && ['login', 'reg'].includes(to.name)) {
         return { name: 'home' }
+    }
 })
 
 if (sessionStorage.getItem("access_token")){

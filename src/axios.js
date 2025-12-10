@@ -38,6 +38,9 @@ instance.interceptors.response.use(
             const userStore = useUserStore()
             userStore.logout()
             router.push({ name: 'login' })
+        } else if (error.response?.status === 403) {
+            window.notyf.error('您没有权限访问此资源')
+            router.push({ name: 'forbidden' })
         } else if (error.response?.status === 422) {
             // 请求验证失败
             const detail = error.response?.data?.detail

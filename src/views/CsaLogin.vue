@@ -30,17 +30,29 @@ const submitLogin = () => {
                 // 根据 token 中是否有 aid 字段判断是否为管理员
                 const isAdmin = payload.aid !== undefined
                 const userType = isAdmin ? 'admin' : 'user'
-                const targetRoute = isAdmin ? 'admin' : 'user'
+                
+                // 如果是管理员，需要从后端获取角色ID
+                let adminRoleId = null
+                if (isAdmin) {
+                    try {
+                        const statusRes = await axios.get('/user/admin_status')
+                        adminRoleId = statusRes.data.admin_role_id
+                    } catch (err) {
+                        console.error('获取管理员角色失败', err)
+                    }
+                }
                 
                 userStore.login(
                     token,
                     payload.uid,
                     payload.nick,
                     payload.exp * 1000,
-                    userType
+                    userType,
+                    adminRoleId
                 )
                 loading.value = false
-                router.push({ name: targetRoute })
+                // 所有用户都跳转到用户后台
+                router.push({ name: 'user' })
             }
         })
         .catch(() => {

@@ -1,12 +1,22 @@
 <script setup>
+import { ref, inject, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
+const router = useRouter()
 const userStore = useUserStore()
 const axios = inject('axios')
 
 const profile = ref({
     user_type: '会员',
     is_member: false
+})
+
+const adminStatus = ref({
+    is_admin: false,
+    admin_role_id: null,
+    admin_role_name: null,
+    admin_token: null
 })
 
 const fetchProfile = async () => {
@@ -18,8 +28,33 @@ const fetchProfile = async () => {
     }
 }
 
+const checkAdminStatus = async () => {
+    try {
+        const response = await axios.get('/user/admin_status')
+        adminStatus.value = response.data
+    } catch (error) {
+        console.error('检查管理员状态失败', error)
+    }
+}
+
+const goToAdmin = () => {
+    if (adminStatus.value.is_admin && adminStatus.value.admin_token) {
+        // 保存管理员token并跳转
+        userStore.login(
+            adminStatus.value.admin_token,
+            userStore.uid,
+            userStore.nick,
+            new Date().getTime() + 2 * 60 * 60 * 1000, // 2小时后过期
+            'admin',
+            adminStatus.value.admin_role_id
+        )
+        router.push({ name: 'admin' })
+    }
+}
+
 onMounted(() => {
     fetchProfile()
+    checkAdminStatus()
 })
 </script>
 
@@ -61,6 +96,27 @@ onMounted(() => {
                             <span class="text-neutral-600 dark:text-neutral-400 w-24">昵称:</span>
                             <span class="text-neutral-800 dark:text-neutral-200 font-medium">{{ userStore.nick }}</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 管理员权限提示（如果有） -->
+                <div v-if="adminStatus.is_admin" class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div class="text-white">
+                            <h2 class="text-xl font-semibold mb-2">
+                                管理员权限
+                            </h2>
+                            <p class="text-indigo-100">
+                                您拥有 <span class="font-bold">{{ adminStatus.admin_role_name }}</span> 权限，可以访问管理后台
+                            </p>
+                        </div>
+                        <button 
+                            @click="goToAdmin"
+                            class="px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        >
+                            <i class="pi pi-lock-open mr-2"></i>
+                            进入管理后台
+                        </button>
                     </div>
                 </div>
 
