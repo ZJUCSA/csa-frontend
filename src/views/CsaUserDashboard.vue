@@ -8,8 +8,10 @@ const userStore = useUserStore()
 const axios = inject('axios')
 
 const profile = ref({
-    user_type: '会员',
-    is_member: false
+    nick: '',
+    uid: '',
+    email: '',
+    role_name: '未知'
 })
 
 const adminStatus = ref({
@@ -24,7 +26,10 @@ const fetchProfile = async () => {
         const response = await axios.get('/user/profile')
         profile.value = response.data
     } catch (error) {
-        console.error('获取用户资料失败', error)
+        // 静默处理错误，避免在加载时显示错误提示
+        if (error.response?.status !== 401) {
+            console.error('获取用户资料失败', error)
+        }
     }
 }
 
@@ -33,7 +38,10 @@ const checkAdminStatus = async () => {
         const response = await axios.get('/user/admin_status')
         adminStatus.value = response.data
     } catch (error) {
-        console.error('检查管理员状态失败', error)
+        // 静默处理错误，避免在加载时显示错误提示
+        if (error.response?.status !== 401) {
+            console.error('检查管理员状态失败', error)
+        }
     }
 }
 
@@ -68,14 +76,6 @@ onMounted(() => {
                         <h1 class="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
                             用户后台
                         </h1>
-                        <span 
-                            class="px-3 py-1 text-sm font-medium rounded-full"
-                            :class="profile.is_member 
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' 
-                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'"
-                        >
-                            {{ profile.user_type }}
-                        </span>
                     </div>
                     <p class="text-neutral-600 dark:text-neutral-400 mt-2">
                         欢迎, {{ userStore.nick }}
@@ -84,49 +84,66 @@ onMounted(() => {
 
                 <!-- 用户信息卡片 -->
                 <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold mb-4 text-neutral-800 dark:text-neutral-100">
-                        个人信息
-                    </h2>
-                    <div class="space-y-3">
-                        <div class="flex items-center">
-                            <span class="text-neutral-600 dark:text-neutral-400 w-24">学号:</span>
-                            <span class="text-neutral-800 dark:text-neutral-200 font-medium">{{ userStore.uid }}</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-neutral-600 dark:text-neutral-400 w-24">昵称:</span>
-                            <span class="text-neutral-800 dark:text-neutral-200 font-medium">{{ userStore.nick }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 管理员权限提示（如果有） -->
-                <div v-if="adminStatus.is_admin" class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-md p-6 mb-6">
-                    <div class="flex items-center justify-between">
-                        <div class="text-white">
-                            <h2 class="text-xl font-semibold mb-2">
-                                管理员权限
-                            </h2>
-                            <p class="text-indigo-100">
-                                您拥有 <span class="font-bold">{{ adminStatus.admin_role_name }}</span> 权限，可以访问管理后台
-                            </p>
-                        </div>
-                        <button 
-                            @click="goToAdmin"
-                            class="px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-neutral-800 dark:text-neutral-100">
+                            基本信息
+                        </h2>
+                        <span 
+                            class="px-3 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
                         >
-                            <i class="pi pi-lock-open mr-2"></i>
-                            进入管理后台
-                        </button>
+                            {{ profile.role_name }}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">姓名</span>
+                            <div class="text-neutral-800 dark:text-neutral-200 font-medium">
+                                {{ profile.nick || userStore.nick }}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">学号</span>
+                            <div class="text-neutral-800 dark:text-neutral-200 font-medium">
+                                {{ profile.uid || userStore.uid }}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">邮箱</span>
+                            <div class="text-neutral-800 dark:text-neutral-200 font-medium">
+                                {{ profile.email || '-' }}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">部门</span>
+                            <div class="text-neutral-800 dark:text-neutral-200 font-medium">
+                                {{ profile.department || '-' }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 功能区域（预留） -->
+                <!-- 功能区域 -->
                 <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold mb-4 text-neutral-800 dark:text-neutral-100">
-                        快捷功能
+                        仪表盘
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+
+                        <router-link :to="{ name: 'user-profile' }">
+                            <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <i class="pi pi-user text-2xl text-green-500"></i>
+                                    <div>
+                                        <h3 class="font-medium text-neutral-800 dark:text-neutral-200">详细资料</h3>
+                                        <p class="text-sm text-neutral-500 dark:text-neutral-400">查看、编辑个人信息</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </router-link>
+                        <!-- <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                             <div class="flex items-center space-x-3">
                                 <i class="pi pi-calendar text-2xl text-blue-500"></i>
                                 <div>
@@ -134,21 +151,8 @@ onMounted(() => {
                                     <p class="text-sm text-neutral-500 dark:text-neutral-400">查看参与的活动</p>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <router-link :to="{ name: 'user-profile' }">
-                            <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                                <div class="flex items-center space-x-3">
-                                    <i class="pi pi-user text-2xl text-green-500"></i>
-                                    <div>
-                                        <h3 class="font-medium text-neutral-800 dark:text-neutral-200">个人资料</h3>
-                                        <p class="text-sm text-neutral-500 dark:text-neutral-400">编辑个人信息</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </router-link>
-                        
-                        <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        </div> -->
+                        <!-- <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                             <div class="flex items-center space-x-3">
                                 <i class="pi pi-cog text-2xl text-purple-500"></i>
                                 <div>
@@ -156,7 +160,7 @@ onMounted(() => {
                                     <p class="text-sm text-neutral-500 dark:text-neutral-400">管理账户设置</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

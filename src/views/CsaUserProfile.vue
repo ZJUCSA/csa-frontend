@@ -24,8 +24,7 @@ const profile = ref({
     position: '',
     is_active: null,
     skills: '',
-    is_member: false,  // 是否为干事
-    user_type: '会员'  // 用户类型
+    role_name: '会员'  // 角色名称
 })
 
 const editForm = reactive({
@@ -80,7 +79,7 @@ const saveEdit = async () => {
         editMode.value = false
         await fetchProfile()
     } catch (error) {
-        window.notyf.error('更新个人资料失败')
+        window.notyf.error('个人资料更新失败')
     } finally {
         loading.value = false
     }
@@ -97,21 +96,40 @@ onMounted(() => {
             <div class="max-w-4xl mx-auto">
                 <!-- 页面标题 -->
                 <div class="mb-8 flex items-center justify-between">
-                    <div>
+                    <div class="flex items-center gap-4">
+                        <Button
+                            icon="pi pi-arrow-left"
+                            severity="secondary"
+                            text
+                            @click="router.back()"
+                        />
                         <h1 class="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
                             个人资料
                         </h1>
-                        <p class="text-neutral-600 dark:text-neutral-400 mt-2">
-                            当前账号: {{ profile.nick }}
-                        </p>
                     </div>
-                    <Button
-                        v-if="!editMode"
-                        label="编辑资料"
-                        icon="pi pi-pencil"
-                        @click="enterEditMode"
-                        severity="secondary"
-                    />
+                    <div class="flex gap-2">
+                        <Button
+                            v-if="!editMode"
+                            label="编辑资料"
+                            icon="pi pi-pencil"
+                            @click="enterEditMode"
+                            severity="secondary"
+                        />
+                        <template v-else>
+                            <Button
+                                label="取消"
+                                severity="secondary"
+                                @click="cancelEdit"
+                                :disabled="loading"
+                            />
+                            <Button
+                                label="保存"
+                                icon="pi pi-check"
+                                @click="saveEdit"
+                                :loading="loading"
+                            />
+                        </template>
+                    </div>
                 </div>
 
                 <!-- 头像和基本信息 -->
@@ -126,12 +144,9 @@ onMounted(() => {
                                     {{ profile.nick }}
                                 </h2>
                                 <span 
-                                    class="px-3 py-1 text-sm font-medium rounded-full"
-                                    :class="profile.is_member 
-                                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' 
-                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'"
+                                    class="px-3 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
                                 >
-                                    {{ profile.user_type }}
+                                    {{ profile.role_name }}
                                 </span>
                             </div>
                             <div class="space-y-1">
@@ -139,7 +154,7 @@ onMounted(() => {
                                     <i class="pi pi-id-card mr-2"></i>学号: {{ profile.uid }}
                                 </p>
                                 <p class="text-neutral-600 dark:text-neutral-400">
-                                    <i class="pi pi-envelope mr-2"></i>邮箱: {{ profile.email || '未设置' }}
+                                    <i class="pi pi-envelope mr-2"></i>邮箱: {{ profile.email || '-' }}
                                 </p>
                             </div>
                         </div>
@@ -155,17 +170,17 @@ onMounted(() => {
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- 姓名（不可编辑） -->
+                        <!-- 姓名 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                 姓名
                             </label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
-                                {{ profile.name || '-' }}
+                                {{ profile.name || profile.nick || '-' }}
                             </div>
                         </div>
                         
-                        <!-- 学号（不可编辑） -->
+                        <!-- 学号 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                 学号
@@ -175,7 +190,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 性别（不可编辑） -->
+                        <!-- 性别 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">性别</label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
@@ -183,7 +198,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 专业（不可编辑） -->
+                        <!-- 专业 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                 专业
@@ -193,7 +208,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 学院（不可编辑） -->
+                        <!-- 学院 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">学院</label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
@@ -201,7 +216,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 年级（不可编辑） -->
+                        <!-- 年级 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">年级</label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
@@ -209,23 +224,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 电话 -->
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                电话
-                            </label>
-                            <InputText
-                                v-if="editMode"
-                                v-model="editForm.phone"
-                                placeholder="请输入联系电话"
-                                class="w-full"
-                            />
-                            <div v-else class="text-neutral-800 dark:text-neutral-200 font-medium">
-                                {{ profile.phone || '-' }}
-                            </div>
-                        </div>
-                        
-                        <!-- 部门（不可编辑） -->
+                        <!-- 部门 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                 部门
@@ -235,7 +234,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 职位（不可编辑） -->
+                        <!-- 职位 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">职位</label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
@@ -243,7 +242,7 @@ onMounted(() => {
                             </div>
                         </div>
                         
-                        <!-- 状态（不可编辑） -->
+                        <!-- 状态 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">状态</label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
@@ -275,7 +274,21 @@ onMounted(() => {
                                 {{ profile.email || '-' }}
                             </div>
                         </div>
-                        
+                                                <!-- 电话 -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                电话
+                            </label>
+                            <InputText
+                                v-if="editMode"
+                                v-model="editForm.phone"
+                                placeholder="请输入联系电话"
+                                class="w-full"
+                            />
+                            <div v-else class="text-neutral-800 dark:text-neutral-200 font-medium">
+                                {{ profile.phone || '-' }}
+                            </div>
+                        </div>
                         <!-- 微信号 -->
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-neutral-600 dark:text-neutral-400">
@@ -327,22 +340,6 @@ onMounted(() => {
                             {{ profile.skills || '-' }}
                         </div>
                     </div>
-                </div>
-
-                <!-- 编辑模式下的操作按钮 -->
-                <div v-if="editMode" class="flex justify-end gap-4">
-                    <Button
-                        label="取消"
-                        severity="secondary"
-                        @click="cancelEdit"
-                        :disabled="loading"
-                    />
-                    <Button
-                        label="保存"
-                        icon="pi pi-check"
-                        @click="saveEdit"
-                        :loading="loading"
-                    />
                 </div>
             </div>
         </div>
