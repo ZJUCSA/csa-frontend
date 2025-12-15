@@ -266,9 +266,89 @@ watch([page, size], () => {
     </div>
 </template>
 
-<style>
+<style scoped>
+/* 标题样式 */
+.text-3xl {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+/* InputText 组件样式 */
+:deep(.p-inputtext) {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:deep(.p-inputtext:focus) {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
 .p-datatable-column-title {
     white-space: nowrap;
+}
+
+/* DataTable组件样式 - 应用全局CSS变量 */
+:deep(.p-datatable) {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:deep(.p-datatable .p-datatable-header) {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    font-weight: 600;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 1rem;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    background: transparent !important;
+    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+/* 确保表格内的所有文字都使用正确的颜色 */
+:deep(.p-datatable .p-datatable-tbody > tr > td *) {
+    color: var(--text-primary) !important;
+}
+
+/* 确保按钮和标签等元素也使用正确的颜色 */
+:deep(.p-datatable .p-datatable-tbody > tr > td .p-button) {
+    color: inherit;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td .p-tag) {
+    color: inherit;
 }
 
 /* Paginator组件样式 - 应用全局CSS变量 */

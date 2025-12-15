@@ -2091,12 +2091,18 @@ onMounted(async () => {
   border-bottom: 1px solid var(--border-color);
 }
 
+.recruit-table tr {
+  background: var(--bg-surface);
+  transition: background 0.3s ease;
+}
+
 .recruit-table tr:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .recruit-table tr.selected {
-  background: #e3f2fd;
+  background: rgba(102, 126, 234, 0.15);
+  border-left: 3px solid var(--accent-color);
 }
 
 .department-order {
@@ -2167,15 +2173,23 @@ onMounted(async () => {
 
 .pagination button {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: white;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   cursor: pointer;
   border-radius: 4px;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--bg-secondary);
 }
 
 .pagination button:disabled {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .modal-overlay {
@@ -2192,11 +2206,14 @@ onMounted(async () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   padding: 2rem;
   border-radius: 8px;
   min-width: 400px;
   max-width: 600px;
+  border: 1px solid var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .evaluation-form {

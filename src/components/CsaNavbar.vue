@@ -97,9 +97,9 @@ watch(
                         <i v-else class="pi pi-moon"></i>
                     </button>
                     <!-- 未登录时显示登录按钮 -->
-                    <router-link v-if="!userStore.uid" :to="{ name: 'login' }">
+                    <!-- <router-link v-if="!userStore.uid" :to="{ name: 'login' }">
                         <Button label="登录" severity="secondary" class="mx-2 min-w-40" />
-                    </router-link>
+                    </router-link> -->
                     <!-- 已登录时显示用户组件 -->
                     <csa-user v-if="userStore.uid" class="ml-auto" />
                 </div>

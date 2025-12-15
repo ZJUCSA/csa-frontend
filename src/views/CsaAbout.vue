@@ -53,7 +53,7 @@ onUnmounted(() => {
     <Vision />
     <Timeline />
     <Team />
-    <Activities />
+    <!-- <Activities /> -->
     <Venue />
   </div>
 </template>

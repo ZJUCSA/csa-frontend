@@ -852,13 +852,14 @@ h2 {
 }
 
 .tab-btn:hover {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
 }
 
 .tab-btn.active {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
+  font-weight: 600;
 }
 
 .member-count {

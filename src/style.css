@@ -494,6 +494,26 @@ a:hover {
     box-shadow: 0 6px 16px var(--shadow-color);
 }
 
+/* PrimeVue 按钮样式覆盖 - 使用 CSS 变量 */
+.p-button-secondary {
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.p-button-secondary:not(:disabled):hover {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.p-button-secondary:not(:disabled):active {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
 /* 打印样式 */
 @media print {
     .no-print {

@@ -12,12 +12,12 @@
             class="base-date-input"
           >
         </div>
-        <button @click="openAutoScheduleModal()" class="auto-schedule-btn">
+        <!-- <button @click="openAutoScheduleModal()" class="auto-schedule-btn">
           <i class="pi pi-magic"></i> 一键排班
         </button>
         <button @click="showScheduleFormModal()" class="add-btn">
           <i class="pi pi-calendar"></i> 安排面试
-        </button>
+        </button> -->
         <button @click="refreshData" class="refresh-btn">
           <i class="pi pi-refresh"></i> 刷新
         </button>
@@ -1190,8 +1190,6 @@ const getRecruitName = (uid) => {
 
 
 const applyFilters = () => {
-  // 筛选是实时的，不需要重新获取数据
-  // 重置分页到第一页
   resetPagination();
 };
 
@@ -1597,9 +1595,10 @@ onMounted(() => {
 
 .page-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.8rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .header-actions {
@@ -1612,28 +1611,30 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: white;
+  background: var(--bg-surface);
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px var(--shadow-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .base-time-setting label {
   font-weight: 500;
-  color: #495057;
+  color: var(--text-primary);
   font-size: 0.9rem;
   white-space: nowrap;
+  transition: color 0.3s ease;
 }
 
 .base-date-input {
   padding: 0.5rem;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9rem;
-  background: white;
-  color: #495057;
-  transition: border-color 0.2s ease;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .base-date-input:focus {
@@ -1729,11 +1730,12 @@ onMounted(() => {
 
 /* 筛选面板 */
 .filter-panel {
-  background: white;
+  background: var(--bg-surface);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   margin-bottom: 2rem;
+  transition: background-color 0.3s ease;
 }
 
 .filter-row {
@@ -1750,31 +1752,37 @@ onMounted(() => {
 
 .filter-group label {
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .filter-group select,
 .filter-group input {
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
   min-width: 150px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 表格样式 */
 .table-container {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .loading {
   padding: 2rem;
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .empty-state {
@@ -1789,8 +1797,9 @@ onMounted(() => {
 
 .empty-text {
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
+  transition: color 0.3s ease;
 }
 
 .empty-action {
@@ -1813,17 +1822,18 @@ onMounted(() => {
 .interview-table td {
   padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .interview-table th {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .interview-table tr:hover {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .stage-badge {
@@ -1928,15 +1938,17 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   margin-top: 2rem;
+  transition: background-color 0.3s ease;
 }
 
 .pagination-info {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .pagination-controls {
@@ -1947,9 +1959,9 @@ onMounted(() => {
 
 .page-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -1957,7 +1969,7 @@ onMounted(() => {
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .page-btn:disabled {
@@ -1967,7 +1979,8 @@ onMounted(() => {
 
 .page-info {
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 /* 模态框样式 */
@@ -1985,13 +1998,14 @@ onMounted(() => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px var(--shadow-color);
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  transition: background-color 0.3s ease;
 }
 
 .interview-form-modal {
@@ -1999,9 +2013,10 @@ onMounted(() => {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: background-color 0.3s ease;
 }
 
 .auto-schedule-modal {
@@ -2009,9 +2024,10 @@ onMounted(() => {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: background-color 0.3s ease;
 }
 
 .auto-schedule-info {
@@ -2021,23 +2037,26 @@ onMounted(() => {
 }
 
 .info-section {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .info-section h4 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .info-section ul {
   margin: 0;
   padding-left: 1.5rem;
-  color: #666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .info-section li {
@@ -2046,17 +2065,19 @@ onMounted(() => {
 }
 
 .form-section {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .form-section h5 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .warning-section {
@@ -2084,12 +2105,14 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .close-btn {
@@ -2097,7 +2120,8 @@ onMounted(() => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .modal-body {
@@ -2117,17 +2141,19 @@ onMounted(() => {
 }
 
 .form-section {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .form-section h5 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .form-group {
@@ -2138,18 +2164,21 @@ onMounted(() => {
 
 .form-group label {
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
-  transition: border-color 0.2s ease;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .form-group input:focus,
@@ -2171,14 +2200,15 @@ onMounted(() => {
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .cancel-btn {
   padding: 0.75rem 1.5rem;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -2186,7 +2216,7 @@ onMounted(() => {
 }
 
 .cancel-btn:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .submit-btn {
@@ -2223,28 +2253,30 @@ onMounted(() => {
 }
 
 .drawer-content {
-  background: white;
+  background: var(--bg-surface);
   width: 500px;
   max-width: 90vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 10px var(--shadow-color);
   animation: slideIn 0.3s ease-out;
+  transition: background-color 0.3s ease;
 }
 
 /* 时间段信息抽屉样式 */
 .time-slot-info-drawer {
-  background: white;
+  background: var(--bg-surface);
   width: 400px;
   max-width: 80vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 10px var(--shadow-color);
   animation: slideInLeft 0.3s ease-out;
   position: relative;
   z-index: 1001;
+  transition: background-color 0.3s ease;
 }
 
 @keyframes slideInLeft {
@@ -2261,15 +2293,17 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .time-slot-info-header h4 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .time-slot-info-body {
@@ -2286,9 +2320,10 @@ onMounted(() => {
 
 .time-slot-summary h5 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .summary-stats {
@@ -2301,8 +2336,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .stat-item i {
@@ -2312,16 +2348,18 @@ onMounted(() => {
 
 .scheduled-candidates h6 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .empty-candidates {
   text-align: center;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
   padding: 2rem 0;
+  transition: color 0.3s ease;
 }
 
 .candidate-list {
@@ -2331,15 +2369,15 @@ onMounted(() => {
 }
 
 .candidate-card {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.2s ease;
 }
 
 .candidate-card:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .candidate-header {
@@ -2351,13 +2389,15 @@ onMounted(() => {
 
 .candidate-name {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .candidate-uid {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 .candidate-details {
@@ -2371,8 +2411,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 .candidate-time i {
@@ -2392,9 +2433,9 @@ onMounted(() => {
 
 .info-btn {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  background: white;
-  color: #007bff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--accent-color);
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
@@ -2405,8 +2446,8 @@ onMounted(() => {
 }
 
 .info-btn:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 @keyframes slideIn {
@@ -2420,18 +2461,20 @@ onMounted(() => {
 
 .drawer-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .drawer-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .drawer-body {
@@ -2444,50 +2487,56 @@ onMounted(() => {
 .recruits-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-color);
+  transition: background-color 0.3s ease;
 }
 
 .recruits-table th {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1rem 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
   font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .recruits-table td {
   padding: 1rem 0.75rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
+  transition: border-color 0.3s ease;
 }
 
 /* 分页补齐空行：固定每页表格视觉高度，避免最后一页变短导致下方卡片上移 */
 .recruits-table .recruit-table-filler-row td {
   height: 56px;
   padding: 0 0.75rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .recruits-table tr:hover {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .no-schedule {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
+  transition: color 0.3s ease;
 }
 
 .form-help {
   display: block;
   margin-top: 0.25rem;
   font-size: 0.875rem;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
+  transition: color 0.3s ease;
 }
 
 /* 通知状态样式 */
@@ -2523,8 +2572,9 @@ onMounted(() => {
 
 .notification-info h4 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
 .info-grid {
@@ -2542,13 +2592,15 @@ onMounted(() => {
 
 .info-item label {
   font-weight: 500;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .info-item span {
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .notification-message {
@@ -2559,16 +2611,20 @@ onMounted(() => {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .notification-message textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   resize: vertical;
   font-family: inherit;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .notification-warning {
@@ -2593,7 +2649,8 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 /* 排班按钮样式 */
@@ -2696,11 +2753,12 @@ onMounted(() => {
 
 /* 时间段排班统计表格样式 */
 .time-slot-stats-table {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   margin-top: 2rem;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .table-header {
@@ -2708,22 +2766,24 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .table-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .refresh-btn-small {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.8rem;
@@ -2734,33 +2794,36 @@ onMounted(() => {
 }
 
 .refresh-btn-small:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .time-slot-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-surface);
+  transition: background-color 0.3s ease;
 }
 
 .time-slot-table th {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1rem 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
   font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .time-slot-table td {
   padding: 1rem 0.75rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-color);
   vertical-align: top;
+  transition: border-color 0.3s ease;
 }
 
 .time-slot-table tr:hover {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .time-slot-cell {
@@ -2775,8 +2838,9 @@ onMounted(() => {
 
 .time-slot-name {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .count-badge {
@@ -2820,9 +2884,10 @@ onMounted(() => {
 }
 
 .no-interviewer, .no-venue {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 .candidates-cell {
@@ -2836,7 +2901,8 @@ onMounted(() => {
 
 .candidate-item {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .candidate-item:last-child {
@@ -2852,33 +2918,36 @@ onMounted(() => {
 
 .candidate-name {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .candidate-uid {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 .empty-slot {
   text-align: center;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
   padding: 1rem;
+  transition: color 0.3s ease;
 }
 
 .scheduled-item {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 6px;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
 .scheduled-item:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .scheduled-item:last-child {
@@ -2894,12 +2963,14 @@ onMounted(() => {
 
 .person-name {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .person-uid {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .person-details {
@@ -2910,8 +2981,9 @@ onMounted(() => {
 }
 
 .interviewer {
-  color: #495057;
+  color: var(--text-secondary);
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 .stage-badge {

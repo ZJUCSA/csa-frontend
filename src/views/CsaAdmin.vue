@@ -65,7 +65,7 @@ const items = ref([
 <template>
     <div class="flex min-h-screen">
         <!-- 左侧菜单区域 -->
-        <div class="w-80 min-h-screen border-r theme-transition"
+        <div class="w-64 min-h-screen border-r theme-transition"
              :class="themeStore.isDark ? 'dark' : ''"
              :style="{
                  backgroundColor: themeStore.isDark ? 'var(--bg-primary)' : 'var(--bg-surface)',
@@ -101,7 +101,7 @@ const items = ref([
 /* 菜单项 - 中等字号 */
 ::v-deep(.p-menu .p-menuitem-link) {
     border-radius: 0 !important;
-    padding: 16px 32px !important;
+    padding: 16px 24px !important;
     border-left: 4px solid transparent !important;
     margin: 0 !important;
     font-size: 18px !important; /* 18px - 中等大小 */
@@ -114,17 +114,17 @@ const items = ref([
 }
 
 /* 应用主题颜色 */
-::v-deep(.p-menu .p-menuitem-link:not(.dark)) {
+::v-deep(.p-menu .p-menuitem-link) {
     color: var(--text-primary) !important;
     background-color: transparent !important;
 }
 
-::v-deep(.p-menu .p-menuitem-link:hover:not(.dark)) {
+::v-deep(.p-menu .p-menuitem-link:hover) {
     background-color: rgba(102, 126, 234, 0.1) !important;
     border-left-color: var(--accent-color) !important;
 }
 
-::v-deep(.p-menu .p-menuitem-link.p-highlight:not(.dark)) {
+::v-deep(.p-menu .p-menuitem-link.p-highlight) {
     background-color: rgba(102, 126, 234, 0.2) !important;
     border-left-color: var(--accent-color) !important;
     color: var(--accent-color) !important;
@@ -138,20 +138,16 @@ const items = ref([
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
-    padding: 24px 32px 12px !important;
+    padding: 24px 24px 12px !important;
     background: transparent !important;
     border: none !important;
     margin-top: 16px !important;
     min-height: 48px !important;
+    color: var(--text-secondary) !important;
 }
 
 ::v-deep(.p-menu .p-submenu-header:first-child) {
     margin-top: 0 !important;
-}
-
-/* 应用主题颜色到标题 */
-::v-deep(.p-menu .p-submenu-header:not(.dark)) {
-    color: var(--text-secondary) !important;
 }
 
 /* 图标 - 中等大小 */
@@ -164,6 +160,7 @@ const items = ref([
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    color: inherit !important;
 }
 
 /* 菜单文字 - 单独控制 */
@@ -171,38 +168,12 @@ const items = ref([
     font-size: 18px !important; /* 18px */
     font-weight: 500 !important;
     line-height: 1.5 !important;
-}
-
-/* 深色模式 */
-:deep(html.dark) .p-menu .p-menuitem-link {
-    color: var(--text-primary) !important;
-    background-color: transparent !important;
-}
-
-:deep(html.dark) .p-menu .p-menuitem-link:hover {
-    background-color: rgba(66, 165, 245, 0.15) !important;
-    border-left-color: var(--accent-color) !important;
-}
-
-:deep(html.dark) .p-menu .p-menuitem-link.p-highlight {
-    background-color: rgba(66, 165, 245, 0.25) !important;
-    border-left-color: var(--accent-color) !important;
-    color: var(--accent-color) !important;
-    font-weight: 600 !important;
-    font-size: 19px !important;
-}
-
-:deep(html.dark) .p-menu .p-submenu-header {
-    color: var(--text-secondary) !important;
-}
-
-:deep(html.dark) .p-menu .p-menuitem-icon {
-    color: var(--accent-color) !important;
+    color: inherit !important;
 }
 
 /* 菜单分隔线 */
 ::v-deep(.p-menu .p-menu-separator) {
-    margin: 16px 32px !important;
+    margin: 16px 24px !important;
     border-color: var(--border-color) !important;
     border-width: 1px !important;
     min-height: 1px !important;

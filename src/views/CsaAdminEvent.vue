@@ -1,8 +1,14 @@
 <script setup>
+import { computed } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
+import { useUserStore } from '@/stores/user'
 
 const confirm = useConfirm()
 const axios = inject('axios')
+const userStore = useUserStore()
+
+// 检查是否为管理员（rid=7）
+const isManager = computed(() => userStore.admin_role_id === 7)
 
 const data = ref([])
 
@@ -118,6 +124,7 @@ watch([page, size], () => {
             "
         ></Button>
         <Button
+            v-if="isManager"
             label="清理废弃草稿"
             class="mb-4 ml-2"
             severity="warning"
@@ -212,7 +219,13 @@ watch([page, size], () => {
     </div>
 </template>
 
-<style>
+<style scoped>
+/* 标题样式 */
+.text-3xl {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
 .p-datatable-column-title {
     white-space: nowrap;
 }

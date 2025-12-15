@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 import competition_avatar from '@/assets/about/department/team-avatar/competition.jpg?url'
 import research_avatar from '@/assets/about/department/team-avatar/research.png?url'
@@ -7,8 +7,8 @@ import activity_avatar from '@/assets/about/department/team-avatar/activity.png?
 import publicity_avatar from '@/assets/about/department/team-avatar/publicity.png?url'
 import secretary_avatar from '@/assets/about/department/team-avatar/secretary.png?url'
 
-const showModal = ref(false)
-const currentDepartment = ref('')
+// 当前展示的部门，默认为竞赛部
+const activeDepartment = ref('competition')
 
 const departments = ref({
     competition: {
@@ -48,35 +48,9 @@ const departments = ref({
     },
 })
 
-import {
-    disableBodyScroll,
-    enableBodyScroll,
-    clearAllBodyScrollLocks,
-} from 'body-scroll-lock'
-
-const openModal = dept => {
-    disableBodyScroll(document.body)
-    const section = document.getElementById('team')
-    if (section) {
-        section.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-        })
-    }
-    setTimeout(() => {
-        currentDepartment.value = dept
-        showModal.value = true
-    }, 350)
+const handleMouseEnter = (key) => {
+    activeDepartment.value = key
 }
-
-const closeModal = () => {
-    showModal.value = false
-    enableBodyScroll(document.body)
-}
-
-onUnmounted(() => {
-    clearAllBodyScrollLocks()
-})
 </script>
 
 <template>
@@ -88,7 +62,8 @@ onUnmounted(() => {
                     class="team-card card"
                     v-for="(dept, key) in departments"
                     :key="key"
-                    @click="openModal(key)"
+                    @mouseenter="handleMouseEnter(key)"
+                    :class="{ 'is-hovered': activeDepartment === key }"
                 >
                     <img
                         :src="dept.avatar"
@@ -100,18 +75,19 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <Transition name="modal">
+            <!-- 介绍展示区域 -->
+            <Transition name="description">
                 <div
-                    v-if="showModal"
-                    class="department-modal"
-                    @click.self="closeModal"
+                    v-if="activeDepartment && departments[activeDepartment]"
+                    class="description-panel"
                 >
-                    <div class="modal-content">
-                        <button class="close-btn" @click="closeModal">×</button>
-                        <h2>{{ departments[currentDepartment].name }}</h2>
+                    <div class="description-content">
+                        <h3 class="description-title">
+                            {{ departments[activeDepartment].name }}
+                        </h3>
                         <div
-                            class="modal-body"
-                            v-html="departments[currentDepartment].description"
+                            class="description-body"
+                            v-html="departments[activeDepartment].description"
                         ></div>
                     </div>
                 </div>
@@ -126,6 +102,7 @@ onUnmounted(() => {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .team-card {
@@ -133,10 +110,13 @@ onUnmounted(() => {
     text-align: center;
     padding: 2rem 1.5rem;
     transition: all 0.3s ease;
+    position: relative;
 }
 
-.team-card:hover {
+.team-card:hover,
+.team-card.is-hovered {
     transform: translateY(-4px);
+    box-shadow: 0 8px 16px var(--shadow-color);
 }
 
 .member-avatar {
@@ -146,122 +126,86 @@ onUnmounted(() => {
     object-fit: cover;
     object-position: center;
     margin: 0 auto 1rem;
-    border: 3px solid #e5e7eb;
+    border: 3px solid var(--border-color);
     display: block;
     user-select: none;
     -webkit-user-drag: none;
     transition: border-color 0.3s ease;
 }
 
-.team-card:hover .member-avatar {
-    border-color: #2563eb;
+.team-card:hover .member-avatar,
+.team-card.is-hovered .member-avatar {
+    border-color: var(--accent-color);
 }
 
 .team-card h3 {
     font-size: 1.25rem;
-    color: #1f2937;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
 }
 
 .team-card p {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.9rem;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
-.modal-enter-active,
-.modal-leave-active {
-    transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-    opacity: 0;
-}
-
-.modal-enter-active .modal-content,
-.modal-leave-active .modal-content {
+/* 介绍展示面板 */
+.description-panel {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
     transition: all 0.3s ease;
 }
 
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-    transform: scale(0.95);
+.description-content {
+    max-width: 100%;
 }
 
-.department-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    position: relative;
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 8px;
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.modal-content h2 {
+.description-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
-    text-align: left;
-    border-bottom: 2px solid #2563eb;
     padding-bottom: 1rem;
+    border-bottom: 2px solid var(--accent-color);
+    font-weight: 600;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-.modal-body {
-    overflow-y: auto;
-    flex-grow: 1;
-    padding: 0;
-    margin-top: 1rem;
-    color: #4b5563;
+.description-body {
+    color: var(--text-primary);
     line-height: 1.8;
+    transition: color 0.3s ease;
 }
 
-.modal-body p {
+.description-body :deep(p) {
     margin-bottom: 1rem;
 }
 
-.modal-body strong {
-    color: #1f2937;
+.description-body :deep(strong) {
+    color: var(--text-primary);
     font-weight: 600;
 }
 
-.close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 2rem;
-    line-height: 1;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #6b7280;
-    transition: color 0.2s;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
+/* 过渡动画 */
+.description-enter-active,
+.description-leave-active {
+    transition: all 0.3s ease;
 }
 
-.close-btn:hover {
-    color: #1f2937;
-    background: #f3f4f6;
+.description-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.description-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 @media (max-width: 768px) {
@@ -279,9 +223,13 @@ onUnmounted(() => {
         height: 80px;
     }
 
-    .modal-content {
+    .description-panel {
         padding: 1.5rem;
-        width: 95%;
+        margin-top: 1.5rem;
+    }
+
+    .description-title {
+        font-size: 1.25rem;
     }
 }
 </style>
