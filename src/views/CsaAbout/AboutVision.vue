@@ -74,11 +74,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eff6ff;
+  background: rgba(102, 126, 234, 0.1);
   border-radius: 12px;
   margin-bottom: 1.25rem;
-  color: #2563eb;
+  color: var(--accent-color);
   flex-shrink: 0;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .card-icon svg {
@@ -88,15 +89,17 @@
 
 .vision-card h3 {
   margin-bottom: 1rem;
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 1.25rem;
+  transition: color 0.3s ease;
 }
 
 .vision-card p {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
   margin: 0;
   flex-grow: 1;
+  transition: color 0.3s ease;
 }
 
 /* 平板端：2列布局 */

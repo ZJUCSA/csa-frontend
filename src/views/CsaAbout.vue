@@ -61,10 +61,11 @@ onUnmounted(() => {
 <style>
 .about-container {
   width: 100%;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   min-height: 100vh;
   padding: 0;
   position: relative;
+  transition: background 0.3s ease;
 }
 
 /* 平滑滚动 */

@@ -60,10 +60,11 @@
 .description {
   font-size: 1.125rem;
   line-height: 1.8;
-  color: #4b5563;
+  color: var(--text-secondary);
   text-align: center;
   margin-bottom: 2rem;
   font-weight: 400;
+  transition: color 0.3s ease;
 }
 
 .team-photo-container {
@@ -77,8 +78,9 @@
   max-width: 900px;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
   object-fit: cover;
+  transition: box-shadow 0.3s ease;
 }
 
 .content-section {
@@ -91,19 +93,21 @@
 
 .content-section h3 {
   font-size: 1.5rem;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 1rem;
   font-weight: 600;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .content-section p {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.9;
   font-size: 1rem;
   margin: 0;
   text-align: left;
+  transition: color 0.3s ease;
 }
 
 @media (max-width: 768px) {

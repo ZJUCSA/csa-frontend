@@ -107,8 +107,9 @@
 
 .activity-card h3 {
   margin-bottom: 1rem;
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 1.25rem;
+  transition: color 0.3s ease;
 }
 
 .activity-card ul {
@@ -118,33 +119,37 @@
 }
 
 .activity-card p {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 1rem;
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .activity-card li {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
   padding: 0.4rem 0;
   position: relative;
   padding-left: 1.5rem;
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .activity-card li strong {
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .activity-card li::before {
   content: '•';
   position: absolute;
   left: 0;
-  color: #2563eb;
+  color: var(--accent-color);
   font-weight: bold;
   font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
 
 @media (max-width: 768px) {

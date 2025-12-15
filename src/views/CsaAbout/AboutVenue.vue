@@ -88,7 +88,8 @@ const prevVenue = () => {
   width: 100%;
   height: 400px;
   overflow: hidden;
-  background: #f3f4f6;
+  background: var(--bg-secondary);
+  transition: background 0.3s ease;
 }
 
 .venue-image {
@@ -103,7 +104,7 @@ const prevVenue = () => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(var(--bg-surface-rgb), 0.9);
   border: none;
   width: 40px;
   height: 40px;
@@ -113,13 +114,13 @@ const prevVenue = () => {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #1f2937;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .nav-btn:hover {
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: var(--bg-surface);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .nav-btn svg {
@@ -148,13 +149,13 @@ const prevVenue = () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--bg-surface-rgb), 0.5);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .indicator.active {
-  background: #ffffff;
+  background: var(--bg-surface);
   width: 24px;
   border-radius: 4px;
 }
@@ -165,13 +166,15 @@ const prevVenue = () => {
 
 .venue-info h3 {
   margin-bottom: 1rem;
-  color: #1f2937;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .venue-info p {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 @media (max-width: 768px) {
