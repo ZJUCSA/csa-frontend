@@ -16,6 +16,8 @@ instance.interceptors.request.use(
         if (access_token) {
             if (userStore.expires <= new Date().getTime()) {
                 userStore.logout()
+                router.push({ name: 'login' })
+                return Promise.reject(new Error('Token expired'))
             } else {
                 config.headers.Authorization = 'Bearer ' + access_token
             }
@@ -33,14 +35,27 @@ instance.interceptors.response.use(
         return response
     },
     error => {
+        if (error.message === 'Token expired') {
+            return Promise.reject(error)
+        }
+        
+        const userStore = useUserStore()
+        
         if (error.response?.status === 401) {
-            window.notyf.error('登录已过期，请重新登录')
-            const userStore = useUserStore()
-            userStore.logout()
-            router.push({ name: 'login' })
+            if (userStore.access_token) {
+                window.notyf.error('登录已过期，请重新登录')
+                userStore.logout()
+                router.push({ name: 'login' })
+            }
+            // 未登录状态的 401 不显示错误提示
         } else if (error.response?.status === 403) {
-            window.notyf.error('您没有权限访问此资源')
-            router.push({ name: 'forbidden' })
+            // 403 错误显示具体的错误信息
+            const detail = error.response?.data?.detail
+            if (typeof detail === 'string') {
+                window.notyf.error(detail)
+            } else {
+                window.notyf.error('您没有权限访问此资源')
+            }
         } else if (error.response?.status === 422) {
             // 请求验证失败
             const detail = error.response?.data?.detail
@@ -55,8 +70,8 @@ instance.interceptors.response.use(
             }
         } else if (typeof error.response?.data?.detail === 'string') {
             window.notyf.error(error.response.data.detail)
-        } else {
-            window.notyf.error('未知错误')
+        } else if (error.response) {
+            window.notyf.error('操作失败，未知错误')
         }
         return Promise.reject(error)
     }
