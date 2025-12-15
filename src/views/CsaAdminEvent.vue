@@ -42,6 +42,34 @@ const ConfirmDelete = (event, eid) => {
     })
 }
 
+const ConfirmCleanup = (event) => {
+    confirm.require({
+        target: event.currentTarget,
+        message: '确认清理所有24小时前的废弃草稿？此操作将删除旧草稿及其关联图片，且不可恢复。',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: '取消',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptProps: {
+            label: '清理',
+            severity: 'danger',
+        },
+        accept: () => {
+            axios
+                .post('/admin/cleanup_drafts')
+                .then(res => {
+                    const d = res.data.details || {
+                        news_deleted: 0,
+                        events_deleted: 0
+                    }
+                    window.notyf.success(`清理完成: 删除新闻草稿${d.news_deleted}条, 活动草稿${d.events_deleted}条`)
+                })
+        },
+    })
+}
+
 const fetchContent = () => {
     axios
         .get('/event/list', {
@@ -88,6 +116,12 @@ watch([page, size], () => {
                     operator = null
                 }
             "
+        ></Button>
+        <Button
+            label="清理废弃草稿"
+            class="mb-4 ml-2"
+            severity="warning"
+            @click="ConfirmCleanup"
         ></Button>
         <div class="overflow-x-auto mb-4">
             <DataTable :value="data" class="min-w-full">
