@@ -4,12 +4,10 @@ import draggable from 'vuedraggable';
 
 const axios = inject('axios')
 
-// 
 const isLoading = ref(true);
 const isRecruiting = ref(false); // 
 const recruitDeadline = ref(''); //
 
-// Reactive state for your form data
 const form = reactive({
   name: '',
   render: true,
@@ -147,10 +145,16 @@ const validateForm = () => {
   const phoneValid = validatePhone(form.phone);
   const timeSlotsValid = validateTimeSlots();
   
+  if (form.degree === '学士' || (typeof form.degree === 'number' && form.degree === 0)) {
+    if (!form.major_id || !form.college_id || !form.college_name) {
+      window.notyf.error('请从专业列表中选择您的专业');
+      return false;
+    }
+  }
+  
   return nameValid && uidValid && phoneValid && timeSlotsValid;
 };
 
-// Use a ref for the draggable list, which will be our source of truth for department order
 const departmentList = ref([
   { id: 'office_department_willing', name: '办公室部' },
   { id: 'competition_department_willing', name: '竞赛部' },

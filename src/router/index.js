@@ -29,6 +29,15 @@ const router = createRouter({
                         title: '登录',
                     },
                 },
+                {
+                    path: 'change-password',
+                    name: 'change-password',
+                    component: () => import('../views/CsaChangePassword.vue'),
+                    meta: {
+                        title: '修改密码',
+                        requiresAuth: true,
+                    },
+                },
                 /* {
                     path: 'register',
                     name: 'register',

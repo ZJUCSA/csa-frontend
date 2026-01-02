@@ -60,6 +60,25 @@ const goToAdmin = () => {
     }
 }
 
+// 部门名称翻译映射
+const departmentMap = {
+    'office': '办公室部',
+    'competition': '竞赛部',
+    'research': '科研部',
+    'activity': '活动部'
+}
+
+// 翻译部门名称
+const translateDepartment = (dept) => {
+    if (!dept) return '-'
+    return departmentMap[dept] || dept
+}
+
+// 计算属性：翻译后的部门名称
+const translatedDepartment = computed(() => {
+    return translateDepartment(profile.value.department)
+})
+
 onMounted(() => {
     fetchProfile()
     checkAdminStatus()
@@ -119,7 +138,7 @@ onMounted(() => {
                         <div class="space-y-2">
                             <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">部门</span>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
-                                {{ profile.department || '-' }}
+                                {{ translatedDepartment }}
                             </div>
                         </div>
                     </div>
@@ -139,6 +158,18 @@ onMounted(() => {
                                     <div>
                                         <h3 class="font-medium text-neutral-800 dark:text-neutral-200">详细资料</h3>
                                         <p class="text-sm text-neutral-500 dark:text-neutral-400">查看、编辑个人信息</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </router-link>
+
+                        <router-link :to="{ name: 'change-password' }">
+                            <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <i class="pi pi-key text-2xl text-blue-500"></i>
+                                    <div>
+                                        <h3 class="font-medium text-neutral-800 dark:text-neutral-200">修改密码</h3>
+                                        <p class="text-sm text-neutral-500 dark:text-neutral-400">更改账户登录密码</p>
                                     </div>
                                 </div>
                             </div>

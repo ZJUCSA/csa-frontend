@@ -85,6 +85,25 @@ const saveEdit = async () => {
     }
 }
 
+// 部门名称翻译映射
+const departmentMap = {
+    'office': '办公室部',
+    'competition': '竞赛部',
+    'research': '科研部',
+    'activity': '活动部'
+}
+
+// 翻译部门名称
+const translateDepartment = (dept) => {
+    if (!dept) return '-'
+    return departmentMap[dept] || dept
+}
+
+// 计算属性：翻译后的部门名称
+const translatedDepartment = computed(() => {
+    return translateDepartment(profile.value.department)
+})
+
 onMounted(() => {
     fetchProfile()
 })
@@ -230,7 +249,7 @@ onMounted(() => {
                                 部门
                             </label>
                             <div class="text-neutral-800 dark:text-neutral-200 font-medium">
-                                {{ profile.department || '-' }}
+                                {{ translatedDepartment }}
                             </div>
                         </div>
                         
