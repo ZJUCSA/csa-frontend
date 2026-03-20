@@ -32,7 +32,9 @@
                 </div>
                 
                 <div class="info-grid">
-                    <csa-info-home />
+                    <div class="info-card">
+                        <csa-info-home />
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,7 +134,8 @@
 }
 
 .news-card,
-.event-card {
+.event-card,
+.info-card {
     background: var(--bg-surface);
     border-radius: 20px;
     box-shadow: 0 10px 30px var(--shadow-color);
@@ -143,7 +146,8 @@
 }
 
 .news-card::before,
-.event-card::before {
+.event-card::before,
+.info-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -154,7 +158,8 @@
 }
 
 .news-card:hover,
-.event-card:hover {
+.event-card:hover,
+.info-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px var(--shadow-color);
 }

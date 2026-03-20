@@ -126,41 +126,9 @@ onMounted(() => {
 
 <style scoped>
 .info-layout {
-    position: relative;
     display: flex;
     width: 100%;
-    overflow: hidden;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-surface);
-    box-shadow: 0 10px 30px var(--shadow-color);
-    animation: panelFadeIn 0.7s ease-out both;
-    transition: all 0.3s ease;
-    will-change: transform, box-shadow;
-}
-
-.info-layout:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px var(--shadow-color);
-}
-
-.info-layout::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-}
-
-.info-layout::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    pointer-events: none;
+    height: 100%;
 }
 
 .info-section {
@@ -242,18 +210,6 @@ onMounted(() => {
 .list-item:not(:last-child),
 .skeleton-item:not(:last-child) {
     border-bottom: 1px solid rgba(102, 126, 234, 0.08);
-}
-
-@keyframes panelFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 @keyframes listItemReveal {
