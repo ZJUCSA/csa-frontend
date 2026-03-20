@@ -627,12 +627,11 @@ const fetchMembers = async () => {
 
 
 const getDepartmentMemberCount = (dept) => {
-  if (!members.value || !Array.isArray(members.value)) return 0
   if (dept === 'all') {
-    return members.value.length
+    return totalMembers.value;
   }
-  return members.value.filter(member => member && member.department === dept).length
-}
+  return stats.value?.[dept]?.total || 0;
+};
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -831,7 +830,7 @@ h2 {
 /* 部门分栏 */
 .department-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
   margin-bottom: 2rem;
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 1rem;
@@ -840,31 +839,42 @@ h2 {
 .tab-btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--bg-secondary);
   color: var(--text-primary);
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .tab-btn:hover {
-  background: var(--accent-color);
-  color: white;
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  color: var(--accent-color);
 }
 
 .tab-btn.active {
-  background: var(--accent-color);
-  color: white;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+  color: white !important;
   font-weight: 600;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  border: none !important;
+}
+
+.tab-btn.active .member-count {
+  font-size: 0.8rem;
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
 }
 
 .member-count {
   font-size: 0.8rem;
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 /* 筛选条件 */
