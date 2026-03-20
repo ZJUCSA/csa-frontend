@@ -1,5 +1,5 @@
 <script setup>
-import { ref, inject, onMounted } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 
 const axios = inject('axios')
 
@@ -8,30 +8,66 @@ const data2 = ref([])
 const data3 = ref([])
 const loading = ref(true)
 
-const fetchData = async () => {
-    try {
-        const [res1, res2, res3] = await Promise.all([
-            axios.get('/news/list', { params: { page: 1, size: 6, category: 2 } }),
-            axios.get('/news/list', { params: { page: 1, size: 6, category: 3 } }),
-            axios.get('/news/list', { params: { page: 1, size: 6, category: 5 } })
-        ])
-        
-        data1.value = res1.data
-        data2.value = res2.data || []
-        data3.value = res3.data
-    } catch (error) {
-        console.error('获取信息失败:', error)
-        try {
-            const fallbackRes = await axios.get('/news/list', { params: { page: 1, size: 6, category: 3 } })
-            data2.value = fallbackRes.data
-        } catch (fallbackError) {
-            console.error('获取网安知识失败:', fallbackError)
-            data2.value = []
-        }
-    } finally {
-        loading.value = false
-    }
+const fetchCategory = async category => {
+    const response = await axios.get('/news/list', {
+        params: { page: 1, size: 6, category },
+    })
+    return response.data || []
 }
+
+const fetchData = async () => {
+    const [noticeResult, knowledgeResult, contestResult] = await Promise.allSettled([
+        fetchCategory(2),
+        fetchCategory(3),
+        fetchCategory(5),
+    ])
+
+    data1.value = noticeResult.status === 'fulfilled' ? noticeResult.value : []
+    data2.value = knowledgeResult.status === 'fulfilled' ? knowledgeResult.value : []
+    data3.value = contestResult.status === 'fulfilled' ? contestResult.value : []
+
+    if (noticeResult.status === 'rejected') {
+        console.error('获取通知公告失败:', noticeResult.reason)
+    }
+    if (knowledgeResult.status === 'rejected') {
+        console.error('获取网安知识失败:', knowledgeResult.reason)
+    }
+    if (contestResult.status === 'rejected') {
+        console.error('获取赛事信息失败:', contestResult.reason)
+    }
+
+    loading.value = false
+}
+
+const sections = computed(() => [
+    {
+        key: 'notice',
+        title: '通知公告',
+        subtitle: 'Announcement & Notice',
+        emptyText: '暂无通知公告',
+        items: data1.value,
+    },
+    {
+        key: 'knowledge',
+        title: '网安知识',
+        subtitle: 'Cyber Security Knowledge',
+        emptyText: '暂无网安知识',
+        items: data2.value,
+    },
+    {
+        key: 'contest',
+        title: '赛事信息',
+        subtitle: 'Contest Information',
+        emptyText: '暂无赛事信息',
+        items: data3.value,
+    },
+])
+
+const formatDate = timestamp =>
+    new Date(timestamp * 1000).toLocaleDateString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+    })
 
 onMounted(() => {
     fetchData()
@@ -40,18 +76,26 @@ onMounted(() => {
 
 <template>
     <div class="info-layout">
-        <div class="info-section">
+        <div
+            v-for="(section, sectionIndex) in sections"
+            :key="section.key"
+            class="info-section"
+        >
             <div class="section-header">
-                <h3 class="section-title">通知公告</h3>
-                <p class="section-subtitle">Announcement & Notice</p>
+                <h3 class="section-title">{{ section.title }}</h3>
+                <p class="section-subtitle">{{ section.subtitle }}</p>
             </div>
+
             <div class="info-list">
-                <div v-if="!loading && data1.length > 0">
-                    <div 
-                        v-for="(item, index) in data1" 
+                <div v-if="!loading && section.items.length > 0" class="list-content">
+                    <div
+                        v-for="(item, index) in section.items"
                         :key="item.nid"
                         class="list-item"
-                        :style="{ animationDelay: `${index * 0.1}s` }"
+                        :style="{
+                            animationDelay: `${sectionIndex * 0.08 + index * 0.07}s`,
+                            '--item-enter-x': '-18px',
+                        }"
                     >
                         <router-link
                             class="item-link"
@@ -59,100 +103,21 @@ onMounted(() => {
                         >
                             <span class="item-title">{{ item.title }}</span>
                             <span class="item-date">
-                                {{ new Date(item.first_publish * 1000).toLocaleDateString('zh-CN', {
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                }) }}
+                                {{ formatDate(item.first_publish) }}
                             </span>
                         </router-link>
                     </div>
                 </div>
-                <div v-else-if="loading" class="loading-state">
-                    <div v-for="i in 4" :key="i" class="skeleton-item">
-                        <div class="skeleton-title"></div>
-                        <div class="skeleton-date"></div>
-                    </div>
-                </div>
-                <div v-else class="empty-state">
-                    <p class="empty-text">暂无通知公告</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="info-section">
-            <div class="section-header">
-                <h3 class="section-title">网安知识</h3>
-                <p class="section-subtitle">Cyber Security Knowledge</p>
-            </div>
-            <div class="info-list">
-                <div v-if="!loading && data2.length > 0">
-                    <div 
-                        v-for="(item, index) in data2" 
-                        :key="item.kid || item.nid"
-                        class="list-item"
-                        :style="{ animationDelay: `${index * 0.1}s` }"
-                    >
-                        <router-link
-                            class="item-link"
-                            :to="{ name: item.kid ? 'admin-knowledge' : 'news', params: { id: item.kid || item.nid } }"
-                        >
-                            <span class="item-title">{{ item.title }}</span>
-                            <span class="item-date">
-                                {{ new Date((item.publish_date || item.first_publish) * 1000).toLocaleDateString('zh-CN', {
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                }) }}
-                            </span>
-                        </router-link>
-                    </div>
-                </div>
                 <div v-else-if="loading" class="loading-state">
-                    <div v-for="i in 4" :key="i" class="skeleton-item">
+                    <div v-for="i in 6" :key="i" class="skeleton-item">
                         <div class="skeleton-title"></div>
                         <div class="skeleton-date"></div>
                     </div>
                 </div>
-                <div v-else class="empty-state">
-                    <p class="empty-text">暂无网安知识</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="info-section">
-            <div class="section-header">
-                <h3 class="section-title">赛事信息</h3>
-                <p class="section-subtitle">Contest Information</p>
-            </div>
-            <div class="info-list">
-                <div v-if="!loading && data3.length > 0">
-                    <div 
-                        v-for="(item, index) in data3" 
-                        :key="item.nid"
-                        class="list-item"
-                        :style="{ animationDelay: `${index * 0.1}s` }"
-                    >
-                        <router-link
-                            class="item-link"
-                            :to="{ name: 'news', params: { id: item.nid } }"
-                        >
-                            <span class="item-title">{{ item.title }}</span>
-                            <span class="item-date">
-                                {{ new Date(item.first_publish * 1000).toLocaleDateString('zh-CN', {
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                }) }}
-                            </span>
-                        </router-link>
-                    </div>
-                </div>
-                <div v-else-if="loading" class="loading-state">
-                    <div v-for="i in 4" :key="i" class="skeleton-item">
-                        <div class="skeleton-title"></div>
-                        <div class="skeleton-date"></div>
-                    </div>
-                </div>
                 <div v-else class="empty-state">
-                    <p class="empty-text">暂无赛事信息</p>
+                    <p class="empty-text">{{ section.emptyText }}</p>
                 </div>
             </div>
         </div>
@@ -163,152 +128,268 @@ onMounted(() => {
 .info-layout {
     display: flex;
     width: 100%;
+    height: 100%;
 }
 
 .info-section {
-    flex: 1 1 0%;
-    padding: 20px;
-    background-color: var(--bg-surface);
     position: relative;
+    flex: 1 1 0%;
+    min-height: 360px;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
 }
 
 .info-section:not(:last-child)::after {
     content: '';
     position: absolute;
     right: 0;
-    top: 20px;
-    bottom: 20px;
+    top: 28px;
+    bottom: 24px;
     width: 1px;
-    background-color: var(--border-color);
+    background: linear-gradient(
+        180deg,
+        rgba(102, 126, 234, 0) 0%,
+        rgba(102, 126, 234, 0.12) 14%,
+        rgba(102, 126, 234, 0.12) 86%,
+        rgba(102, 126, 234, 0) 100%
+    );
 }
 
 .section-header {
-    margin-bottom: 20px;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.08);
 }
 
 .section-title {
-    font-size: 1.5rem; /* 标题字体增大 */
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin: 0 0 5px 0;
+    margin: 0 0 5px;
 }
 
 .section-subtitle {
-    font-size: 0.9rem; /* 英文副标题 */
+    font-size: 0.86rem;
     color: var(--text-secondary);
     margin: 0;
+    letter-spacing: 0.01em;
 }
 
 .info-list {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    gap: 10px;
+    min-height: 0;
+}
+
+.list-content,
+.loading-state,
+.empty-state {
+    flex: 1;
+}
+
+.list-content {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .list-item {
-    animation: fadeInUp 0.6s ease-out forwards;
+    list-style: none;
+    position: relative;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateX(var(--item-enter-x, -18px));
+    animation: listItemReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, transform;
 }
 
-@keyframes fadeInUp {
+.list-item:not(:last-child),
+.skeleton-item:not(:last-child) {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+}
+
+@keyframes listItemReveal {
+    from {
+        opacity: 0;
+        transform: translateX(var(--item-enter-x, -18px));
+    }
+
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
 .item-link {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 56px;
     align-items: center;
+    gap: 10px;
+    padding: 12px 8px 12px 3px;
     text-decoration: none;
     color: var(--text-primary);
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color);
-    transition: all 0.2s ease;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px transparent;
+    transition:
+        background-color 0.24s ease,
+        color 0.24s ease,
+        padding-left 0.18s ease,
+        box-shadow 0.24s ease;
+}
+
+.item-link::before {
+    content: none;
 }
 
 .item-link:hover {
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.08) 0%,
+        rgba(102, 126, 234, 0.04) 24%,
+        rgba(102, 126, 234, 0.015) 100%
+    );
+    padding-left: 8px;
+    box-shadow: inset 2px 0 0 rgba(102, 126, 234, 0.24);
+}
+
+.item-link:hover .item-title {
     color: var(--accent-color);
-    transform: translateX(5px);
 }
 
 .item-title {
-    flex: 1;
+    min-width: 0;
     font-size: 0.95rem;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     line-height: 1.5;
+    transition: color 0.18s ease;
 }
 
 .item-date {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
+    text-align: right;
     white-space: nowrap;
-    margin-left: 15px;
+    font-variant-numeric: tabular-nums;
 }
 
-/* loading状态 */
 .loading-state {
     display: flex;
     flex-direction: column;
-    gap: 10px;
 }
 
 .skeleton-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 56px;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 8px 12px 3px;
 }
 
 .skeleton-title {
     height: 14px;
-    width: 70%;
+    width: 72%;
     background-color: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: 999px;
     animation: pulse 1.5s infinite ease-in-out;
 }
 
 .skeleton-date {
+    justify-self: end;
     height: 14px;
-    width: 20%;
+    width: 42px;
     background-color: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: 999px;
     animation: pulse 1.5s infinite ease-in-out;
 }
 
 @keyframes pulse {
-    0% { opacity: 0.5; }
-    50% { opacity: 1; }
-    100% { opacity: 0.5; }
+    0% {
+        opacity: 0.45;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.45;
+    }
 }
 
-/* empty状态 */
 .empty-state {
+    display: flex;
+    min-height: 220px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 20px 0;
+    padding: 20px 10px;
 }
 
 .empty-text {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
 }
 
-/* 响应式设计 */
 @media (max-width: 992px) {
     .info-layout {
         flex-direction: column;
     }
-    .info-section:not(:last-child)::after {
-        content: none; /* 移除垂直分隔线 */
+
+    .info-section {
+        min-height: 320px;
     }
+
+    .info-section:not(:last-child)::after {
+        content: none;
+    }
+
     .info-section:not(:last-child) {
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+    }
+}
+
+@media (max-width: 768px) {
+    .info-layout {
+        border-radius: 18px;
+    }
+
+    .info-section {
+        padding: 24px 18px 18px;
+    }
+
+    .section-title {
+        font-size: 1.18rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.82rem;
+    }
+
+    .item-link,
+    .skeleton-item {
+        grid-template-columns: minmax(0, 1fr) 48px;
+        gap: 10px;
+        padding: 11px 6px 11px 2px;
+    }
+
+    .item-title {
+        font-size: 0.92rem;
+    }
+
+    .item-date {
+        font-size: 0.78rem;
     }
 }
 </style>

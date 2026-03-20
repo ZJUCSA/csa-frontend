@@ -215,9 +215,10 @@ watch([page, size, category], () => {
 
 <style scoped>
 .events-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: var(--gradient-primary);
-    padding: 40px 20px;
+    padding: 40px 20px calc(40px + var(--page-footer-gap));
     transition: background 0.3s ease;
 }
 
@@ -726,7 +727,7 @@ watch([page, size, category], () => {
 
 @media (max-width: 768px) {
     .events-container {
-        padding: 20px 15px;
+        padding: 20px 15px calc(20px + var(--page-footer-gap));
     }
     
     .page-title {

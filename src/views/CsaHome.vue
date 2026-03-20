@@ -32,7 +32,9 @@
                 </div>
                 
                 <div class="info-grid">
-                    <csa-info-home />
+                    <div class="info-card">
+                        <csa-info-home />
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,7 +43,8 @@
 
 <style scoped>
 .home-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
 }
 
@@ -58,7 +61,7 @@
     margin-top: -50px;
     position: relative;
     z-index: 10;
-    padding: 60px 0;
+    padding: 60px 0 calc(60px + var(--page-footer-gap));
 }
 
 .content-section {
@@ -131,7 +134,8 @@
 }
 
 .news-card,
-.event-card {
+.event-card,
+.info-card {
     background: var(--bg-surface);
     border-radius: 20px;
     box-shadow: 0 10px 30px var(--shadow-color);
@@ -142,7 +146,8 @@
 }
 
 .news-card::before,
-.event-card::before {
+.event-card::before,
+.info-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -153,7 +158,8 @@
 }
 
 .news-card:hover,
-.event-card:hover {
+.event-card:hover,
+.info-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px var(--shadow-color);
 }
@@ -168,7 +174,7 @@
 @media (max-width: 768px) {
     .main-content {
         margin-top: -30px;
-        padding: 40px 0;
+        padding: 40px 0 calc(40px + var(--page-footer-gap));
     }
     
     .content-section {

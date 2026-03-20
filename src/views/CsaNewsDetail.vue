@@ -169,9 +169,10 @@ onMounted(() => {
 
 /* 全局容器 */
 .news-detail-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: var(--bg-primary);
-    padding: 0;
+    padding: 0 0 var(--page-footer-gap);
     transition: all 0.3s ease;
 }
 
@@ -482,7 +483,7 @@ onMounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .news-detail-container {
-        padding: 0 20px;
+        padding: 0 20px var(--page-footer-gap);
     }
     
     .news-detail {

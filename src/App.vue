@@ -17,29 +17,37 @@ import ConfirmDialog from 'primevue/confirmdialog'
 /* Global styles can go here */
 #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    margin-top: 0;
-    margin-bottom: 6rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background: var(--bg-secondary);
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html {
-    position: relative;
     min-height: 100%;
 }
 
 body {
-    margin: 0 0 3.5rem;
+    margin: 0;
+    min-height: 100vh;
     background: var(--bg-secondary);
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .main-content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     padding-top: 70px;
-    padding-bottom: 56px;
     background: var(--bg-secondary);
-    min-height: calc(100vh - 126px);
+    --page-footer-gap: 56px;
+}
+
+.main-content-area > * {
+    flex: 1 0 auto;
+    width: 100%;
 }
 </style>
