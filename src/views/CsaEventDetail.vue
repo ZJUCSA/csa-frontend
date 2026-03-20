@@ -145,9 +145,10 @@ onMounted(() => {
 
 <style scoped>
 .event-detail-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: var(--bg-secondary);
-    padding: 40px 20px;
+    padding: 40px 20px calc(40px + var(--page-footer-gap));
     transition: background 0.3s ease;
 }
 
@@ -459,7 +460,7 @@ onMounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .event-detail-container {
-        padding: 20px 15px;
+        padding: 20px 15px calc(20px + var(--page-footer-gap));
     }
     
     .event-detail {

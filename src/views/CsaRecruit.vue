@@ -1262,12 +1262,13 @@ select:focus {
 
 /* 成功页面样式 */
 .success-container {
-  min-height: 100vh;
+  min-height: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-  padding: 2rem;
+  padding: 2rem 2rem calc(2rem + var(--page-footer-gap));
   transition: background 0.3s ease;
 }
 

@@ -1,14 +1,14 @@
-/* 专业正式的About页面样式 */
+/* 专业正式的 About 页面样式 */
 
-.content-wrapper {
+.about-container .content-wrapper {
   max-width: 1200px;
   margin: 0 auto;
   padding: 4rem 2rem;
   position: relative;
 }
 
-/* Section基础样式 - 专业简洁 */
-.section {
+/* Section 基础样式 */
+.about-container .section {
   min-height: auto;
   text-align: left;
   position: relative;
@@ -21,16 +21,17 @@
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-.section:nth-child(even) {
+.about-container .section:nth-child(even) {
   background: var(--bg-secondary);
 }
 
-.section:last-child {
+.about-container .section:last-child {
   border-bottom: none;
+  padding-bottom: calc(5rem + var(--page-footer-gap));
 }
 
-/* 标题样式 - 专业正式 */
-h2 {
+/* 标题样式 */
+.about-container h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
   color: var(--text-primary);
@@ -44,11 +45,11 @@ h2 {
   transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-h2::after {
+.about-container h2::after {
   display: none;
 }
 
-h3 {
+.about-container h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: var(--text-primary);
@@ -58,12 +59,12 @@ h3 {
   transition: color 0.3s ease;
 }
 
-h3::before {
+.about-container h3::before {
   display: none;
 }
 
-/* 卡片样式 - 专业简洁 */
-.card {
+/* 卡片样式 */
+.about-container .card {
   background: var(--bg-surface);
   border-radius: 8px;
   padding: 2rem;
@@ -73,21 +74,21 @@ h3::before {
   transition: all 0.3s ease;
 }
 
-.card:hover {
+.about-container .card:hover {
   box-shadow: 0 4px 12px var(--shadow-color);
   border-color: var(--accent-color);
   transform: translateY(-2px);
 }
 
 /* 文本样式 */
-p {
+.about-container p {
   color: var(--text-secondary);
   line-height: 1.8;
   font-size: 1rem;
   transition: color 0.3s ease;
 }
 
-.description {
+.about-container .description {
   font-size: 1.125rem;
   line-height: 1.8;
   color: var(--text-secondary);
@@ -98,8 +99,8 @@ p {
   transition: color 0.3s ease;
 }
 
-/* 淡入动画 - 简化版 */
-.fade-in {
+/* 淡入动画 */
+.about-container .fade-in {
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -108,52 +109,60 @@ p {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .about-container {
     padding: 0;
   }
 
-  .content-wrapper {
+  .about-container .content-wrapper {
     max-width: 100%;
     padding: 2rem 1rem;
   }
 
-  h2 {
+  .about-container h2 {
     font-size: 2rem;
     margin-bottom: 2rem;
   }
 
-  .section {
+  .about-container .section {
     padding: 3rem 0;
   }
 
-  .card {
+  .about-container .section:last-child {
+    padding-bottom: calc(3rem + var(--page-footer-gap));
+  }
+
+  .about-container .card {
     padding: 1.5rem;
     margin: 1rem 0;
   }
 
-  h3 {
+  .about-container h3 {
     font-size: 1.25rem;
   }
 
-  .description {
+  .about-container .description {
     font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  h2 {
+  .about-container h2 {
     font-size: 1.75rem;
   }
 
-  .section {
+  .about-container .section {
     padding: 2rem 0;
+  }
+
+  .about-container .section:last-child {
+    padding-bottom: calc(2rem + var(--page-footer-gap));
   }
 }

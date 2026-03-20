@@ -125,11 +125,12 @@ const submitLogin = () => {
 
 <style scoped>
 .login-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 2rem 2rem calc(2rem + var(--page-footer-gap));
     background: linear-gradient(135deg, 
         var(--bg-primary) 0%, 
         var(--bg-secondary) 50%, 
