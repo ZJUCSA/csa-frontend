@@ -108,8 +108,8 @@ watch(
     --nav-action-bg-hover: rgba(var(--bg-surface-rgb), 0.8);
     --nav-action-border: rgba(255, 255, 255, 0.42);
     --nav-action-border-hover: rgba(255, 255, 255, 0.52);
-    --nav-action-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-    --nav-action-shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.1);
+    --nav-action-shadow: none;
+    --nav-action-shadow-hover: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -129,8 +129,8 @@ watch(
     --nav-action-bg-hover: rgba(52, 52, 52, 0.82);
     --nav-action-border: rgba(255, 255, 255, 0.08);
     --nav-action-border-hover: rgba(255, 255, 255, 0.14);
-    --nav-action-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
-    --nav-action-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.32);
+    --nav-action-shadow: none;
+    --nav-action-shadow-hover: none;
     background-color: rgba(30, 30, 30, 0.95);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
