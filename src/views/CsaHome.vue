@@ -41,7 +41,8 @@
 
 <style scoped>
 .home-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
 }
 
@@ -58,7 +59,7 @@
     margin-top: -50px;
     position: relative;
     z-index: 10;
-    padding: 60px 0;
+    padding: 60px 0 calc(60px + var(--page-footer-gap));
 }
 
 .content-section {
@@ -168,7 +169,7 @@
 @media (max-width: 768px) {
     .main-content {
         margin-top: -30px;
-        padding: 40px 0;
+        padding: 40px 0 calc(40px + var(--page-footer-gap));
     }
     
     .content-section {

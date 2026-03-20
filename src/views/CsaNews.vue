@@ -268,9 +268,10 @@ watch([page, size, category], () => {
 }
 
 .news-container {
-    min-height: 100vh;
+    min-height: 100%;
+    box-sizing: border-box;
     background: linear-gradient(180deg, rgba(102, 126, 234, 0.05) 0%, var(--bg-secondary) 100%);
-    padding: 0;
+    padding: 0 0 var(--page-footer-gap);
     transition: all 0.3s ease;
 }
 

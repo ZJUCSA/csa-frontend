@@ -27,6 +27,7 @@
 
 .about-container .section:last-child {
   border-bottom: none;
+  padding-bottom: calc(5rem + var(--page-footer-gap));
 }
 
 /* 标题样式 */
@@ -134,6 +135,10 @@
     padding: 3rem 0;
   }
 
+  .about-container .section:last-child {
+    padding-bottom: calc(3rem + var(--page-footer-gap));
+  }
+
   .about-container .card {
     padding: 1.5rem;
     margin: 1rem 0;
@@ -155,5 +160,9 @@
 
   .about-container .section {
     padding: 2rem 0;
+  }
+
+  .about-container .section:last-child {
+    padding-bottom: calc(2rem + var(--page-footer-gap));
   }
 }

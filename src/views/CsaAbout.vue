@@ -62,7 +62,8 @@ onUnmounted(() => {
 .about-container {
   width: 100%;
   background: var(--bg-secondary);
-  min-height: 100vh;
+  min-height: 100%;
+  box-sizing: border-box;
   padding: 0;
   position: relative;
   transition: background 0.3s ease;
