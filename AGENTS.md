@@ -19,3 +19,7 @@
 - 代理完成的提交在通过基本验证后，默认自动 `push` 到当前仓库的 `origin` 当前分支，也就是用户自己的 Gitee fork。
 - 除非用户明确要求，绝不向 `upstream` 执行 `push`。
 - 如果工作区里已有用户自己的未提交改动，不要把这些无关改动混入代理的提交；必要时只提交本次改动，或者先说明阻塞。
+
+## 参考约定
+
+- If the user says "my website", "my own site", "my previous site", or asks for a website reference without another qualifier, default that reference to `D:\Website\ExpensePro`.
