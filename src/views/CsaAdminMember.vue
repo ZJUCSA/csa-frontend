@@ -224,9 +224,6 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button @click="closeModal" class="btn-secondary">关闭</button>
-        </div>
       </div>
     </div>
 
