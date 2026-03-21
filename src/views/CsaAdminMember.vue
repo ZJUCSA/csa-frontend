@@ -7,7 +7,8 @@
       <button 
         v-for="dept in departments" 
         :key="dept.value"
-        @click="currentDepartment = dept.value"
+        type="button"
+        @click="selectDepartment(dept.value)"
         :class="['tab-btn', { active: currentDepartment === dept.value }]"
       >
         {{ dept.label }}
@@ -42,15 +43,19 @@
       </div>
     </div>
 
+    <p v-if="!loading" class="list-summary">共 {{ total }} 条记录</p>
+
     <!-- 干事列表 -->
-    <div class="members-grid">
-      <div v-for="member in filteredMembers" :key="member.uid" class="member-card">
+    <div v-if="loading" class="loading-hint">加载中…</div>
+    <div v-else-if="!members.length" class="empty-hint">暂无干事数据</div>
+    <div v-else class="members-grid">
+      <div v-for="member in members" :key="member.uid" class="member-card">
         <div class="member-header">
           <div class="member-avatar">
             <i class="pi pi-user"></i>
           </div>
           <div class="member-info">
-            <h3 class="member-name">{{ member.name }}</h3>
+            <h3 class="member-name">{{ member.name || '—' }}</h3>
             <p class="member-uid">{{ member.uid }}</p>
             <div class="member-status">
               <span :class="['status-badge', member.is_active ? 'active' : 'inactive']">
@@ -79,7 +84,7 @@
           </div>
           <div class="detail-item">
             <label>年级:</label>
-            <span>{{ member.grade }}级</span>
+            <span>{{ formatGrade(member.grade) }}</span>
           </div>
           <div class="detail-item">
             <label>电话:</label>
@@ -135,7 +140,7 @@
               </div>
               <div class="detail-item">
                 <label>年级:</label>
-                <span>{{ selectedMember.grade }}级</span>
+                <span>{{ formatGrade(selectedMember.grade) }}</span>
               </div>
               <div class="detail-item">
                 <label>电话:</label>
@@ -529,13 +534,17 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const loading = ref(false)
+/** 来自 GET /member/members/stats，用于标签上的部门人数 */
+const memberStats = ref({
+  total_members: 0,
+  department_stats: {}
+})
 
 // 筛选条件
 const filters = ref({
   name: '',
   uid: '',
-  is_active: '',
-  position: ''
+  is_active: ''
 })
 
 // 部门选项
@@ -547,38 +556,22 @@ const departments = [
   { value: 'activity', label: '活动部' }
 ]
 
-// 计算属性
-const filteredMembers = computed(() => {
-  if (!members.value) return []
-  
-  let filtered = members.value
+/** 与后端 member 路由中的部门别名一致，用于把库里的中文/英文部门归一成表单用的 key */
+const DEPARTMENT_ALIASES = {
+  office: ['office', '办公室', '办公室部'],
+  competition: ['competition', '竞赛', '竞赛部'],
+  research: ['research', '科研', '科研部'],
+  activity: ['activity', '活动', '活动部']
+}
 
-  // 按部门筛选
-  if (currentDepartment.value !== 'all') {
-    filtered = filtered.filter(member => member.department === currentDepartment.value)
+const canonicalDepartmentKey = (department) => {
+  if (department == null || department === '') return ''
+  const raw = String(department).trim()
+  for (const [key, aliases] of Object.entries(DEPARTMENT_ALIASES)) {
+    if (aliases.some((a) => a.toLowerCase() === raw.toLowerCase())) return key
   }
-
-  // 按姓名筛选
-  if (filters.value.name) {
-    filtered = filtered.filter(member => 
-      member.name.toLowerCase().includes(filters.value.name.toLowerCase())
-    )
-  }
-
-  // 按学号筛选
-  if (filters.value.uid) {
-    filtered = filtered.filter(member => 
-      member.uid.includes(filters.value.uid)
-    )
-  }
-
-  // 按状态筛选
-  if (filters.value.is_active !== '') {
-    filtered = filtered.filter(member => member.is_active === filters.value.is_active)
-  }
-
-  return filtered
-})
+  return ''
+}
 
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
@@ -586,7 +579,6 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 const fetchMembers = async () => {
   loading.value = true
   try {
-    console.log('Fetching members...')
     const params = {
       page: currentPage.value,
       size: pageSize.value
@@ -607,12 +599,17 @@ const fetchMembers = async () => {
       params.department = currentDepartment.value
     }
     
-    console.log('API params:', params)
     const response = await axios.get('/member/members', { params })
-    console.log('API response:', response.data)
     members.value = response.data.members || []
     total.value = response.data.total || 0
-    console.log('Members loaded:', members.value.length)
+    const maxPage = Math.ceil(total.value / pageSize.value) || 1
+    if (total.value === 0) {
+      currentPage.value = 1
+    } else if (currentPage.value > maxPage) {
+      currentPage.value = maxPage
+      await fetchMembers()
+      return
+    }
   } catch (error) {
     console.error('Failed to fetch members:', error)
     console.error('Error response:', error.response?.data)
@@ -624,29 +621,54 @@ const fetchMembers = async () => {
   }
 }
 
-
+const fetchMemberStats = async () => {
+  try {
+    const { data } = await axios.get('/member/members/stats')
+    memberStats.value = {
+      total_members: data.total_members ?? 0,
+      department_stats: data.department_stats ?? {}
+    }
+  } catch (error) {
+    console.error('Failed to fetch member stats:', error)
+    memberStats.value = { total_members: 0, department_stats: {} }
+  }
+}
 
 const getDepartmentMemberCount = (dept) => {
   if (dept === 'all') {
-    return totalMembers.value;
+    return memberStats.value.total_members ?? 0
   }
-  return stats.value?.[dept]?.total || 0;
-};
+  return memberStats.value.department_stats?.[dept]?.total ?? 0
+}
 
 const formatDate = (dateString) => {
-  if (!dateString) return ''
+  if (!dateString) return '—'
   const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return '—'
   return date.toLocaleDateString('zh-CN')
 }
 
+const formatGrade = (grade) => {
+  if (grade == null || grade === '') return '—'
+  return `${grade}级`
+}
+
 const getDepartmentLabel = (department) => {
+  const key = canonicalDepartmentKey(department)
   const labels = {
-    'office': '办公室部',
-    'competition': '竞赛部',
-    'research': '科研部',
-    'activity': '活动部'
+    office: '办公室部',
+    competition: '竞赛部',
+    research: '科研部',
+    activity: '活动部'
   }
-  return labels[department] || department
+  if (key && labels[key]) return labels[key]
+  return department || '—'
+}
+
+const selectDepartment = (dept) => {
+  currentDepartment.value = dept
+  currentPage.value = 1
+  fetchMembers()
 }
 
 const handleFilterChange = () => {
@@ -655,6 +677,8 @@ const handleFilterChange = () => {
 }
 
 const changePage = (page) => {
+  const tp = Math.ceil(total.value / pageSize.value) || 1
+  if (page < 1 || page > tp) return
   currentPage.value = page
   fetchMembers()
 }
@@ -739,7 +763,7 @@ const editMember = (member) => {
     grade: member.grade || 0,
     phone: member.phone || '',
     degree: member.degree || 0,
-    department: member.department,
+    department: canonicalDepartmentKey(member.department) || member.department,
     position: member.position || '干事',
     is_active: member.is_active,
     bank_card: member.bank_card || '',
@@ -772,6 +796,7 @@ const saveMember = async () => {
     showEditModal.value = false
     showAddModal.value = false
     selectedMember.value = null
+    await fetchMemberStats()
     fetchMembers()
   } catch (error) {
     console.error('Save member failed:', error)
@@ -796,6 +821,7 @@ const deleteMember = async (member) => {
       try {
         await axios.delete(`/member/members/${member.uid}`)
         window.notyf.success('干事删除成功')
+        await fetchMemberStats()
         fetchMembers()
       } catch (error) {
         console.error('Delete member failed:', error)
@@ -807,6 +833,7 @@ const deleteMember = async (member) => {
 
 // 生命周期
 onMounted(() => {
+  fetchMemberStats()
   fetchMembers()
 })
 </script>
@@ -825,7 +852,25 @@ h2 {
   font-weight: bold;
 }
 
+.list-summary {
+  margin: 0 0 1rem;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.95rem;
+}
 
+.loading-hint,
+.empty-hint {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-secondary, #64748b);
+  font-size: 1rem;
+}
+
+.empty-hint {
+  border: 1px dashed var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  background: var(--bg-secondary, #f8fafc);
+}
 
 /* 部门分栏 */
 .department-tabs {
