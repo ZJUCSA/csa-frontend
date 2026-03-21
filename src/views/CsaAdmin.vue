@@ -44,7 +44,7 @@ const dataManagementEntries = [
 
 const userManagementEntries = [
     ['用户管理', 'pi pi-user', 'admin-users'],
-    ['纳新管理', 'pi pi-user', 'admin-recruit'],
+    ['纳新管理', 'pi pi-user-plus', 'admin-recruit'],
     ['面试管理', 'pi pi-comments', 'admin-interview'],
     ['干事管理', 'pi pi-users', 'admin-member'],
 ]
