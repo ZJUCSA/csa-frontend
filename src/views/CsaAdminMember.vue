@@ -46,9 +46,6 @@
     <div class="members-grid">
       <div v-for="member in filteredMembers" :key="member.uid" class="member-card">
         <div class="member-header">
-          <div class="member-avatar">
-            <i class="pi pi-user"></i>
-          </div>
           <div class="member-info">
             <h3 class="member-name">{{ member.name }}</h3>
             <p class="member-uid">{{ member.uid }}</p>
@@ -56,6 +53,7 @@
               <span :class="['status-badge', member.is_active ? 'active' : 'inactive']">
                 {{ member.is_active ? '在职' : '离职' }}
               </span>
+              <span class="department-badge">{{ getDepartmentLabel(member.department) }}</span>
               <span class="position-badge">{{ member.position }}</span>
             </div>
           </div>
@@ -110,7 +108,34 @@
           </button>
         </div>
         <div class="modal-body" v-if="selectedMember">
-          <div class="detail-section">
+          <div class="detail-summary">
+            <div class="detail-summary-main">
+              <h4 class="detail-summary-name">{{ selectedMember.name }}</h4>
+              <p class="detail-summary-uid">{{ selectedMember.uid }}</p>
+              <div class="detail-summary-badges">
+                <span :class="['status-badge', selectedMember.is_active ? 'active' : 'inactive']">
+                  {{ selectedMember.is_active ? '在职' : '离职' }}
+                </span>
+                <span class="department-badge">{{ getDepartmentLabel(selectedMember.department) }}</span>
+                <span class="position-badge">{{ selectedMember.position }}</span>
+              </div>
+            </div>
+            <div class="detail-summary-meta">
+              <div class="detail-summary-meta-item">
+                <span class="detail-summary-meta-label">学院</span>
+                <span class="detail-summary-meta-value">{{ selectedMember.college_name || '未填写' }}</span>
+              </div>
+              <div class="detail-summary-meta-item">
+                <span class="detail-summary-meta-label">专业</span>
+                <span class="detail-summary-meta-value">{{ selectedMember.major_name || '未填写' }}</span>
+              </div>
+              <div class="detail-summary-meta-item">
+                <span class="detail-summary-meta-label">年级</span>
+                <span class="detail-summary-meta-value">{{ selectedMember.grade ? selectedMember.grade + '级' : '未填写' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section detail-section-basic">
             <h4>基本信息</h4>
             <div class="detail-grid">
               <div class="detail-item">
@@ -1032,42 +1057,36 @@ h2 {
 
 .member-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.member-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-}
-
 .member-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .member-name {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: bold;
   color: var(--text-primary);
-  margin: 0 0 0.25rem 0;
+  margin: 0;
 }
 
 .member-uid {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 .member-status {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
@@ -1097,9 +1116,20 @@ h2 {
   color: white;
 }
 
+.department-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
 .member-actions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .action-btn {
@@ -1288,42 +1318,142 @@ h2 {
 
 /* 详情模态框样式 */
 .detail-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .detail-section h4 {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color);
+  margin-bottom: 0.85rem;
 }
 
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .detail-grid .detail-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
   background: var(--bg-hover);
-  border-radius: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .detail-grid .detail-item label {
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0;
+  font-size: 0.78rem;
 }
 
 .detail-grid .detail-item span {
   color: var(--text-primary);
   font-weight: 500;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.detail-grid .detail-item .status-badge {
+  align-self: flex-start;
+}
+
+.detail-section-basic .detail-item:nth-child(4) {
+  order: 8;
+}
+
+.detail-section-basic .detail-item:nth-child(5) {
+  order: 7;
+}
+
+.detail-section-basic .detail-item:nth-child(6) {
+  order: 9;
+}
+
+.detail-section-basic .detail-item:nth-child(7) {
+  order: 10;
+}
+
+.detail-section-basic .detail-item:nth-child(8) {
+  order: 5;
+}
+
+.detail-section-basic .detail-item:nth-child(9) {
+  order: 6;
+}
+
+.detail-section-basic .detail-item:nth-child(10) {
+  order: 4;
+}
+
+.detail-summary {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-surface) 100%);
+}
+
+.detail-summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.detail-summary-name {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.detail-summary-uid {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.detail-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.detail-summary-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.detail-summary-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 10px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.detail-summary-meta-label {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.detail-summary-meta-value {
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 /* 表单样式 */
@@ -1460,6 +1590,19 @@ h2 {
   .modal-content {
     width: 95%;
     margin: 1rem;
+  }
+
+  .member-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .member-actions {
+    align-self: flex-start;
+  }
+
+  .detail-summary-meta {
+    grid-template-columns: 1fr;
   }
   
   .detail-grid,
