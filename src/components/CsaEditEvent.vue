@@ -1,6 +1,4 @@
 <script setup>
-import AdminDateTimeRangeRow from '@/components/admin/AdminDateTimeRangeRow.vue'
-import AdminSelectField from '@/components/admin/AdminSelectField.vue'
 import { eventCategory } from '@/const'
 import { processMarkdownImages, processImageUrl } from '@/utils/imageUtils'
 
@@ -75,15 +73,15 @@ const submit = () => {
         })
 }
 
-const handleFileUpload = event => {
+const handleFileUpload = (event) => {
     const file = event.target.files[0]
     if (!file) return
-
+    
     if (!file.name.endsWith('.zip') && !file.name.endsWith('.rar')) {
-        window.notyf.error('请上传 zip 或 rar 格式的压缩包')
+        window.notyf.error('请上传zip或rar格式的压缩包')
         return
     }
-
+    
     uploadFile.value = file
 }
 
@@ -92,7 +90,7 @@ const uploadAndParse = () => {
         window.notyf.error('请先选择文件')
         return
     }
-
+    
     isUploading.value = true
     const currentEid = props.eid || draftEid.value
     const formData = new FormData()
@@ -101,7 +99,7 @@ const uploadAndParse = () => {
     if (currentEid) {
         formData.append('eid', currentEid)
     }
-
+    
     axios
         .post('/upload/parse', formData, {
             headers: {
@@ -111,9 +109,7 @@ const uploadAndParse = () => {
         .then(res => {
             if (res.data.success) {
                 data.title = res.data.title || data.title
-                data.description = processMarkdownImages(
-                    res.data.content || data.description
-                )
+                data.description = processMarkdownImages(res.data.content || data.description)
                 data.image = processImageUrl(res.data.image || data.image)
                 window.notyf.success('文件解析成功')
                 uploadMode.value = false
@@ -123,10 +119,7 @@ const uploadAndParse = () => {
             }
         })
         .catch(error => {
-            window.notyf.error(
-                '上传失败: ' +
-                    (error.response?.data?.detail || error.message)
-            )
+            window.notyf.error('上传失败: ' + (error.response?.data?.detail || error.message))
         })
         .finally(() => {
             isUploading.value = false
@@ -154,9 +147,7 @@ watch(visible, value => {
                 })
                 .then(res => {
                     data.title = res.data.title
-                    data.description = processMarkdownImages(
-                        res.data.description
-                    )
+                    data.description = processMarkdownImages(res.data.description)
                     data.start_time = new Date(res.data.start_time * 1000)
                     data.end_time = new Date(res.data.end_time * 1000)
                     data.start_signup_time = new Date(
@@ -197,153 +188,180 @@ watch(visible, value => {
 
 <template>
     <Dialog
-        v-model:visible="visible"
-        modal
-        header="创建/编辑活动"
-        :style="{ width: '50rem' }"
-    >
-        <div v-if="!loading" class="mx-8">
-            <div class="flex items-center gap-4 mb-4">
-                <Button
-                    :label="uploadMode ? '手动编辑' : '上传压缩包'"
-                    :icon="uploadMode ? 'pi pi-pencil' : 'pi pi-upload'"
-                    severity="info"
-                    size="small"
-                    @click="uploadMode = !uploadMode"
-                />
-                <span class="text-sm text-gray-600">
-                    {{
-                        uploadMode
-                            ? '上传包含 xx.md 和 img/ 文件夹的压缩包'
-                            : '手动输入内容'
-                    }}
-                </span>
-            </div>
+            v-model:visible="visible"
+            modal
+            header="创建/编辑活动"
+            :style="{ width: '50rem' }"
+        >
+            <div class="mx-8" v-if="!loading">
+                <!-- 上传模式切换 -->
+                <div class="flex items-center gap-4 mb-4">
+                    <Button
+                        :label="uploadMode ? '手动编辑' : '上传压缩包'"
+                        :icon="uploadMode ? 'pi pi-pencil' : 'pi pi-upload'"
+                        severity="info"
+                        size="small"
+                        @click="uploadMode = !uploadMode"
+                    />
+                    <span class="text-sm text-gray-600">
+                        {{ uploadMode ? '上传包含xx.md和img/文件夹的压缩包' : '手动输入内容' }}
+                    </span>
+                </div>
 
-            <div
-                v-if="uploadMode"
-                class="mb-4 rounded-lg border-2 border-dashed border-gray-300 p-4"
-            >
-                <div class="text-center">
-                    <input
-                        ref="fileInput"
-                        type="file"
-                        accept=".zip,.rar"
-                        class="hidden"
-                        @change="handleFileUpload"
-                    />
-                    <Button
-                        label="选择压缩包"
-                        icon="pi pi-upload"
-                        class="mb-2"
-                        @click="$refs.fileInput.click()"
-                    />
-                    <div
-                        v-if="uploadFile"
-                        class="mb-2 text-sm text-green-600"
-                    >
-                        已选择: {{ uploadFile.name }}
+                <!-- 上传区域 -->
+                <div v-if="uploadMode" class="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <div class="text-center">
+                        <input
+                            type="file"
+                            ref="fileInput"
+                            @change="handleFileUpload"
+                            accept=".zip,.rar"
+                            class="hidden"
+                        />
+                        <Button
+                            label="选择压缩包"
+                            icon="pi pi-upload"
+                            @click="$refs.fileInput.click()"
+                            class="mb-2"
+                        />
+                        <div v-if="uploadFile" class="text-sm text-green-600 mb-2">
+                            已选择: {{ uploadFile.name }}
+                        </div>
+                        <Button
+                            label="解析上传"
+                            icon="pi pi-check"
+                            :loading="isUploading"
+                            :disabled="!uploadFile"
+                            @click="uploadAndParse"
+                        />
                     </div>
-                    <Button
-                        label="解析上传"
-                        icon="pi pi-check"
-                        :loading="isUploading"
-                        :disabled="!uploadFile"
-                        @click="uploadAndParse"
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>标题</label>
+                    <InputText
+                        id="username"
+                        class="flex-auto"
+                        placeholder="标题"
+                        autocomplete="off"
+                        v-model="data.title"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-4 mb-4">
+                    <label>描述</label>
+                    <vue-vditor
+                        v-model="data.description"
+                        :options="options"
+                        class="editor"
+                        @after="rendering = false"
+                    ></vue-vditor>
+                    <Skeleton
+                        v-if="rendering"
+                        width="100%"
+                        height="200px"
+                    ></Skeleton>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>标签</label>
+                    <InputText
+                        id="tag"
+                        class="flex-auto"
+                        placeholder="标签"
+                        autocomplete="off"
+                        v-model="data.tag"
+                    />
+                </div>
+                <div class="flex gap-x-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>活动开始时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.start_time"
+                        />
+                    </div>
+
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>活动结束时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.end_time"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-x-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>开始报名时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.start_signup_time"
+                        />
+                    </div>
+
+                    <div class="flex items-center gap-4 mb-4">
+                        <label>结束报名时间</label>
+                        <DatePicker
+                            showTime
+                            hourFormat="24"
+                            fluid
+                            dateFormat="yy-mm-dd"
+                            v-model="data.end_signup_time"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>分类</label>
+                    <Select
+                        v-model="data.category"
+                        optionLabel="label"
+                        optionValue="value"
+                        :options="cateOptions"
+                    ></Select>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>头图</label>
+                    <InputText
+                        id="image"
+                        class="flex-auto"
+                        placeholder="头图 URL"
+                        autocomplete="off"
+                        v-model="data.image"
+                    />
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label>地点</label>
+                    <InputText
+                        id="place"
+                        class="flex-auto"
+                        placeholder="地点"
+                        autocomplete="off"
+                        v-model="data.place"
                     />
                 </div>
             </div>
+            <Skeleton v-else width="100%" height="300px"></Skeleton>
 
-            <div class="mb-4 flex items-center gap-4">
-                <label>标题</label>
-                <InputText
-                    id="username"
-                    v-model="data.title"
-                    class="flex-auto"
-                    placeholder="标题"
-                    autocomplete="off"
-                />
+            <div class="flex justify-end gap-2 mt-6">
+                <Button
+                    type="button"
+                    label="取消"
+                    severity="secondary"
+                    @click="visible = false"
+                ></Button>
+                <Button type="button" label="保存" @click="submit"></Button>
             </div>
-
-            <div class="mb-4 flex flex-col gap-4">
-                <label>描述</label>
-                <vue-vditor
-                    v-model="data.description"
-                    :options="options"
-                    class="editor"
-                    @after="rendering = false"
-                ></vue-vditor>
-                <Skeleton
-                    v-if="rendering"
-                    width="100%"
-                    height="200px"
-                ></Skeleton>
-            </div>
-
-            <div class="mb-4 flex items-center gap-4">
-                <label>标签</label>
-                <InputText
-                    id="tag"
-                    v-model="data.tag"
-                    class="flex-auto"
-                    placeholder="标签"
-                    autocomplete="off"
-                />
-            </div>
-
-            <AdminDateTimeRangeRow
-                v-model:start="data.start_time"
-                v-model:end="data.end_time"
-                start-label="活动开始时间"
-                end-label="活动结束时间"
-            />
-
-            <AdminDateTimeRangeRow
-                v-model:start="data.start_signup_time"
-                v-model:end="data.end_signup_time"
-                start-label="开始报名时间"
-                end-label="结束报名时间"
-            />
-
-            <AdminSelectField
-                v-model="data.category"
-                label="分类"
-                :options="cateOptions"
-            />
-
-            <div class="mb-4 flex items-center gap-4">
-                <label>头图</label>
-                <InputText
-                    id="image"
-                    v-model="data.image"
-                    class="flex-auto"
-                    placeholder="头图 URL"
-                    autocomplete="off"
-                />
-            </div>
-
-            <div class="mb-4 flex items-center gap-4">
-                <label>地点</label>
-                <InputText
-                    id="place"
-                    v-model="data.place"
-                    class="flex-auto"
-                    placeholder="地点"
-                    autocomplete="off"
-                />
-            </div>
-        </div>
-
-        <Skeleton v-else width="100%" height="300px"></Skeleton>
-
-        <div class="mt-6 flex justify-end gap-2">
-            <Button
-                type="button"
-                label="取消"
-                severity="secondary"
-                @click="visible = false"
-            ></Button>
-            <Button type="button" label="保存" @click="submit"></Button>
-        </div>
     </Dialog>
 </template>
