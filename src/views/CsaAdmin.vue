@@ -37,24 +37,46 @@ const createMenuItem = (label, icon, routeName) => ({
     },
 })
 
-const items = computed(() => [
+const dataManagementEntries = [
+    ['信息管理', 'pi pi-file-edit', 'admin-news'],
+    ['活动管理', 'pi pi-calendar', 'admin-event'],
+]
+
+const userManagementEntries = [
+    ['用户管理', 'pi pi-user', 'admin-users'],
+    ['纳新管理', 'pi pi-user', 'admin-recruit'],
+    ['面试管理', 'pi pi-comments', 'admin-interview'],
+    ['干事管理', 'pi pi-users', 'admin-member'],
+]
+
+const createMenuItems = entries =>
+    entries.map(([label, icon, routeName]) =>
+        createMenuItem(label, icon, routeName)
+    )
+
+const expandedItems = computed(() => [
     {
         label: '数据管理',
-        items: [
-            createMenuItem('信息管理', 'pi pi-file-edit', 'admin-news'),
-            createMenuItem('活动管理', 'pi pi-calendar', 'admin-event'),
-        ],
+        items: createMenuItems(dataManagementEntries),
     },
     {
         label: '用户管理',
-        items: [
-            createMenuItem('用户管理', 'pi pi-user', 'admin-users'),
-            createMenuItem('纳新管理', 'pi pi-user', 'admin-recruit'),
-            createMenuItem('面试管理', 'pi pi-comments', 'admin-interview'),
-            createMenuItem('干事管理', 'pi pi-users', 'admin-member'),
-        ],
+        items: createMenuItems(userManagementEntries),
     },
 ])
+
+const collapsedItems = computed(() => [
+    ...createMenuItems(dataManagementEntries),
+    {
+        separator: true,
+        class: 'collapsed-group-divider',
+    },
+    ...createMenuItems(userManagementEntries),
+])
+
+const menuItems = computed(() =>
+    sidebarCollapsed.value ? collapsedItems.value : expandedItems.value
+)
 </script>
 
 <template>
@@ -93,7 +115,7 @@ const items = computed(() => [
             </div>
 
             <div class="admin-sidebar__menu py-6">
-                <Menu :model="items" />
+                <Menu :model="menuItems" />
             </div>
         </aside>
 
@@ -131,9 +153,9 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed {
-    width: 4.75rem;
-    min-width: 4.75rem;
-    flex-basis: 4.75rem;
+    width: 5rem;
+    min-width: 5rem;
+    flex-basis: 5rem;
 }
 
 .admin-sidebar__header {
@@ -184,7 +206,7 @@ const items = computed(() => [
 
 .admin-sidebar.is-collapsed .admin-sidebar__header {
     justify-content: center;
-    padding-top: 16px;
+    padding: 16px 12px 12px;
 }
 
 .admin-sidebar.is-collapsed .admin-sidebar__title-wrap {
@@ -290,28 +312,24 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-list) {
-    padding: 0;
-    gap: 10px;
-    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item) {
-    width: auto;
+    width: 100%;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-content) {
-    width: 2.75rem;
-    min-width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 14px !important;
+    width: 100%;
+    border-radius: 10px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-link) {
     justify-content: center;
     width: 100%;
-    height: 100%;
-    min-height: 0 !important;
-    padding: 0 !important;
+    min-height: 44px !important;
+    padding: 12px !important;
     gap: 0 !important;
 }
 
@@ -321,17 +339,14 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-icon) {
-    width: 1.125rem !important;
-    min-width: 1.125rem !important;
+    width: 18px !important;
+    min-width: 18px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content) {
     background-color: rgba(102, 126, 234, 0.16) !important;
-    box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.16);
-}
-
-.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content .p-menu-item-icon) {
     color: var(--accent-color) !important;
+    box-shadow: none !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content:hover) {
@@ -344,6 +359,11 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-separator) {
-    display: none !important;
+    display: block !important;
+    margin: 10px 4px !important;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-separator.collapsed-group-divider) {
+    border-color: var(--border-color) !important;
 }
 </style>
