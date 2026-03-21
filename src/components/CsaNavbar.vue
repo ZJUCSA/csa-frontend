@@ -49,6 +49,8 @@ const isActiveItem = item => {
     return activeNames.includes(route.name)
 }
 
+const isAdminRoute = computed(() => String(route.name || '').startsWith('admin'))
+
 watch(
     () => route.name,
     () => {
@@ -60,7 +62,7 @@ watch(
 </script>
 
 <template>
-    <div class="fixed-nav">
+    <div class="fixed-nav" :class="{ 'fixed-nav--admin': isAdminRoute }">
         <Menubar :model="items" class="nav-content">
             <template #start>
                 <router-link :to="{ name: 'home' }" class="nav-brand my-3 mx-5 text-xl">
@@ -150,6 +152,10 @@ watch(
     --nav-action-shadow-hover: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
+.fixed-nav.fixed-nav--admin {
+    box-shadow: none;
+}
+
 /* about-nav样式已移除，统一使用fixed-nav */
 
 /* 深色模式下的导航栏样式 */
@@ -164,6 +170,10 @@ watch(
     --nav-action-color-hover: var(--text-primary);
     --nav-action-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
     --nav-action-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.24);
+}
+
+.dark .fixed-nav.fixed-nav--admin {
+    box-shadow: none;
 }
 
 /* 导航栏文字颜色适配主题 */
