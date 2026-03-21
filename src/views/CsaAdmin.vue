@@ -131,9 +131,9 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed {
-    width: 5.5rem;
-    min-width: 5.5rem;
-    flex-basis: 5.5rem;
+    width: 4.75rem;
+    min-width: 4.75rem;
+    flex-basis: 4.75rem;
 }
 
 .admin-sidebar__header {
@@ -290,12 +290,28 @@ const items = computed(() => [
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-list) {
-    padding: 0 10px;
+    padding: 0;
+    gap: 10px;
+    align-items: center;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item) {
+    width: auto;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-content) {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 14px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-link) {
     justify-content: center;
-    padding: 12px !important;
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+    padding: 0 !important;
     gap: 0 !important;
 }
 
@@ -304,13 +320,30 @@ const items = computed(() => [
     display: none !important;
 }
 
-.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-content) {
-    border-radius: 12px !important;
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-icon) {
+    width: 1.125rem !important;
+    min-width: 1.125rem !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content) {
-    box-shadow:
-        inset 4px 0 0 var(--accent-color),
-        0 0 0 1px rgba(102, 126, 234, 0.1);
+    background-color: rgba(102, 126, 234, 0.16) !important;
+    box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.16);
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content .p-menu-item-icon) {
+    color: var(--accent-color) !important;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content:hover) {
+    background-color: rgba(102, 126, 234, 0.18) !important;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item:not(.route-active):not(.p-disabled) > .p-menu-item-content:hover),
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.p-focus:not(.route-active):not(.p-disabled) > .p-menu-item-content) {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-separator) {
+    display: none !important;
 }
 </style>
