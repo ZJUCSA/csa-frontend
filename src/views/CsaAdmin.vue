@@ -42,32 +42,36 @@ const items = computed(() => [
 
 <template>
     <div class="flex min-h-screen">
-        <!-- 左侧菜单区域 -->
-        <div class="w-64 min-h-screen border-r theme-transition"
-             :class="themeStore.isDark ? 'dark' : ''"
-             :style="{
-                 backgroundColor: themeStore.isDark ? 'var(--bg-primary)' : 'var(--bg-surface)',
-                 borderColor: themeStore.isDark ? 'var(--border-color)' : 'var(--border-color)'
-             }">
-            <!-- 菜单容器 -->
+        <div
+            class="w-64 min-h-screen border-r theme-transition"
+            :class="themeStore.isDark ? 'dark' : ''"
+            :style="{
+                backgroundColor: themeStore.isDark
+                    ? 'var(--bg-primary)'
+                    : 'var(--bg-surface)',
+                borderColor: 'var(--border-color)',
+            }"
+        >
             <div class="py-8">
                 <Menu :model="items" />
             </div>
         </div>
-        
-        <!-- 右侧内容区域 -->
-        <div class="grow min-w-0 p-8 theme-transition"
-             :class="themeStore.isDark ? 'dark' : ''"
-             :style="{
-                 backgroundColor: themeStore.isDark ? 'var(--bg-primary)' : 'var(--bg-secondary)'
-             }">
+
+        <div
+            class="grow min-w-0 p-8 theme-transition"
+            :class="themeStore.isDark ? 'dark' : ''"
+            :style="{
+                backgroundColor: themeStore.isDark
+                    ? 'var(--bg-primary)'
+                    : 'var(--bg-secondary)',
+            }"
+        >
             <router-view />
         </div>
     </div>
 </template>
 
 <style scoped>
-/* 基础菜单样式 */
 ::v-deep(.p-menu) {
     width: 100%;
     border: none;
@@ -76,126 +80,91 @@ const items = computed(() => [
     padding: 0;
 }
 
-/* 菜单项 - 中等字号 */
-::v-deep(.p-menu .p-menuitem-link) {
-    border-radius: 0 !important;
-    padding: 16px 24px !important;
-    border-left: 4px solid transparent !important;
-    margin: 0 !important;
-    font-size: 18px !important; /* 18px - 中等大小 */
-    font-weight: 500 !important;
-    line-height: 1.5 !important;
-    min-height: 56px !important;
-    display: flex !important;
-    align-items: center !important;
-    transition: all 0.3s ease !important;
+::v-deep(.p-menu .p-menu-list) {
+    padding: 0 12px;
+    gap: 6px;
 }
 
-/* 应用主题颜色 */
-::v-deep(.p-menu .p-menuitem-link) {
+::v-deep(.p-menu .p-menu-item-content) {
+    border-radius: 10px !important;
     color: var(--text-primary) !important;
-    background-color: transparent !important;
+    background: transparent !important;
+    transition:
+        background-color 0.22s ease,
+        color 0.22s ease,
+        box-shadow 0.22s ease;
 }
 
-::v-deep(.p-menu .p-menuitem-link:hover) {
-    background-color: rgba(102, 126, 234, 0.1) !important;
-    border-left-color: var(--accent-color) !important;
+::v-deep(.p-menu .p-menu-item-link) {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    min-height: 48px !important;
+    color: inherit !important;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
 }
 
-::v-deep(.p-menu .p-menuitem-link.p-highlight) {
-    background-color: rgba(102, 126, 234, 0.2) !important;
-    border-left-color: var(--accent-color) !important;
-    color: var(--accent-color) !important;
-    font-weight: 600 !important;
-    font-size: 19px !important; /* 选中时稍大 */
+::v-deep(.p-menu .p-menu-item-icon) {
+    margin-right: 0 !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    font-size: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0;
+    color: inherit !important;
 }
 
-/* 分组标题 - 中等字号 */
-::v-deep(.p-menu .p-submenu-header) {
-    font-size: 16px !important; /* 16px - 中等大小 */
+::v-deep(.p-menu .p-menu-item-label) {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    color: inherit !important;
+}
+
+::v-deep(.p-menu .p-menu-submenu-label) {
+    margin-top: 14px !important;
+    padding: 18px 16px 8px !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    padding: 24px 24px 12px !important;
+    letter-spacing: 0.08em !important;
     background: transparent !important;
-    border: none !important;
-    margin-top: 16px !important;
-    min-height: 48px !important;
     color: var(--text-secondary) !important;
 }
 
-::v-deep(.p-menu .p-submenu-header:first-child) {
+::v-deep(.p-menu .p-menu-submenu-label:first-child) {
     margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
-/* 图标 - 中等大小 */
-::v-deep(.p-menu .p-menuitem-icon) {
-    margin-right: 16px !important;
-    font-size: 20px !important; /* 20px - 中等大小 */
-    width: 24px !important;
-    min-width: 24px !important;
-    text-align: center !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    color: inherit !important;
-}
-
-/* 菜单文字 - 单独控制 */
-::v-deep(.p-menu .p-menuitem-text) {
-    font-size: 18px !important; /* 18px */
-    font-weight: 500 !important;
-    line-height: 1.5 !important;
-    color: inherit !important;
-}
-
-/* 菜单分隔线 */
-::v-deep(.p-menu .p-menu-separator) {
-    margin: 16px 24px !important;
-    border-color: var(--border-color) !important;
-    border-width: 1px !important;
-    min-height: 1px !important;
-}
-
-/* 确保PrimeVue组件的样式覆盖 */
-:global(.p-menu) {
-    font-size: 18px !important;
-}
-
-:global(.p-menu *) {
-    font-size: inherit !important;
+::v-deep(.p-menu .p-menu-item:not(.route-active):not(.p-disabled) > .p-menu-item-content:hover),
+::v-deep(.p-menu .p-menu-item.p-focus:not(.route-active):not(.p-disabled) > .p-menu-item-content) {
+    background-color: rgba(102, 126, 234, 0.08) !important;
+    color: var(--text-primary) !important;
 }
 
 ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content) {
-    background-color: rgba(102, 126, 234, 0.16) !important;
+    background-color: rgba(102, 126, 234, 0.14) !important;
+    color: var(--accent-color) !important;
     box-shadow: inset 4px 0 0 var(--accent-color);
 }
 
 ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content > .p-menu-item-link) {
-    color: var(--accent-color) !important;
+    color: inherit !important;
+}
+
+::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content .p-menu-item-label) {
     font-weight: 600 !important;
 }
 
-::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content .p-menu-item-icon) {
-    color: var(--accent-color) !important;
-}
-</style>
-
-<style>
-/* 全局样式 - 中等字号 */
-.p-menu .p-menuitem-link {
-    font-size: 18px !important;
+::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content:hover) {
+    background-color: rgba(102, 126, 234, 0.14) !important;
 }
 
-.p-menu .p-submenu-header {
-    font-size: 16px !important;
-}
-
-.p-menu .p-menuitem-icon {
-    font-size: 20px !important;
-}
-
-.p-menu .p-menuitem-text {
-    font-size: 18px !important;
+::v-deep(.p-menu .p-menu-separator) {
+    margin: 16px 16px 0 !important;
+    border-color: var(--border-color) !important;
 }
 </style>
