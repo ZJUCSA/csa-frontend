@@ -1,7 +1,8 @@
 <script setup>
-import { ref, reactive, inject, onMounted } from 'vue';
+import { computed, ref, reactive, inject, onMounted } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useRouter } from 'vue-router';
+import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
 const confirm = useConfirm();
 const axios = inject('axios');
@@ -213,6 +214,43 @@ const gradeOptions = [
   { value: 24, label: '24级' },
   { value: 25, label: '25级' }
 ];
+
+const degreeFilterOptions = [{ value: '', label: '全部' }, ...degreeOptions];
+const gradeFilterOptions = [{ value: '', label: '全部' }, ...gradeOptions];
+const recommendedDepartmentOptions = [
+  { value: '', label: '未推荐' },
+  { value: 'office', label: '办公室部' },
+  { value: 'competition', label: '竞赛部' },
+  { value: 'research', label: '科研部' },
+  { value: 'activity', label: '活动部' }
+];
+const evaluationResultOptions = [
+  { value: 'pending', label: '待定' },
+  { value: 'pass', label: '通过' },
+  { value: 'fail', label: '不通过' },
+  { value: 'recommended', label: '推荐' }
+];
+const interviewStageOptions = [
+  { value: 'first_round', label: '一面' },
+  { value: 'second_round', label: '二面' }
+];
+const interviewCompletedOptions = [
+  { value: false, label: '未完成' },
+  { value: true, label: '已完成' }
+];
+const interviewResultOptions = [
+  { value: 'pending', label: '待定' },
+  { value: 'pass', label: '通过' },
+  { value: 'fail', label: '未通过' },
+  { value: 'recommended', label: '推荐' }
+];
+const interviewTimeSlotOptions = computed(() => [
+  { value: '', label: '全部时间段' },
+  ...interviewTimeSlots.value.map(slot => ({
+    value: slot.id,
+    label: `${slot.name} (${slot.current_count}/${slot.max_capacity})`
+  }))
+]);
 
 // 获取已排班面试时间段列表
 const fetchInterviewTimeSlots = async () => {
@@ -1094,21 +1132,23 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>学位:</label>
-          <select v-model="filters.degree" @change="handleFilterChange">
-            <option value="">全部</option>
-            <option v-for="option in degreeOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.degree"
+            :options="degreeFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>年级:</label>
-          <select v-model="filters.grade" @change="handleFilterChange">
-            <option value="">全部</option>
-            <option v-for="option in gradeOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.grade"
+            :options="gradeFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>表单截止日期:</label>
@@ -1122,19 +1162,23 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>状态:</label>
-          <select v-model="filters.status" @change="handleFilterChange">
-            <option v-for="status in interviewStatusOptions" :key="status.value" :value="status.value">
-              {{ status.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.status"
+            :options="interviewStatusOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>部门:</label>
-          <select v-model="filters.department" @change="handleFilterChange">
-            <option v-for="option in departmentOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.department"
+            :options="departmentOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>面试基准日期:</label>
@@ -1142,12 +1186,13 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>已排班时间段:</label>
-          <select v-model="filters.interview_time_slot" @change="handleFilterChange">
-            <option value="">全部时间段</option>
-            <option v-for="slot in interviewTimeSlots" :key="slot.id" :value="slot.id">
-              {{ slot.name }} ({{ slot.current_count }}/{{ slot.max_capacity }})
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.interview_time_slot"
+            :options="interviewTimeSlotOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
       </div>
     </div>
@@ -1593,22 +1638,21 @@ onMounted(async () => {
                 <h4>推荐和部门</h4>
                 <div class="form-group">
                   <label>推荐部门:</label>
-                  <select v-model="evaluationForm.recommended_department">
-                    <option value="">未推荐</option>
-                    <option value="office">办公室部</option>
-                    <option value="competition">竞赛部</option>
-                    <option value="research">科研部</option>
-                    <option value="activity">活动部</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="evaluationForm.recommended_department"
+                    :options="recommendedDepartmentOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                  />
                 </div>
                 <div class="form-group">
                   <label>评价结果:</label>
-                  <select v-model="evaluationForm.result">
-                    <option value="pending">待定</option>
-                    <option value="pass">通过</option>
-                    <option value="fail">不通过</option>
-                    <option value="recommended">推荐</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="evaluationForm.result"
+                    :options="evaluationResultOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                  />
                 </div>
                 <div class="form-group">
                   <label>所属部门:</label>
@@ -1772,10 +1816,12 @@ onMounted(async () => {
             <div class="form-row">
               <div class="form-group">
                 <label>面试阶段 *</label>
-                <select v-model="interviewForm.stage" required>
-                  <option value="first_round">一面</option>
-                  <option value="second_round">二面</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="interviewForm.stage"
+                  :options="interviewStageOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                />
               </div>
               <div class="form-group">
                 <label>面试日期 *</label>
@@ -1786,10 +1832,12 @@ onMounted(async () => {
             <div class="form-row">
               <div class="form-group">
                                   <label>面试完成状态 *</label>
-                <select v-model="interviewForm.interview_completed" required>
-                  <option :value="false">未完成</option>
-                  <option :value="true">已完成</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="interviewForm.interview_completed"
+                  :options="interviewCompletedOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                />
               </div>
               <div class="form-group">
                 <label>面试时长（分钟）</label>
@@ -1833,23 +1881,22 @@ onMounted(async () => {
             
             <div class="form-group">
               <label>面试结果</label>
-              <select v-model="interviewForm.result">
-                <option value="pending">待定</option>
-                <option value="pass">通过</option>
-                <option value="fail">未通过</option>
-                <option value="recommended">推荐</option>
-              </select>
+              <AdminFilterSelect
+                v-model="interviewForm.result"
+                :options="interviewResultOptions"
+                optionLabel="label"
+                optionValue="value"
+              />
             </div>
             
             <div class="form-group">
               <label>推荐部门</label>
-              <select v-model="interviewForm.recommended_department">
-                <option value="">未推荐</option>
-                <option value="office">办公室部</option>
-                <option value="competition">竞赛部</option>
-                <option value="research">科研部</option>
-                <option value="activity">活动部</option>
-              </select>
+              <AdminFilterSelect
+                v-model="interviewForm.recommended_department"
+                :options="recommendedDepartmentOptions"
+                optionLabel="label"
+                optionValue="value"
+              />
             </div>
             
             <div class="form-group">
@@ -1975,6 +2022,12 @@ onMounted(async () => {
 .filter-section {
   --recruit-filter-control-height: 2.75rem;
   --recruit-filter-button-height: 3.25rem;
+  --admin-filter-select-height: var(--recruit-filter-control-height);
+  --admin-filter-select-radius: 8px;
+  --admin-filter-select-border: var(--border-color);
+  --admin-filter-select-hover-border: var(--accent-color);
+  --admin-filter-select-focus: var(--accent-color);
+  --admin-filter-select-focus-ring: rgba(102, 126, 234, 0.12);
   background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
@@ -2007,8 +2060,7 @@ onMounted(async () => {
   margin-bottom: 0;
 }
 
-.filter-item input,
-.filter-item select {
+.filter-item input {
   width: 100%;
   min-height: var(--recruit-filter-control-height);
   padding: 0 0.875rem;
@@ -2017,6 +2069,10 @@ onMounted(async () => {
   background: var(--bg-surface);
   color: var(--text-primary);
   box-sizing: border-box;
+}
+
+.filter-item :deep(.admin-filter-select) {
+  width: 100%;
 }
 
 .export-button,
@@ -2399,7 +2455,6 @@ onMounted(async () => {
   margin-bottom: 0.5rem;
 }
 
-.form-group select,
 .form-group textarea,
 .form-group input {
   width: 100%;
@@ -2410,12 +2465,20 @@ onMounted(async () => {
   font-size: 0.95rem;
 }
 
-.form-group select:focus,
 .form-group textarea:focus,
 .form-group input:focus {
   outline: none;
   border-color: #2196f3;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-group :deep(.admin-filter-select) {
+  --admin-filter-select-height: 3rem;
+  --admin-filter-select-radius: 8px;
+  --admin-filter-select-border: #e9ecef;
+  --admin-filter-select-hover-border: #2196f3;
+  --admin-filter-select-focus: #2196f3;
+  --admin-filter-select-focus-ring: rgba(33, 150, 243, 0.1);
 }
 
 .form-group textarea {
@@ -3249,7 +3312,6 @@ onMounted(async () => {
 }
 
 .form-group input,
-.form-group select,
 .form-group textarea {
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -3259,11 +3321,19 @@ onMounted(async () => {
 }
 
 .form-group input:focus,
-.form-group select:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #ff9800;
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.interview-form .form-group :deep(.admin-filter-select) {
+  --admin-filter-select-height: 2.875rem;
+  --admin-filter-select-radius: 6px;
+  --admin-filter-select-border: #ddd;
+  --admin-filter-select-hover-border: #ff9800;
+  --admin-filter-select-focus: #ff9800;
+  --admin-filter-select-focus-ring: rgba(255, 152, 0, 0.1);
 }
 
 .form-group textarea {
