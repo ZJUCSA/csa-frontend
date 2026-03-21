@@ -2,7 +2,6 @@
 import { ref, reactive, inject, onMounted } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useRouter } from 'vue-router';
-import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
 const confirm = useConfirm();
 const axios = inject('axios');
@@ -216,24 +215,6 @@ const gradeOptions = [
 ];
 
 // 获取已排班面试时间段列表
-const degreeFilterOptions = computed(() => [
-  { value: '', label: '??' },
-  ...degreeOptions
-]);
-
-const gradeFilterOptions = computed(() => [
-  { value: '', label: '??' },
-  ...gradeOptions
-]);
-
-const interviewTimeSlotOptions = computed(() => [
-  { value: '', label: '?????' },
-  ...interviewTimeSlots.value.map(slot => ({
-    value: slot.id,
-    label: `${slot.name} (${slot.current_count}/${slot.max_capacity})`
-  }))
-]);
-
 const fetchInterviewTimeSlots = async () => {
   try {
     const response = await axios.get('/interview/time-slots', {
@@ -1104,57 +1085,83 @@ onMounted(async () => {
     <div class="filter-section">
       <div class="filter-row">
         <div class="filter-item">
-          <label>??:</label>
-          <input v-model="filters.name" class="filter-control" @input="handleFilterChange" @change="handleFilterChange" placeholder="????">
+          <label>姓名:</label>
+          <input v-model="filters.name" @input="handleFilterChange" @change="handleFilterChange" placeholder="搜索姓名">
         </div>
         <div class="filter-item">
-          <label>??:</label>
-          <input v-model="filters.uid" class="filter-control" @input="handleFilterChange" @change="handleFilterChange" placeholder="????">
+          <label>学号:</label>
+          <input v-model="filters.uid" @input="handleFilterChange" @change="handleFilterChange" placeholder="搜索学号">
         </div>
         <div class="filter-item">
-          <label>??:</label>
-          <AdminFilterSelect v-model="filters.degree" :options="degreeFilterOptions" @update:model-value="handleFilterChange" />
+          <label>学位:</label>
+          <select v-model="filters.degree" @change="handleFilterChange">
+            <option value="">全部</option>
+            <option v-for="option in degreeOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
         <div class="filter-item">
-          <label>??:</label>
-          <AdminFilterSelect v-model="filters.grade" :options="gradeFilterOptions" @update:model-value="handleFilterChange" />
+          <label>年级:</label>
+          <select v-model="filters.grade" @change="handleFilterChange">
+            <option value="">全部</option>
+            <option v-for="option in gradeOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
         <div class="filter-item">
-          <label>??????:</label>
-          <input type="date" v-model="newDeadline" class="filter-control" @input="handleSetDeadline">
+          <label>表单截止日期:</label>
+          <input type="date" v-model="newDeadline" @input="handleSetDeadline">
         </div>
       </div>
       <div class="filter-row">
         <div class="filter-item">
-          <label>??:</label>
-          <input v-model="filters.major_name" class="filter-control" @input="handleFilterChange" placeholder="????">
+          <label>专业:</label>
+          <input v-model="filters.major_name" @input="handleFilterChange" placeholder="搜索专业">
         </div>
         <div class="filter-item">
-          <label>??:</label>
-          <AdminFilterSelect v-model="filters.status" :options="interviewStatusOptions" @update:model-value="handleFilterChange" />
+          <label>状态:</label>
+          <select v-model="filters.status" @change="handleFilterChange">
+            <option v-for="status in interviewStatusOptions" :key="status.value" :value="status.value">
+              {{ status.label }}
+            </option>
+          </select>
         </div>
         <div class="filter-item">
-          <label>??:</label>
-          <AdminFilterSelect v-model="filters.department" :options="departmentOptions" @update:model-value="handleFilterChange" />
+          <label>部门:</label>
+          <select v-model="filters.department" @change="handleFilterChange">
+            <option v-for="option in departmentOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
         <div class="filter-item">
-          <label>??????:</label>
-          <input type="date" v-model="interviewBaseDate" class="filter-control" @change="handleBaseDateChange">
+          <label>面试基准日期:</label>
+          <input type="date" v-model="interviewBaseDate" @change="handleBaseDateChange">
         </div>
         <div class="filter-item">
-          <label>??????:</label>
-          <AdminFilterSelect v-model="filters.interview_time_slot" :options="interviewTimeSlotOptions" @update:model-value="handleFilterChange" />
+          <label>已排班时间段:</label>
+          <select v-model="filters.interview_time_slot" @change="handleFilterChange">
+            <option value="">全部时间段</option>
+            <option v-for="slot in interviewTimeSlots" :key="slot.id" :value="slot.id">
+              {{ slot.name }} ({{ slot.current_count }}/{{ slot.max_capacity }})
+            </option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <button @click="showExportOptions" class="export-button">导出数据</button>
         </div>
       </div>
     </div>
 
-    <!-- ???? -->
+    <!-- 批量操作 -->
     <div class="batch-actions">
-      <button @click="showExportOptions" class="filter-action-button export-button">????</button>
-      <button @click="batchDeleteRecruits()" class="filter-action-button batch-button delete">????</button>
-      <!-- <button @click="deleteAllRecruits()" class="batch-button delete-all">????</button> -->
+      <button @click="batchDeleteRecruits()" class="batch-button delete">批量删除</button>
+      <!-- <button @click="deleteAllRecruits()" class="batch-button delete-all">全部删除</button> -->
     </div>
 
+    <!-- 数据表格 -->
     <div class="table-container">
       <table class="recruit-table">
         <thead>
@@ -1968,7 +1975,6 @@ onMounted(async () => {
 }
 
 .filter-section {
-  --recruit-filter-control-height: 42px;
   background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
@@ -1978,8 +1984,6 @@ onMounted(async () => {
 
 .filter-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -1991,54 +1995,48 @@ onMounted(async () => {
 .filter-item {
   display: flex;
   flex-direction: column;
-  flex: 1 1 180px;
-  min-width: 180px;
-  gap: 0.5rem;
+  min-width: 150px;
 }
 
 .filter-item label {
   font-weight: bold;
-  margin-bottom: 0;
+  margin-bottom: 0.5rem;
 }
 
-.filter-item input {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.filter-control {
-  min-height: var(--recruit-filter-control-height);
-  padding: 0 0.875rem;
+.filter-item input,
+.filter-item select {
+  padding: 0.5rem;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--bg-surface);
   color: var(--text-primary);
 }
 
-.filter-action-button,
-.batch-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--recruit-filter-control-height);
-  padding: 0 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-weight: 600;
-}
-
 .export-button {
   background: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1.5rem;
 }
 
 .batch-actions {
   margin-bottom: 1rem;
   display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
 }
+
+.batch-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+}
+
+
 
 .batch-button.delete {
   background: #f44336;
