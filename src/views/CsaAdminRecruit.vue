@@ -2,6 +2,7 @@
 import { computed, ref, reactive, inject, onMounted } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useRouter } from 'vue-router';
+import AdminDateField from '@/components/admin/AdminDateField.vue';
 import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
 const confirm = useConfirm();
@@ -1189,7 +1190,10 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>表单截止日期:</label>
-          <input type="date" v-model="newDeadline" @input="handleSetDeadline">
+          <AdminDateField
+            v-model="newDeadline"
+            @update:modelValue="handleSetDeadline"
+          />
         </div>
       </div>
       <div class="filter-row">
@@ -1219,7 +1223,10 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>面试基准日期:</label>
-          <input type="date" v-model="interviewBaseDate" @change="handleBaseDateChange">
+          <AdminDateField
+            v-model="interviewBaseDate"
+            @update:modelValue="handleBaseDateChange"
+          />
         </div>
         <div class="filter-item">
           <label>已排班时间段:</label>
@@ -2100,6 +2107,37 @@ onMounted(async () => {
   background: var(--bg-surface);
   color: var(--text-primary);
   box-sizing: border-box;
+}
+
+.filter-item :deep(.p-datepicker) {
+  width: 100%;
+}
+
+.filter-item :deep(.p-datepicker-input) {
+  width: 100%;
+  min-height: var(--recruit-filter-control-height);
+  padding: 0 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-item :deep(.p-datepicker:not(.p-disabled):hover .p-datepicker-input) {
+  border-color: var(--border-color);
+}
+
+.filter-item :deep(.p-datepicker.p-focus .p-datepicker-input) {
+  border-color: var(--border-color);
+  box-shadow: none;
+  outline: none;
+}
+
+.filter-item :deep(.p-datepicker-input::placeholder) {
+  color: var(--text-secondary);
 }
 
 .filter-item :deep(.p-select) {

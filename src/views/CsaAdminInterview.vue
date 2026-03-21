@@ -5,12 +5,11 @@
       <div class="header-actions">
         <div class="base-time-setting">
           <label>面试基准时间：</label>
-          <input 
-            type="date" 
-            v-model="globalBaseDate" 
-            @change="updateGlobalBaseDate"
-            class="base-date-input"
-          >
+          <AdminDateField
+            v-model="globalBaseDate"
+            class="base-date-field"
+            @update:modelValue="updateGlobalBaseDate"
+          />
         </div>
         <!-- <button @click="openAutoScheduleModal()" class="auto-schedule-btn">
           <i class="pi pi-magic"></i> 一键排班
@@ -336,7 +335,10 @@
             <div class="form-row">
               <div class="form-group">
                 <label>面试开始基准日期 *</label>
-                <input type="date" v-model="scheduleForm.base_date" required>
+                <AdminDateField
+                  v-model="scheduleForm.base_date"
+                  required
+                />
                 <small class="form-help">选择面试开始的基准日期，系统将根据此日期计算具体的面试时间</small>
               </div>
               <div class="form-group">
@@ -470,12 +472,11 @@
             <div class="form-section">
               <div class="form-group">
                 <label>基准日期：</label>
-                <input 
-                  type="date" 
-                  v-model="autoScheduleForm.base_date" 
-                  class="form-input"
+                <AdminDateField
+                  v-model="autoScheduleForm.base_date"
+                  class="form-date-field"
                   required
-                >
+                />
                 <small>用于计算具体的面试日期</small>
               </div>
               
@@ -574,6 +575,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, inject } from 'vue';
+import AdminDateField from '@/components/admin/AdminDateField.vue';
 import { useConfirm } from 'primevue/useconfirm';
 import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
@@ -1686,20 +1688,28 @@ onMounted(() => {
   transition: color 0.3s ease;
 }
 
-.base-date-input {
-  padding: 0.5rem;
+.base-time-setting :deep(.base-date-field) {
+  min-width: 11rem;
+}
+
+.base-time-setting :deep(.base-date-field .p-datepicker-input) {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9rem;
   background: var(--bg-surface);
   color: var(--text-primary);
-  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
 }
 
-.base-date-input:focus {
-  outline: none;
+.base-time-setting :deep(.base-date-field.p-focus .p-datepicker-input) {
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  outline: none;
 }
 
 .add-btn, .refresh-btn, .auto-schedule-btn {
@@ -2332,6 +2342,34 @@ onMounted(() => {
 
 .form-group :deep(.p-select-dropdown) {
   width: 2.75rem;
+  color: var(--text-secondary);
+}
+
+.form-group :deep(.p-datepicker) {
+  width: 100%;
+}
+
+.form-group :deep(.p-datepicker-input) {
+  width: 100%;
+  min-height: var(--interview-form-control-height);
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.form-group :deep(.p-datepicker.p-focus .p-datepicker-input) {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: none;
+}
+
+.form-group :deep(.p-datepicker-input::placeholder) {
   color: var(--text-secondary);
 }
 
