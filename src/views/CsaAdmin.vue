@@ -314,29 +314,27 @@ const menuItems = computed(() =>
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-list) {
     width: 100%;
-    padding: 0 8px;
+    padding: 0 12px;
     gap: 8px;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item) {
     width: 100%;
-    display: flex;
-    justify-content: flex-start;
+    display: block;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-content) {
-    width: auto;
-    min-width: 2.625rem;
-    border-radius: 12px !important;
-    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    border-radius: 8px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-link) {
     justify-content: center;
-    width: 2.625rem;
-    min-width: 2.625rem;
-    min-height: 2.625rem !important;
-    padding: 0 !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px !important;
+    padding: 12px !important;
     gap: 0 !important;
 }
 
@@ -346,9 +344,9 @@ const menuItems = computed(() =>
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item-icon) {
-    width: 16px !important;
-    min-width: 16px !important;
-    font-size: 16px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    font-size: 18px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-item.route-active > .p-menu-item-content) {
@@ -368,8 +366,8 @@ const menuItems = computed(() =>
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-separator) {
     display: block !important;
-    width: 1.75rem;
-    margin: 8px 0 8px 8px !important;
+    width: auto;
+    margin: 8px 12px !important;
 }
 
 .admin-sidebar.is-collapsed ::v-deep(.p-menu .p-menu-separator.collapsed-group-divider) {
