@@ -1149,14 +1149,12 @@ onMounted(async () => {
             </option>
           </select>
         </div>
-        <div class="filter-item">
-          <button @click="showExportOptions" class="export-button">导出数据</button>
-        </div>
       </div>
     </div>
 
     <!-- 批量操作 -->
     <div class="batch-actions">
+      <button @click="showExportOptions" class="export-button">导出数据</button>
       <button @click="batchDeleteRecruits()" class="batch-button delete">批量删除</button>
       <!-- <button @click="deleteAllRecruits()" class="batch-button delete-all">全部删除</button> -->
     </div>
@@ -1975,6 +1973,7 @@ onMounted(async () => {
 }
 
 .filter-section {
+  --recruit-filter-control-height: 2.75rem;
   background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
@@ -1984,6 +1983,8 @@ onMounted(async () => {
 
 .filter-row {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -1995,45 +1996,55 @@ onMounted(async () => {
 .filter-item {
   display: flex;
   flex-direction: column;
-  min-width: 150px;
+  flex: 1 1 180px;
+  min-width: 180px;
+  gap: 0.5rem;
 }
 
 .filter-item label {
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 .filter-item input,
 .filter-item select {
-  padding: 0.5rem;
+  width: 100%;
+  min-height: var(--recruit-filter-control-height);
+  padding: 0 0.875rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--bg-surface);
   color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.export-button,
+.batch-button {
+  min-height: var(--recruit-filter-control-height);
+  padding: 0 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .export-button {
   background: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 1.5rem;
 }
 
 .batch-actions {
   margin-bottom: 1rem;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 1rem;
 }
 
 .batch-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
 }
 
 
