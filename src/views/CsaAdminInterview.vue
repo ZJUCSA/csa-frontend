@@ -1840,7 +1840,9 @@ onMounted(() => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
   margin-bottom: 2rem;
 }
 
@@ -1849,13 +1851,19 @@ onMounted(() => {
   color: var(--text-primary);
   font-size: 1.8rem;
   font-weight: bold;
+  white-space: nowrap;
+  flex: 0 0 auto;
   transition: color 0.3s ease;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex: 1 1 24rem;
+  flex-wrap: wrap;
   gap: 1rem;
+  min-width: min(100%, 18rem);
 }
 
 .base-time-setting {
