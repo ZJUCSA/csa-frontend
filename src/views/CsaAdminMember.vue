@@ -854,10 +854,10 @@ onMounted(() => {
   margin: 0 auto;
   --member-filter-control-height: 3rem;
   --member-form-control-height: 2.875rem;
-  --member-add-btn-bg: var(--primary-color);
+  --member-add-btn-bg: var(--accent-color);
   --member-add-btn-border: transparent;
   --member-add-btn-text: #ffffff;
-  --member-add-btn-hover-bg: var(--primary-hover);
+  --member-add-btn-hover-bg: var(--accent-hover);
   --member-action-view-bg: rgba(59, 130, 246, 0.14);
   --member-action-view-border: rgba(37, 99, 235, 0.22);
   --member-action-view-text: #1d4ed8;
@@ -1016,7 +1016,7 @@ h2 {
 }
 
 .filter-item :deep(.p-select.p-focus) {
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
   outline: none;
 }
@@ -1266,7 +1266,7 @@ h2 {
 }
 
 .pagination button:hover:not(:disabled) {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
 }
 
@@ -1347,7 +1347,7 @@ h2 {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1358,7 +1358,7 @@ h2 {
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--accent-hover);
 }
 
 .btn-secondary {
@@ -1471,7 +1471,7 @@ h2 {
   font-weight: 600;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color);
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .form-grid {
@@ -1518,7 +1518,7 @@ h2 {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
@@ -1538,7 +1538,7 @@ h2 {
 }
 
 .member-form .form-group :deep(.p-select.p-focus) {
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
   outline: none;
 }
