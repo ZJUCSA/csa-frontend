@@ -67,15 +67,60 @@
       <table v-else class="recruits-table">
         <thead>
           <tr>
-            <th class="col-uid">学号</th>
-            <th class="col-name">姓名</th>
-            <th>专业</th>
-            <th>年级</th>
-            <th class="col-stage">面试阶段</th>
-            <th class="col-status">面试状态</th>
-            <th class="col-interview-time">面试时间</th>
-            <th>面试形式</th>
-            <th class="col-notification">是否已通知</th>
+            <th class="col-uid">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'uid' }" @click="toggleSort('uid')">
+                <span>学号</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('uid')"></i>
+              </button>
+            </th>
+            <th class="col-name">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'name' }" @click="toggleSort('name')">
+                <span>姓名</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('name')"></i>
+              </button>
+            </th>
+            <th class="col-major">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'major_name' }" @click="toggleSort('major_name')">
+                <span>专业</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('major_name')"></i>
+              </button>
+            </th>
+            <th class="col-grade">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'grade' }" @click="toggleSort('grade')">
+                <span>年级</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('grade')"></i>
+              </button>
+            </th>
+            <th class="col-stage">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interview_status' }" @click="toggleSort('interview_status')">
+                <span>面试阶段</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interview_status')"></i>
+              </button>
+            </th>
+            <th class="col-status">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'schedule_status' }" @click="toggleSort('schedule_status')">
+                <span>面试状态</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('schedule_status')"></i>
+              </button>
+            </th>
+            <th class="col-interview-time">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interview_date' }" @click="toggleSort('interview_date')">
+                <span>面试时间</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interview_date')"></i>
+              </button>
+            </th>
+            <th class="col-format">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interviewer' }" @click="toggleSort('interviewer')">
+                <span>面试形式</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interviewer')"></i>
+              </button>
+            </th>
+            <th class="col-notification">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'notification_sent' }" @click="toggleSort('notification_sent')">
+                <span>是否已通知</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('notification_sent')"></i>
+              </button>
+            </th>
             <th>操作</th>
           </tr>
         </thead>
@@ -83,8 +128,8 @@
           <tr v-for="recruit in paginatedRecruits" :key="recruit.uid">
             <td class="col-uid">{{ recruit.uid }}</td>
             <td class="col-name">{{ recruit.name }}</td>
-            <td>{{ recruit.major_name }}</td>
-            <td>{{ recruit.grade }}级</td>
+            <td class="col-major">{{ recruit.major_name }}</td>
+            <td class="col-grade">{{ recruit.grade }}级</td>
             <td class="col-stage">
               <span class="stage-badge" :class="recruit.interview_status">
                 {{ getStageLabel(recruit.interview_status) }}
@@ -101,7 +146,7 @@
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
+            <td class="col-format">
               <span v-if="getScheduleByUid(recruit.uid)">
                 {{ getScheduleByUid(recruit.uid).interviewer }}
               </span>
@@ -145,30 +190,16 @@
     </div>
 
     <!-- 分页 -->
-    <div class="pagination" v-if="filteredRecruits.length > 0">
-      <div class="pagination-info">
-        显示 {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, filteredRecruits.length) }} 条，共 {{ filteredRecruits.length }} 条记录
-      </div>
-      <div class="pagination-controls" v-if="totalPages > 1">
-        <button 
-          @click="changePage(currentPage - 1)" 
-          :disabled="currentPage <= 1"
-          class="page-btn"
-        >
-          上一页
-        </button>
-        <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-        <button 
-          @click="changePage(currentPage + 1)" 
-          :disabled="currentPage >= totalPages"
-          class="page-btn"
-        >
-          下一页
-        </button>
-      </div>
-      <div class="pagination-controls" v-else>
-        <span class="page-info">共 {{ filteredRecruits.length }} 条记录</span>
-      </div>
+    <div class="pagination-wrapper" v-if="filteredRecruits.length > 0">
+      <Paginator
+        :first="first"
+        :rows="pageSize"
+        :totalRecords="filteredRecruits.length"
+        :rowsPerPageOptions="[10, 20, 30]"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+        currentPageReportTemplate="第 {currentPage} 页，共 {totalPages} 页"
+        @page="handlePageChange"
+      ></Paginator>
     </div>
 
     <!-- 时间段排班统计表格 -->
@@ -589,6 +620,8 @@ const showScheduleForm = ref(false);
 const editingSchedule = ref(null);
 const currentPage = ref(1);
 const pageSize = ref(10); // 修改为每页10个，更容易看到分页效果
+const sortField = ref('');
+const sortOrder = ref('asc');
 const total = ref(0);
 
 // 筛选条件
@@ -716,6 +749,7 @@ const autoScheduleForm = reactive({
 
 // 计算属性 - 前端分页
 const totalPages = computed(() => Math.ceil(filteredRecruits.value.length / pageSize.value));
+const first = computed(() => Math.max(0, (currentPage.value - 1) * pageSize.value));
 
 const filteredRecruits = computed(() => {
   let filtered = recruits.value;
@@ -739,11 +773,74 @@ const filteredRecruits = computed(() => {
   return filtered;
 });
 
+const compareSortValues = (left, right) => {
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+
+  return String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+};
+
+const getSortableValue = (recruit, field) => {
+  const schedule = getScheduleByUid(recruit.uid);
+  const scheduleStatus = getScheduleStatus(recruit.uid);
+
+  switch (field) {
+    case 'uid':
+      return recruit.uid ?? '';
+    case 'name':
+      return recruit.name ?? '';
+    case 'major_name':
+      return recruit.major_name ?? '';
+    case 'grade':
+      return Number.parseInt(recruit.grade, 10) || 0;
+    case 'interview_status':
+      return {
+        first_round: 1,
+        second_round: 2,
+        completed: 3,
+      }[recruit.interview_status] ?? 99;
+    case 'schedule_status':
+      return {
+        pending: 1,
+        scheduled: 2,
+        completed: 3,
+        cancelled: 4,
+      }[scheduleStatus] ?? 99;
+    case 'interview_date':
+      return schedule?.interview_date ? new Date(schedule.interview_date).getTime() : -1;
+    case 'interviewer':
+      return schedule?.interviewer ?? '';
+    case 'notification_sent':
+      return schedule?.notification_sent ? 1 : 0;
+    default:
+      return recruit[field] ?? '';
+  }
+};
+
+const sortedRecruits = computed(() => {
+  if (!sortField.value) {
+    return filteredRecruits.value;
+  }
+
+  return [...filteredRecruits.value].sort((left, right) => {
+    const result = compareSortValues(
+      getSortableValue(left, sortField.value),
+      getSortableValue(right, sortField.value)
+    );
+
+    return sortOrder.value === 'asc' ? result : -result;
+  });
+});
+
 // 前端分页逻辑
 const paginatedRecruits = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value;
   const endIndex = startIndex + pageSize.value;
-  return filteredRecruits.value.slice(startIndex, endIndex);
+  return sortedRecruits.value.slice(startIndex, endIndex);
 });
 
 // 表格补齐空行：保证每页显示区域高度一致，避免分页时“上下缩放/跳动”
@@ -754,6 +851,30 @@ const recruitTableFillerRows = computed(() => {
 
 const resetPagination = () => {
   currentPage.value = 1;
+};
+
+const handlePageChange = (event) => {
+  currentPage.value = event.page + 1;
+  pageSize.value = event.rows;
+};
+
+const toggleSort = (field) => {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+
+  currentPage.value = 1;
+};
+
+const getSortIconClass = (field) => {
+  if (sortField.value !== field) {
+    return 'pi-sort-alt';
+  }
+
+  return sortOrder.value === 'asc' ? 'pi-angle-up' : 'pi-angle-down';
 };
 
 // 方法
@@ -1250,10 +1371,6 @@ const getRecruitName = (uid) => {
 
 const applyFilters = () => {
   resetPagination();
-};
-
-const changePage = (page) => {
-  currentPage.value = page;
 };
 
 const refreshData = async () => {
@@ -2062,54 +2179,73 @@ onMounted(() => {
 }
 
 /* 分页 */
-.pagination {
+.pagination-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: var(--bg-surface);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px var(--shadow-color);
+  justify-content: center;
   margin-top: 2rem;
-  transition: background-color 0.3s ease;
 }
 
-.pagination-info {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
+.pagination-wrapper :deep(.p-paginator) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 10px;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.pagination-wrapper :deep(.p-paginator-page),
+.pagination-wrapper :deep(.p-paginator-first),
+.pagination-wrapper :deep(.p-paginator-prev),
+.pagination-wrapper :deep(.p-paginator-next),
+.pagination-wrapper :deep(.p-paginator-last) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.page-btn {
-  padding: 0.5rem 1rem;
+.pagination-wrapper :deep(.p-paginator-page:hover),
+.pagination-wrapper :deep(.p-paginator-first:hover),
+.pagination-wrapper :deep(.p-paginator-prev:hover),
+.pagination-wrapper :deep(.p-paginator-next:hover),
+.pagination-wrapper :deep(.p-paginator-last:hover) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.pagination-wrapper :deep(.p-paginator-page.p-paginator-page-selected) {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown) {
+  min-height: 2.5rem;
+  border-radius: 14px;
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-primary);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: var(--bg-secondary);
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+  border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
 }
 
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.page-info {
-  font-weight: bold;
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-label),
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+  color: inherit;
+}
+
+.pagination-wrapper :deep(.p-paginator-current) {
   color: var(--text-primary);
-  transition: color 0.3s ease;
+  font-weight: 600;
+  padding: 0 0.25rem;
 }
 
 /* 模态框样式 */
@@ -2711,6 +2847,53 @@ onMounted(() => {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+.sort-header {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.32rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sort-header:hover {
+  color: inherit;
+}
+
+.sort-header:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sort-header--active {
+  color: inherit;
+}
+
+.sort-indicator {
+  font-size: 0.66rem;
+  color: var(--text-secondary);
+  opacity: 0.42;
+  transform: translateY(1px);
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.sort-header:hover .sort-indicator {
+  opacity: 0.58;
+}
+
+.sort-header--active .sort-indicator {
+  color: var(--accent-color);
+  opacity: 0.74;
+}
+
 .recruits-table td {
   padding: 1rem 0.75rem;
   border-bottom: 1px solid var(--border-color);
@@ -2720,15 +2903,21 @@ onMounted(() => {
 
 .recruits-table th.col-uid,
 .recruits-table th.col-name,
+.recruits-table th.col-major,
+.recruits-table th.col-grade,
 .recruits-table th.col-stage,
 .recruits-table th.col-status,
 .recruits-table th.col-interview-time,
+.recruits-table th.col-format,
 .recruits-table th.col-notification,
 .recruits-table td.col-uid,
 .recruits-table td.col-name,
+.recruits-table td.col-major,
+.recruits-table td.col-grade,
 .recruits-table td.col-stage,
 .recruits-table td.col-status,
 .recruits-table td.col-interview-time,
+.recruits-table td.col-format,
 .recruits-table td.col-notification {
   white-space: nowrap;
 }
@@ -2951,9 +3140,10 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
   
-  .pagination {
-    flex-direction: column;
-    gap: 1rem;
+  .pagination-wrapper :deep(.p-paginator) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
   }
   
   .recruits-table {
