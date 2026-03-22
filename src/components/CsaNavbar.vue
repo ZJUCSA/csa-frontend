@@ -258,6 +258,52 @@ watch(
     font-weight: 500 !important;
 }
 
+.fixed-nav .p-menubar-button {
+    width: var(--nav-action-height);
+    height: var(--nav-action-height);
+    border-radius: var(--nav-action-radius);
+    border: 1px solid var(--nav-action-border);
+    background: var(--nav-action-bg);
+    color: var(--nav-action-color);
+    box-shadow: var(--nav-action-shadow);
+}
+
+.fixed-nav .p-menubar-button:hover {
+    background: var(--nav-action-bg-hover);
+    border-color: var(--nav-action-border-hover);
+    color: var(--nav-action-color-hover);
+    box-shadow: var(--nav-action-shadow-hover);
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list {
+    width: min(22rem, calc(100vw - 2rem));
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 16px;
+    background: rgba(var(--bg-surface-rgb), 0.96);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(16px);
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-content {
+    border-radius: 12px;
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-link.nav-link {
+    width: 100%;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-link.nav-link:hover {
+    background-color: var(--bg-secondary) !important;
+}
+
+.dark .fixed-nav .p-menubar-mobile .p-menubar-root-list {
+    box-shadow: 0 20px 44px rgba(2, 6, 23, 0.55);
+}
+
 /*折叠导航栏的按钮*/
 .nav-button-container {
     position: fixed;
