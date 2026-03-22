@@ -14,6 +14,7 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const sortField = ref('');
 const sortOrder = ref('asc');
+const first = computed(() => Math.max(0, (currentPage.value - 1) * pageSize.value));
 
 const newDeadline = ref('');
 const currentDeadline = ref('正在加载...');
@@ -1120,8 +1121,9 @@ const deleteRecruit = async (recruit) => {
 };
 
 // 分页处理
-const handlePageChange = (newPage) => {
-  currentPage.value = newPage;
+const handlePageChange = (event) => {
+  currentPage.value = event.page + 1;
+  pageSize.value = event.rows;
   fetchRecruits();
 };
 
@@ -1387,10 +1389,14 @@ onMounted(async () => {
     </div>
 
     <!-- 分页 -->
-    <div class="pagination">
-      <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage <= 1">上一页</button>
-      <span>第 {{ currentPage }} 页，共 {{ Math.ceil(total / pageSize) }} 页</span>
-      <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage >= Math.ceil(total / pageSize)">下一页</button>
+    <div class="pagination-wrapper">
+      <Paginator
+        :first="first"
+        :rows="pageSize"
+        :totalRecords="total"
+        :rowsPerPageOptions="[10, 20, 30]"
+        @page="handlePageChange"
+      ></Paginator>
     </div>
 
     <!-- 评价抽屉 -->
@@ -2142,7 +2148,7 @@ onMounted(async () => {
 
 .filter-section {
   --recruit-filter-control-height: 2.75rem;
-  --recruit-filter-button-height: 3.25rem;
+  --recruit-filter-button-height: 3.5rem;
   background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
@@ -2261,8 +2267,9 @@ onMounted(async () => {
 
 .export-button,
 .batch-button {
+  height: var(--recruit-filter-button-height);
   min-height: var(--recruit-filter-button-height);
-  padding: 0 1rem;
+  padding: 0 1.2rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -2271,6 +2278,8 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .export-button {
@@ -2527,33 +2536,49 @@ onMounted(async () => {
   border-color: rgba(239, 68, 68, 0.46);
 }
 
-.pagination {
+.pagination-wrapper {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 30px;
 }
 
-.pagination button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
+:deep(.p-paginator) {
   background: var(--bg-surface);
   color: var(--text-primary);
-  cursor: pointer;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 10px;
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination button:hover:not(:disabled) {
-  background: var(--bg-secondary);
+:deep(.p-paginator-page),
+:deep(.p-paginator-first),
+:deep(.p-paginator-prev),
+:deep(.p-paginator-next),
+:deep(.p-paginator-last) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination button:disabled {
+:deep(.p-paginator-page:hover),
+:deep(.p-paginator-first:hover),
+:deep(.p-paginator-prev:hover),
+:deep(.p-paginator-next:hover),
+:deep(.p-paginator-last:hover) {
   background: var(--bg-secondary);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-  opacity: 0.6;
+  color: var(--text-primary);
+}
+
+:deep(.p-paginator-page.p-highlight) {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+:deep(.p-paginator-current) {
+  color: var(--text-primary);
 }
 
 .modal-overlay {
