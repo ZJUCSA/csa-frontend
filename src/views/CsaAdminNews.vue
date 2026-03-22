@@ -211,6 +211,7 @@ watch([page, size], () => {
                 :first="first"
                 :rows="size"
                 :totalRecords="total"
+                :rowsPerPageOptions="[10, 20, 30]"
                 @page="handlePageChange"
             ></Paginator>
         </div>
