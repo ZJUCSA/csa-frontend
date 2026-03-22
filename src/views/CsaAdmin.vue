@@ -136,6 +136,7 @@ const menuItems = computed(() =>
 <style scoped>
 .admin-layout {
     width: 100%;
+    --admin-sticky-offset: 70px;
 }
 
 .admin-sidebar {
@@ -143,9 +144,9 @@ const menuItems = computed(() =>
     min-width: 16rem;
     flex: 0 0 16rem;
     position: sticky;
-    top: 0;
+    top: var(--admin-sticky-offset);
     align-self: flex-start;
-    height: 100vh;
+    height: calc(100vh - var(--admin-sticky-offset));
     display: flex;
     flex-direction: column;
     transition:
