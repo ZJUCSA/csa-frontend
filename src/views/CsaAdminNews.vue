@@ -17,8 +17,33 @@ const show = ref(false)
 const page = ref(1)
 const total = ref(0)
 const size = ref(10)
+const first = computed(() => Math.max(0, (page.value - 1) * size.value))
 
 const operator = ref(null)
+
+const fetchTotal = () => {
+    return axios.get('/news/count').then(res => {
+        total.value = res.data.count
+    })
+}
+
+const refreshContent = () => {
+    return fetchTotal().then(() => {
+        const maxPage = Math.max(1, Math.ceil(total.value / size.value))
+
+        if (page.value > maxPage) {
+            page.value = maxPage
+            return
+        }
+
+        return fetchContent()
+    })
+}
+
+const handlePageChange = event => {
+    page.value = event.page + 1
+    size.value = event.rows
+}
 
 const ConfirmDelete = (event, nid) => {
     confirm.require({
@@ -40,7 +65,7 @@ const ConfirmDelete = (event, nid) => {
                     nid: nid,
                 })
                 .then(() => {
-                    fetchContent()
+                    refreshContent()
                     window.notyf.success('删除成功')
                 })
         },
@@ -69,6 +94,7 @@ const ConfirmCleanup = (event) => {
                         news_deleted: 0,
                         events_deleted: 0
                     }
+                    refreshContent()
                     window.notyf.success(`清理完成: 删除新闻草稿${d.news_deleted}条, 活动草稿${d.events_deleted}条`)
                 })
         },
@@ -76,7 +102,7 @@ const ConfirmCleanup = (event) => {
 }
 
 const fetchContent = () => {
-    axios
+    return axios
         .get('/news/list', {
             params: {
                 page: page.value,
@@ -88,14 +114,7 @@ const fetchContent = () => {
         })
 }
 
-axios
-    .get('/news/count')
-    .then(res => {
-        total.value = res.data.count
-    })
-    .then(() => {
-        fetchContent()
-    })
+refreshContent()
 
 watch([page, size], () => {
     fetchContent()
@@ -105,7 +124,7 @@ watch([page, size], () => {
 <template>
     <csa-edit-news
         v-model:show="show"
-        @finish="fetchContent"
+        @finish="refreshContent"
         :nid="operator"
     ></csa-edit-news>
     <ConfirmPopup></ConfirmPopup>
@@ -189,9 +208,10 @@ watch([page, size], () => {
         </DataTable>
         <div class="pagination-wrapper">
             <Paginator
-                v-model:page="page"
-                v-model:rows="size"
+                :first="first"
+                :rows="size"
                 :totalRecords="total"
+                @page="handlePageChange"
             ></Paginator>
         </div>
     </div>
@@ -204,7 +224,7 @@ watch([page, size], () => {
     transition: color 0.3s ease;
 }
 
-.p-datatable-column-title {
+:deep(.p-datatable-column-title) {
     white-space: nowrap;
 }
 
@@ -231,6 +251,7 @@ watch([page, size], () => {
     border-bottom: 1px solid var(--border-color);
     padding: 1rem;
     font-weight: 600;
+    white-space: nowrap;
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
