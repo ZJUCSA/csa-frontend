@@ -236,6 +236,8 @@ watch([page, size], () => {
                 :rows="size"
                 :totalRecords="total"
                 :rowsPerPageOptions="[10, 20, 30]"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+                currentPageReportTemplate="第 {currentPage} 页，共 {totalPages} 页"
                 @page="handlePageChange"
             ></Paginator>
         </div>
@@ -253,10 +255,14 @@ watch([page, size], () => {
     --event-btn-primary-bg: var(--accent-color);
     --event-btn-primary-hover: var(--accent-hover);
     --event-btn-primary-text: #ffffff;
+    --event-btn-primary-shadow: 0 10px 20px rgba(99, 102, 241, 0.18);
+    --event-btn-primary-shadow-hover: 0 12px 24px rgba(99, 102, 241, 0.24);
     --event-btn-warning-bg: #7b88b8;
     --event-btn-warning-bg-hover: #6d7aa8;
     --event-btn-warning-border: #7b88b8;
     --event-btn-warning-text: #f8fbff;
+    --event-btn-warning-shadow: 0 10px 20px rgba(123, 136, 184, 0.2);
+    --event-btn-warning-shadow-hover: 0 12px 24px rgba(123, 136, 184, 0.28);
     --event-btn-edit-bg: #ecfdf3;
     --event-btn-edit-bg-hover: #ddfbe9;
     --event-btn-edit-border: #a7f3d0;
@@ -275,10 +281,14 @@ watch([page, size], () => {
     --event-btn-primary-bg: #3f8fdf;
     --event-btn-primary-hover: #58a6ee;
     --event-btn-primary-text: #f8fbff;
+    --event-btn-primary-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+    --event-btn-primary-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.32);
     --event-btn-warning-bg: #7389bd;
     --event-btn-warning-bg-hover: #84a0d8;
     --event-btn-warning-border: #7389bd;
     --event-btn-warning-text: #f8fbff;
+    --event-btn-warning-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+    --event-btn-warning-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.32);
     --event-btn-edit-bg: rgba(16, 185, 129, 0.18);
     --event-btn-edit-bg-hover: rgba(16, 185, 129, 0.26);
     --event-btn-edit-border: rgba(52, 211, 153, 0.34);
@@ -383,21 +393,21 @@ watch([page, size], () => {
 :deep(.event-toolbar-btn--primary.p-button) {
     background: var(--event-btn-primary-bg) !important;
     color: var(--event-btn-primary-text) !important;
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.18);
+    box-shadow: var(--event-btn-primary-shadow) !important;
 }
 
 :deep(.event-toolbar-btn--primary.p-button:not(:disabled):hover) {
     background: var(--event-btn-primary-hover) !important;
     color: var(--event-btn-primary-text) !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.24);
+    box-shadow: var(--event-btn-primary-shadow-hover) !important;
 }
 
 :deep(.event-toolbar-btn--warning.p-button) {
     background: var(--event-btn-warning-bg) !important;
     color: var(--event-btn-warning-text) !important;
     border-color: var(--event-btn-warning-border) !important;
-    box-shadow: 0 10px 20px rgba(123, 136, 184, 0.2);
+    box-shadow: var(--event-btn-warning-shadow) !important;
 }
 
 :deep(.event-toolbar-btn--warning.p-button:not(:disabled):hover) {
@@ -405,7 +415,7 @@ watch([page, size], () => {
     color: var(--event-btn-warning-text) !important;
     border-color: var(--event-btn-warning-border) !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(123, 136, 184, 0.28);
+    box-shadow: var(--event-btn-warning-shadow-hover) !important;
 }
 
 :deep(.event-table-action--edit.p-button) {
@@ -579,13 +589,37 @@ watch([page, size], () => {
     color: var(--text-primary);
 }
 
-.pagination-wrapper :deep(.p-paginator-page.p-highlight) {
+.pagination-wrapper :deep(.p-paginator-page.p-paginator-page-selected) {
     background: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
 }
 
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown) {
+    min-height: 2.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+    border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown.p-focus) {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-label),
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+    color: inherit;
+}
+
 .pagination-wrapper :deep(.p-paginator-current) {
     color: var(--text-primary);
+    font-weight: 600;
+    padding: 0 0.25rem;
 }
 </style>

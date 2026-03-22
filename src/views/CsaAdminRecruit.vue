@@ -465,17 +465,17 @@ const getDepartmentLabel = (department) => {
 // 获取部门样式
 const getDepartmentStyle = (department) => {
   if (!department) {
-    return { color: '#999', backgroundColor: '#f5f5f5' };
+    return { color: 'var(--recruit-department-empty-text)', backgroundColor: 'var(--recruit-department-empty-bg)' };
   }
   
   const styles = {
-    'office': { color: '#1976d2', backgroundColor: '#e3f2fd' },
-    'competition': { color: '#388e3c', backgroundColor: '#e8f5e8' },
-    'research': { color: '#f57c00', backgroundColor: '#fff3e0' },
-    'activity': { color: '#7b1fa2', backgroundColor: '#f3e5f5' }
+    'office': { color: 'var(--recruit-department-office-text)', backgroundColor: 'var(--recruit-department-office-bg)' },
+    'competition': { color: 'var(--recruit-department-competition-text)', backgroundColor: 'var(--recruit-department-competition-bg)' },
+    'research': { color: 'var(--recruit-department-research-text)', backgroundColor: 'var(--recruit-department-research-bg)' },
+    'activity': { color: 'var(--recruit-department-activity-text)', backgroundColor: 'var(--recruit-department-activity-bg)' }
   };
   
-  return styles[department] || { color: '#666', backgroundColor: '#f5f5f5' };
+  return styles[department] || { color: 'var(--recruit-department-empty-text)', backgroundColor: 'var(--recruit-department-empty-bg)' };
 };
 
 // 计算面试状态
@@ -544,19 +544,19 @@ const isRejectLocked = computed(() => {
 const getStatusStyle = (status) => {
   switch (status) {
     case '待面试':
-      return { color: '#ff9800', backgroundColor: '#fff3e0' };
+      return { color: 'var(--recruit-status-pending-text)', backgroundColor: 'var(--recruit-status-pending-bg)' };
     case '已通过一面':
-      return { color: '#2196f3', backgroundColor: '#e3f2fd' };
+      return { color: 'var(--recruit-status-first-text)', backgroundColor: 'var(--recruit-status-first-bg)' };
     case '已通过二面':
-      return { color: '#9c27b0', backgroundColor: '#f3e5f5' };
+      return { color: 'var(--recruit-status-second-text)', backgroundColor: 'var(--recruit-status-second-bg)' };
     case '待录取':
-      return { color: '#ff5722', backgroundColor: '#fbe9e7' };
+      return { color: 'var(--recruit-status-admit-text)', backgroundColor: 'var(--recruit-status-admit-bg)' };
     case '已录取':
-      return { color: '#4caf50', backgroundColor: '#e8f5e8' };
+      return { color: 'var(--recruit-status-enrolled-text)', backgroundColor: 'var(--recruit-status-enrolled-bg)' };
     case '已拒绝':
-      return { color: '#f44336', backgroundColor: '#ffebee' };
+      return { color: 'var(--recruit-status-rejected-text)', backgroundColor: 'var(--recruit-status-rejected-bg)' };
     default:
-      return { color: '#666', backgroundColor: '#f5f5f5' };
+      return { color: 'var(--recruit-status-default-text)', backgroundColor: 'var(--recruit-status-default-bg)' };
   }
 };
 
@@ -1258,8 +1258,16 @@ onMounted(async () => {
 
     <!-- 批量操作 -->
     <div class="batch-actions">
-      <button @click="showExportOptions" class="export-button">导出数据</button>
-      <button @click="batchDeleteRecruits()" class="batch-button delete">批量删除</button>
+      <Button
+        label="导出数据"
+        class="recruit-batch-action recruit-batch-action--export"
+        @click="showExportOptions"
+      ></Button>
+      <Button
+        label="批量删除"
+        class="recruit-batch-action recruit-batch-action--delete"
+        @click="batchDeleteRecruits()"
+      ></Button>
       <!-- <button @click="deleteAllRecruits()" class="batch-button delete-all">全部删除</button> -->
     </div>
 
@@ -1395,6 +1403,8 @@ onMounted(async () => {
         :rows="pageSize"
         :totalRecords="total"
         :rowsPerPageOptions="[10, 20, 30]"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+        currentPageReportTemplate="第 {currentPage} 页，共 {totalPages} 页"
         @page="handlePageChange"
       ></Paginator>
     </div>
@@ -2138,12 +2148,93 @@ onMounted(async () => {
 
 <style scoped>
 .admin-recruit-container {
+  --recruit-btn-export-bg: #4caf50;
+  --recruit-btn-export-bg-hover: #439846;
+  --recruit-btn-export-border: #4caf50;
+  --recruit-btn-export-text: #ffffff;
+  --recruit-btn-export-shadow: 0 10px 22px rgba(76, 175, 80, 0.18);
+  --recruit-btn-export-shadow-hover: 0 12px 28px rgba(76, 175, 80, 0.24);
+  --recruit-btn-delete-bg: #ef4444;
+  --recruit-btn-delete-bg-hover: #dc3c3c;
+  --recruit-btn-delete-border: #ef4444;
+  --recruit-btn-delete-text: #ffffff;
+  --recruit-btn-delete-shadow: 0 10px 22px rgba(239, 68, 68, 0.18);
+  --recruit-btn-delete-shadow-hover: 0 12px 28px rgba(239, 68, 68, 0.24);
+  --recruit-dept-tag-bg: #e6f1ff;
+  --recruit-dept-tag-border: #bfd8ff;
+  --recruit-dept-tag-text: #2f73da;
+  --recruit-status-default-bg: #f3f4f6;
+  --recruit-status-default-text: #64748b;
+  --recruit-status-pending-bg: #fff3e0;
+  --recruit-status-pending-text: #ff9800;
+  --recruit-status-first-bg: #e3f2fd;
+  --recruit-status-first-text: #2196f3;
+  --recruit-status-second-bg: #f3e5f5;
+  --recruit-status-second-text: #9c27b0;
+  --recruit-status-admit-bg: #fbe9e7;
+  --recruit-status-admit-text: #ff5722;
+  --recruit-status-enrolled-bg: #e8f5e8;
+  --recruit-status-enrolled-text: #4caf50;
+  --recruit-status-rejected-bg: #ffebee;
+  --recruit-status-rejected-text: #f44336;
+  --recruit-department-empty-bg: #f3f4f6;
+  --recruit-department-empty-text: #64748b;
+  --recruit-department-office-bg: #e3f2fd;
+  --recruit-department-office-text: #1976d2;
+  --recruit-department-competition-bg: #e8f5e8;
+  --recruit-department-competition-text: #388e3c;
+  --recruit-department-research-bg: #fff3e0;
+  --recruit-department-research-text: #f57c00;
+  --recruit-department-activity-bg: #f3e5f5;
+  --recruit-department-activity-text: #7b1fa2;
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--bg-secondary);
   color: var(--text-primary);
   min-height: 100vh;
+}
+
+.dark .admin-recruit-container {
+  --recruit-btn-export-bg: rgba(34, 197, 94, 0.22);
+  --recruit-btn-export-bg-hover: rgba(34, 197, 94, 0.3);
+  --recruit-btn-export-border: rgba(74, 222, 128, 0.36);
+  --recruit-btn-export-text: #baf7cb;
+  --recruit-btn-export-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  --recruit-btn-export-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.26);
+  --recruit-btn-delete-bg: rgba(239, 68, 68, 0.2);
+  --recruit-btn-delete-bg-hover: rgba(239, 68, 68, 0.28);
+  --recruit-btn-delete-border: rgba(248, 113, 113, 0.34);
+  --recruit-btn-delete-text: #ffb0b8;
+  --recruit-btn-delete-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  --recruit-btn-delete-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.26);
+  --recruit-dept-tag-bg: rgba(59, 130, 246, 0.2);
+  --recruit-dept-tag-border: rgba(96, 165, 250, 0.34);
+  --recruit-dept-tag-text: #a9cbff;
+  --recruit-status-default-bg: rgba(148, 163, 184, 0.16);
+  --recruit-status-default-text: #cbd5e1;
+  --recruit-status-pending-bg: rgba(245, 158, 11, 0.2);
+  --recruit-status-pending-text: #ffd18a;
+  --recruit-status-first-bg: rgba(59, 130, 246, 0.2);
+  --recruit-status-first-text: #a9cbff;
+  --recruit-status-second-bg: rgba(168, 85, 247, 0.2);
+  --recruit-status-second-text: #d7b6ff;
+  --recruit-status-admit-bg: rgba(249, 115, 22, 0.2);
+  --recruit-status-admit-text: #ffc08a;
+  --recruit-status-enrolled-bg: rgba(34, 197, 94, 0.2);
+  --recruit-status-enrolled-text: #baf7cb;
+  --recruit-status-rejected-bg: rgba(239, 68, 68, 0.2);
+  --recruit-status-rejected-text: #ffb0b8;
+  --recruit-department-empty-bg: rgba(148, 163, 184, 0.16);
+  --recruit-department-empty-text: #cbd5e1;
+  --recruit-department-office-bg: rgba(59, 130, 246, 0.2);
+  --recruit-department-office-text: #a9cbff;
+  --recruit-department-competition-bg: rgba(34, 197, 94, 0.2);
+  --recruit-department-competition-text: #baf7cb;
+  --recruit-department-research-bg: rgba(245, 158, 11, 0.2);
+  --recruit-department-research-text: #ffd18a;
+  --recruit-department-activity-bg: rgba(168, 85, 247, 0.2);
+  --recruit-department-activity-text: #d7b6ff;
 }
 
 .filter-section {
@@ -2265,27 +2356,6 @@ onMounted(async () => {
   font-size: 0.85rem;
 }
 
-.export-button,
-.batch-button {
-  height: var(--recruit-filter-button-height);
-  min-height: var(--recruit-filter-button-height);
-  padding: 0 1.2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.export-button {
-  background: #4caf50;
-}
-
 .batch-actions {
   margin-bottom: 1rem;
   display: flex;
@@ -2294,13 +2364,56 @@ onMounted(async () => {
   gap: 1rem;
 }
 
-.batch-button {
+:deep(.recruit-batch-action.p-button) {
+  min-height: var(--recruit-filter-button-height);
+  padding: 0 1.2rem !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
+:deep(.recruit-batch-action .p-button-label),
+:deep(.recruit-batch-action .p-button-icon) {
+  color: inherit !important;
+  font-weight: inherit;
+}
 
+:deep(.recruit-batch-action--export.p-button) {
+  background: var(--recruit-btn-export-bg) !important;
+  color: var(--recruit-btn-export-text) !important;
+  border-color: var(--recruit-btn-export-border) !important;
+  box-shadow: var(--recruit-btn-export-shadow) !important;
+}
 
-.batch-button.delete {
-  background: #f44336;
+:deep(.recruit-batch-action--export.p-button:not(:disabled):hover) {
+  background: var(--recruit-btn-export-bg-hover) !important;
+  color: var(--recruit-btn-export-text) !important;
+  border-color: var(--recruit-btn-export-border) !important;
+  box-shadow: var(--recruit-btn-export-shadow-hover) !important;
+  transform: translateY(-1px);
+}
+
+:deep(.recruit-batch-action--delete.p-button) {
+  background: var(--recruit-btn-delete-bg) !important;
+  color: var(--recruit-btn-delete-text) !important;
+  border-color: var(--recruit-btn-delete-border) !important;
+  box-shadow: var(--recruit-btn-delete-shadow) !important;
+}
+
+:deep(.recruit-batch-action--delete.p-button:not(:disabled):hover) {
+  background: var(--recruit-btn-delete-bg-hover) !important;
+  color: var(--recruit-btn-delete-text) !important;
+  border-color: var(--recruit-btn-delete-border) !important;
+  box-shadow: var(--recruit-btn-delete-shadow-hover) !important;
+  transform: translateY(-1px);
 }
 
 .batch-button.delete-all {
@@ -2433,8 +2546,9 @@ onMounted(async () => {
 }
 
 .dept-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--recruit-dept-tag-bg);
+  color: var(--recruit-dept-tag-text);
+  border: 1px solid var(--recruit-dept-tag-border);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -2571,14 +2685,38 @@ onMounted(async () => {
   color: var(--text-primary);
 }
 
-:deep(.p-paginator-page.p-highlight) {
+:deep(.p-paginator-page.p-paginator-page-selected) {
   background: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
 }
 
+:deep(.p-paginator-rpp-dropdown) {
+  min-height: 2.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+:deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+  border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
+}
+
+:deep(.p-paginator-rpp-dropdown.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+:deep(.p-paginator-rpp-dropdown .p-select-label),
+:deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+  color: inherit;
+}
+
 :deep(.p-paginator-current) {
   color: var(--text-primary);
+  font-weight: 600;
+  padding: 0 0.25rem;
 }
 
 .modal-overlay {

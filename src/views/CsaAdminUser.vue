@@ -212,7 +212,7 @@ watch([page, size], () => {
                 label="搜索"
                 icon="pi pi-search"
                 size="small"
-                class="ml-2"
+                class="ml-2 user-search-btn"
                 @click="fetchContent"
             ></Button>
         </div>
@@ -279,6 +279,8 @@ watch([page, size], () => {
                 :rows="size"
                 :totalRecords="total"
                 :rowsPerPageOptions="[10, 20, 30]"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+                currentPageReportTemplate="第 {currentPage} 页，共 {totalPages} 页"
                 @page="handlePageChange"
             ></Paginator>
         </div>
@@ -293,6 +295,10 @@ watch([page, size], () => {
 }
 
 .admin-user-page {
+    --user-btn-search-bg: var(--accent-color);
+    --user-btn-search-bg-hover: var(--accent-hover);
+    --user-btn-search-border: var(--accent-color);
+    --user-btn-search-text: #ffffff;
     --user-btn-edit-bg: #e6f1ff;
     --user-btn-edit-bg-hover: #d8e9ff;
     --user-btn-edit-border: #bfd8ff;
@@ -304,6 +310,10 @@ watch([page, size], () => {
 }
 
 .dark .admin-user-page {
+    --user-btn-search-bg: #3f8fdf;
+    --user-btn-search-bg-hover: #58a6ee;
+    --user-btn-search-border: #3f8fdf;
+    --user-btn-search-text: #f8fbff;
     --user-btn-edit-bg: rgba(59, 130, 246, 0.2);
     --user-btn-edit-bg-hover: rgba(59, 130, 246, 0.28);
     --user-btn-edit-border: rgba(96, 165, 250, 0.34);
@@ -325,6 +335,35 @@ watch([page, size], () => {
 :deep(.p-inputtext:focus) {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+:deep(.user-search-btn.p-button) {
+    min-height: 2.5rem;
+    padding: 0 1rem !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--user-btn-search-border) !important;
+    background: var(--user-btn-search-bg) !important;
+    color: var(--user-btn-search-text) !important;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.18) !important;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+:deep(.user-search-btn .p-button-label),
+:deep(.user-search-btn .p-button-icon) {
+    color: inherit !important;
+}
+
+:deep(.user-search-btn.p-button:not(:disabled):hover) {
+    background: var(--user-btn-search-bg-hover) !important;
+    color: var(--user-btn-search-text) !important;
+    border-color: var(--user-btn-search-border) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.24) !important;
 }
 
 :deep(.p-datatable-column-title) {
@@ -593,13 +632,37 @@ watch([page, size], () => {
     color: var(--text-primary);
 }
 
-:deep(.p-paginator-page.p-highlight) {
+:deep(.p-paginator-page.p-paginator-page-selected) {
     background: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
 }
 
+:deep(.p-paginator-rpp-dropdown) {
+    min-height: 2.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+:deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+    border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
+}
+
+:deep(.p-paginator-rpp-dropdown.p-focus) {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+:deep(.p-paginator-rpp-dropdown .p-select-label),
+:deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+    color: inherit;
+}
+
 :deep(.p-paginator-current) {
     color: var(--text-primary);
+    font-weight: 600;
+    padding: 0 0.25rem;
 }
 </style>
