@@ -1840,10 +1840,10 @@ onMounted(() => {
   --interview-table-action-delete-border: rgba(248, 113, 113, 0.22);
   --interview-table-action-delete-text: #fecaca;
   --interview-table-action-shadow: 0 10px 24px -20px rgba(2, 6, 23, 0.85);
-  --interview-refresh-bg: #4b86df;
-  --interview-refresh-bg-hover: #5b95ee;
-  --interview-refresh-border: #4b86df;
-  --interview-refresh-text: #f8fbff;
+  --interview-refresh-bg: rgba(34, 197, 94, 0.22);
+  --interview-refresh-bg-hover: rgba(34, 197, 94, 0.3);
+  --interview-refresh-border: rgba(74, 222, 128, 0.36);
+  --interview-refresh-text: #baf7cb;
 }
 
 .page-header {
@@ -3504,7 +3504,7 @@ onMounted(() => {
 }
 
 .candidates-cell {
-  min-width: 300px;
+  min-width: 240px;
 }
 
 .candidates-list {
