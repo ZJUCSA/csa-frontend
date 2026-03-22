@@ -1860,10 +1860,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 1 1 24rem;
-  flex-wrap: wrap;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
   gap: 1rem;
-  min-width: min(100%, 18rem);
+  min-width: fit-content;
 }
 
 .base-time-setting {
