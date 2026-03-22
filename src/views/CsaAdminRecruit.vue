@@ -1254,7 +1254,7 @@ onMounted(async () => {
         <thead>
           <tr>
             <th><input type="checkbox" @change="selectAll" v-model="selectAllRecruits"></th>
-            <th>姓名</th>
+            <th class="col-name">姓名</th>
             <th>学号</th>
             <th>性别</th>
             <th>学位</th>
@@ -1272,7 +1272,7 @@ onMounted(async () => {
             <td>
               <input type="checkbox" v-model="recruit.selected">
             </td>
-            <td>{{ recruit.name }}</td>
+            <td class="col-name">{{ recruit.name }}</td>
             <td>{{ recruit.uid }}</td>
             <td>{{ recruit.render ? '女' : '男' }}</td>
             <td>{{ getDegreeLabel(recruit.degree) }}</td>
@@ -2270,9 +2270,11 @@ onMounted(async () => {
 .recruit-table th.col-department-preference,
 .recruit-table th.col-assigned-department,
 .recruit-table th.col-status,
+.recruit-table th.col-name,
 .recruit-table td.col-department-preference,
 .recruit-table td.col-assigned-department,
-.recruit-table td.col-status {
+.recruit-table td.col-status,
+.recruit-table td.col-name {
   white-space: nowrap;
 }
 

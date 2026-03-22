@@ -67,35 +67,35 @@
       <table v-else class="recruits-table">
         <thead>
           <tr>
-            <th>学号</th>
-            <th>姓名</th>
+            <th class="col-uid">学号</th>
+            <th class="col-name">姓名</th>
             <th>专业</th>
             <th>年级</th>
-            <th>面试阶段</th>
-            <th>面试状态</th>
-            <th>面试时间</th>
+            <th class="col-stage">面试阶段</th>
+            <th class="col-status">面试状态</th>
+            <th class="col-interview-time">面试时间</th>
             <th>面试形式</th>
-            <th>是否已通知</th>
+            <th class="col-notification">是否已通知</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="recruit in paginatedRecruits" :key="recruit.uid">
-            <td>{{ recruit.uid }}</td>
-            <td>{{ recruit.name }}</td>
+            <td class="col-uid">{{ recruit.uid }}</td>
+            <td class="col-name">{{ recruit.name }}</td>
             <td>{{ recruit.major_name }}</td>
             <td>{{ recruit.grade }}级</td>
-            <td>
+            <td class="col-stage">
               <span class="stage-badge" :class="recruit.interview_status">
                 {{ getStageLabel(recruit.interview_status) }}
               </span>
             </td>
-            <td>
+            <td class="col-status">
               <span class="status-badge" :class="getScheduleStatus(recruit.uid)">
                 {{ getStatusLabel(getScheduleStatus(recruit.uid)) }}
               </span>
             </td>
-            <td>
+            <td class="col-interview-time">
               <span v-if="getScheduleByUid(recruit.uid)">
                 {{ formatDate(getScheduleByUid(recruit.uid).interview_date) }}
               </span>
@@ -107,7 +107,7 @@
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
+            <td class="col-notification">
               <span v-if="getScheduleByUid(recruit.uid)">
                 <span v-if="getScheduleByUid(recruit.uid).notification_sent" class="notification-sent">
                   <i class="pi pi-check-circle"></i> 已通知
@@ -1948,26 +1948,43 @@ onMounted(() => {
   background: var(--bg-secondary);
 }
 
-.stage-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+.recruits-table .stage-badge,
+.recruits-table .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-height: 1.85rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 600;
+  line-height: 1;
 }
 
-.stage-badge.screening {
-  background: #e3f2fd;
-  color: #1976d2;
+.recruits-table .stage-badge.screening {
+  background: #eaf2ff;
+  color: #2f73da;
+  border-color: #bfd8ff;
 }
 
-.stage-badge.first_round {
+.recruits-table .stage-badge.first_round {
   background: #fff3e0;
-  color: #f57c00;
+  color: #c97715;
+  border-color: #f7c68f;
 }
 
-.stage-badge.second_round {
-  background: #f3e5f5;
-  color: #7b1fa2;
+.recruits-table .stage-badge.second_round {
+  background: #f3e8ff;
+  color: #7b4ab1;
+  border-color: #dec6fa;
+}
+
+.recruits-table .stage-badge.completed {
+  background: #ecfdf3;
+  color: #0f8a62;
+  border-color: #a7f3d0;
 }
 
 .result-badge {
@@ -2690,6 +2707,7 @@ onMounted(() => {
   color: var(--text-primary);
   border-bottom: 2px solid var(--border-color);
   font-size: 0.9rem;
+  white-space: nowrap;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -2698,6 +2716,25 @@ onMounted(() => {
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
   transition: border-color 0.3s ease;
+}
+
+.recruits-table th.col-uid,
+.recruits-table th.col-name,
+.recruits-table th.col-stage,
+.recruits-table th.col-status,
+.recruits-table th.col-interview-time,
+.recruits-table th.col-notification,
+.recruits-table td.col-uid,
+.recruits-table td.col-name,
+.recruits-table td.col-stage,
+.recruits-table td.col-status,
+.recruits-table td.col-interview-time,
+.recruits-table td.col-notification {
+  white-space: nowrap;
+}
+
+.recruits-table td.col-name {
+  min-width: 5.5rem;
 }
 
 /* 分页补齐空行：固定每页表格视觉高度，避免最后一页变短导致下方卡片上移 */
@@ -2852,24 +2889,28 @@ onMounted(() => {
 }
 
 /* 状态徽章样式 */
-.status-badge.pending {
-  background: #ff9800;
-  color: white;
+.recruits-table .status-badge.pending {
+  background: #fff7e8;
+  color: #b96b08;
+  border-color: #f3d39c;
 }
 
-.status-badge.scheduled {
-  background: #2196f3;
-  color: white;
+.recruits-table .status-badge.scheduled {
+  background: #eaf2ff;
+  color: #2f73da;
+  border-color: #bfd8ff;
 }
 
-.status-badge.completed {
-  background: #4caf50;
-  color: white;
+.recruits-table .status-badge.completed {
+  background: #ecfdf3;
+  color: #0f8a62;
+  border-color: #a7f3d0;
 }
 
-.status-badge.cancelled {
-  background: #f44336;
-  color: white;
+.recruits-table .status-badge.cancelled {
+  background: #ffe8eb;
+  color: #cf415e;
+  border-color: #f6bcc7;
 }
 
 
