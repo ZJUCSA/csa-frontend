@@ -236,10 +236,10 @@ watch([page, size], () => {
     --news-btn-primary-bg: var(--accent-color);
     --news-btn-primary-hover: var(--accent-hover);
     --news-btn-primary-text: #ffffff;
-    --news-btn-warning-bg: #475569;
-    --news-btn-warning-bg-hover: #334155;
-    --news-btn-warning-border: #475569;
-    --news-btn-warning-text: #f8fafc;
+    --news-btn-warning-bg: #5f9188;
+    --news-btn-warning-bg-hover: #547f77;
+    --news-btn-warning-border: #5f9188;
+    --news-btn-warning-text: #f6fbfa;
     --news-btn-edit-bg: #ecfdf3;
     --news-btn-edit-bg-hover: #ddfbe9;
     --news-btn-edit-border: #a7f3d0;
@@ -257,10 +257,10 @@ watch([page, size], () => {
     --news-btn-primary-bg: #3f8fdf;
     --news-btn-primary-hover: #58a6ee;
     --news-btn-primary-text: #f8fbff;
-    --news-btn-warning-bg: #64748b;
-    --news-btn-warning-bg-hover: #556278;
-    --news-btn-warning-border: #64748b;
-    --news-btn-warning-text: #f8fafc;
+    --news-btn-warning-bg: #5a8c84;
+    --news-btn-warning-bg-hover: #639990;
+    --news-btn-warning-border: #5a8c84;
+    --news-btn-warning-text: #f6fbfa;
     --news-btn-edit-bg: rgba(16, 185, 129, 0.18);
     --news-btn-edit-bg-hover: rgba(16, 185, 129, 0.26);
     --news-btn-edit-border: rgba(52, 211, 153, 0.34);
@@ -396,7 +396,7 @@ watch([page, size], () => {
     background: var(--news-btn-warning-bg) !important;
     color: var(--news-btn-warning-text) !important;
     border-color: var(--news-btn-warning-border) !important;
-    box-shadow: 0 10px 20px rgba(71, 85, 105, 0.2);
+    box-shadow: 0 10px 20px rgba(95, 145, 136, 0.2);
 }
 
 :deep(.news-toolbar-btn--warning.p-button:not(:disabled):hover) {
@@ -404,7 +404,7 @@ watch([page, size], () => {
     color: var(--news-btn-warning-text) !important;
     border-color: var(--news-btn-warning-border) !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(71, 85, 105, 0.28);
+    box-shadow: 0 12px 24px rgba(95, 145, 136, 0.28);
 }
 
 :deep(.news-table-action--edit.p-button) {
