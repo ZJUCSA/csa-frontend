@@ -15,14 +15,15 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --accent-color: #667eea;
     --accent-hover: #5a6fd8;
+    --scrollbar-track: #f1f4f8;
+    --scrollbar-thumb: #c3ccda;
+    --scrollbar-thumb-hover: #a9b5c8;
     /* 统一渐变变量 */
     --gradient-primary: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     --gradient-primary-reverse: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
     --gradient-secondary: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
     --gradient-success: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
     --gradient-warning: linear-gradient(135deg, #f9ca24 0%, #f0932b 100%);
-    --gradient-scrollbar: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-    --gradient-scrollbar-hover: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
     --gradient-text: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     --skeleton-gradient: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
 }
@@ -38,24 +39,25 @@ html.dark {
 
 /* 深色主题变量 */
 .dark {
-    --bg-primary: #121212;
-    --bg-secondary: #1e1e1e;
-    --bg-surface: #2d2d2d;
-    --bg-surface-rgb: 45, 45, 45;
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --border-color: #404040;
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --accent-color: #42a5f5;
-    --accent-hover: #64b5f6;
+    --bg-primary: #0f172a;
+    --bg-secondary: #172335;
+    --bg-surface: #233147;
+    --bg-surface-rgb: 35, 49, 71;
+    --text-primary: #f8fafc;
+    --text-secondary: #9eb0c7;
+    --border-color: rgba(148, 163, 184, 0.18);
+    --shadow-color: rgba(2, 6, 23, 0.34);
+    --accent-color: #60a5fa;
+    --accent-hover: #7cb9ff;
+    --scrollbar-track: #152031;
+    --scrollbar-thumb: #425671;
+    --scrollbar-thumb-hover: #58708f;
     /* 暗黑主题渐变 */
     --gradient-primary: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     --gradient-primary-reverse: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
     --gradient-secondary: linear-gradient(135deg, #c62828 0%, #e65100 100%);
     --gradient-success: linear-gradient(135deg, #00695c 0%, #2e7d32 100%);
     --gradient-warning: linear-gradient(135deg, #f57f17 0%, #ff6f00 100%);
-    --gradient-scrollbar: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-    --gradient-scrollbar-hover: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-color) 100%);
     --gradient-text: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     --skeleton-gradient: linear-gradient(90deg, #2d2d2d 25%, #383838 50%, #2d2d2d 75%);
 }
@@ -85,23 +87,23 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
+    background: var(--scrollbar-track);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--gradient-scrollbar);
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--gradient-scrollbar-hover);
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* Firefox 滚动条 */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--accent-color) var(--bg-secondary);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 /* 链接样式 */

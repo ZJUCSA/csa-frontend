@@ -48,6 +48,12 @@
     background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
 }
 
+:global(.dark) .home-container {
+    background:
+        radial-gradient(circle at top center, rgba(96, 165, 250, 0.12) 0%, rgba(96, 165, 250, 0) 34%),
+        linear-gradient(180deg, #0f172a 0%, #172335 28%, #1b2738 100%);
+}
+
 .banner-area {
     position: relative;
     height: 100vh;
@@ -62,6 +68,13 @@
     position: relative;
     z-index: 10;
     padding: 60px 0 calc(60px + var(--page-footer-gap));
+}
+
+:global(.dark) .main-content {
+    background: rgba(23, 35, 53, 0.92);
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: 0 -18px 48px rgba(2, 6, 23, 0.28);
+    backdrop-filter: blur(18px);
 }
 
 .content-section {
@@ -126,6 +139,10 @@
     font-weight: 400;
 }
 
+:global(.dark) .section-subtitle {
+    color: #a9b8cd;
+}
+
 .cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -145,6 +162,14 @@
     border: 1px solid var(--border-color);
 }
 
+:global(.dark) .news-card,
+:global(.dark) .event-card,
+:global(.dark) .info-card {
+    background: rgba(35, 49, 71, 0.88);
+    border-color: rgba(148, 163, 184, 0.16);
+    box-shadow: 0 18px 38px rgba(2, 6, 23, 0.22);
+}
+
 .news-card::before,
 .event-card::before,
 .info-card::before {
@@ -162,6 +187,13 @@
 .info-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px var(--shadow-color);
+}
+
+:global(.dark) .news-card:hover,
+:global(.dark) .event-card:hover,
+:global(.dark) .info-card:hover {
+    box-shadow: 0 26px 48px rgba(2, 6, 23, 0.28);
+    border-color: rgba(96, 165, 250, 0.18);
 }
 
 .info-grid {

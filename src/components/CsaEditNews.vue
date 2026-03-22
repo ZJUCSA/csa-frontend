@@ -173,8 +173,7 @@ watch(visible, value => {
 </script>
 
 <template>
-    <div class="card flex justify-center">
-        <Dialog
+    <Dialog
             v-model:visible="visible"
             modal
             header="创建/编辑新闻"
@@ -291,6 +290,5 @@ watch(visible, value => {
                 ></Button>
                 <Button type="button" label="保存" @click="submit"></Button>
             </div>
-        </Dialog>
-    </div>
+    </Dialog>
 </template>

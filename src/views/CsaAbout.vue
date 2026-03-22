@@ -69,6 +69,12 @@ onUnmounted(() => {
   transition: background 0.3s ease;
 }
 
+.dark .about-container {
+  background:
+    radial-gradient(circle at top center, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0) 28%),
+    linear-gradient(180deg, #0f172a 0%, #172335 26%, #1b2738 100%);
+}
+
 /* 平滑滚动 */
 html {
   scroll-behavior: smooth;

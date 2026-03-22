@@ -28,11 +28,11 @@
         </div>
         <div class="filter-item">
           <label>状态:</label>
-          <select v-model="filters.is_active" @change="handleFilterChange">
-            <option value="">全部状态</option>
-            <option value="true">在职</option>
-            <option value="false">离职</option>
-          </select>
+          <AdminFilterSelect
+            v-model="memberStatusFilterValue"
+            :options="memberStatusFilterOptions"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <button @click="showAddMemberModal" class="add-btn">
@@ -46,9 +46,6 @@
     <div class="members-grid">
       <div v-for="member in filteredMembers" :key="member.uid" class="member-card">
         <div class="member-header">
-          <div class="member-avatar">
-            <i class="pi pi-user"></i>
-          </div>
           <div class="member-info">
             <h3 class="member-name">{{ member.name }}</h3>
             <p class="member-uid">{{ member.uid }}</p>
@@ -56,6 +53,7 @@
               <span :class="['status-badge', member.is_active ? 'active' : 'inactive']">
                 {{ member.is_active ? '在职' : '离职' }}
               </span>
+              <span class="department-badge">{{ getDepartmentLabel(member.department) }}</span>
               <span class="position-badge">{{ member.position }}</span>
             </div>
           </div>
@@ -110,7 +108,7 @@
           </button>
         </div>
         <div class="modal-body" v-if="selectedMember">
-          <div class="detail-section">
+          <div class="detail-section detail-section-basic">
             <h4>基本信息</h4>
             <div class="detail-grid">
               <div class="detail-item">
@@ -226,9 +224,6 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button @click="closeModal" class="btn-secondary">关闭</button>
-        </div>
       </div>
     </div>
 
@@ -256,10 +251,10 @@
                 </div>
                 <div class="form-group">
                   <label>性别</label>
-                  <select v-model="memberForm.render">
-                    <option :value="false">男</option>
-                    <option :value="true">女</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberGenderValue"
+                    :options="memberGenderOptions"
+                  />
                 </div>
                 <div class="form-group">
                   <label>专业</label>
@@ -279,13 +274,11 @@
                 </div>
                 <div class="form-group">
                   <label>部门 *</label>
-                  <select v-model="memberForm.department" required>
-                    <option value="">请选择部门</option>
-                    <option value="office">办公室部</option>
-                    <option value="competition">竞赛部</option>
-                    <option value="research">科研部</option>
-                    <option value="activity">活动部</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberDepartmentValue"
+                    :options="memberDepartmentOptions"
+                    required
+                  />
                 </div>
                 <div class="form-group">
                   <label>职位</label>
@@ -293,10 +286,10 @@
                 </div>
                 <div class="form-group">
                   <label>状态</label>
-                  <select v-model="memberForm.is_active">
-                    <option :value="true">在职</option>
-                    <option :value="false">离职</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberActiveValue"
+                    :options="memberActiveOptions"
+                  />
                 </div>
               </div>
             </div>
@@ -397,10 +390,10 @@
                 </div>
                 <div class="form-group">
                   <label>性别</label>
-                  <select v-model="memberForm.render">
-                    <option :value="false">男</option>
-                    <option :value="true">女</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberGenderValue"
+                    :options="memberGenderOptions"
+                  />
                 </div>
                 <div class="form-group">
                   <label>专业</label>
@@ -420,13 +413,11 @@
                 </div>
                 <div class="form-group">
                   <label>部门 *</label>
-                  <select v-model="memberForm.department" required>
-                    <option value="">请选择部门</option>
-                    <option value="office">办公室部</option>
-                    <option value="competition">竞赛部</option>
-                    <option value="research">科研部</option>
-                    <option value="activity">活动部</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberDepartmentValue"
+                    :options="memberDepartmentOptions"
+                    required
+                  />
                 </div>
                 <div class="form-group">
                   <label>职位</label>
@@ -434,10 +425,10 @@
                 </div>
                 <div class="form-group">
                   <label>状态</label>
-                  <select v-model="memberForm.is_active">
-                    <option :value="true">在职</option>
-                    <option :value="false">离职</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="memberActiveValue"
+                    :options="memberActiveOptions"
+                  />
                 </div>
               </div>
             </div>
@@ -519,6 +510,7 @@
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
+import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue'
 
 const axios = inject('axios');
 const confirm = useConfirm();
@@ -538,6 +530,20 @@ const filters = ref({
   position: ''
 })
 
+const MEMBER_STATUS_ALL_VALUE = '__all_member_status__'
+const MEMBER_GENDER_MALE_VALUE = '__member_gender_male__'
+const MEMBER_STATUS_INACTIVE_VALUE = '__member_status_inactive__'
+const MEMBER_DEPARTMENT_EMPTY_VALUE = '__member_department_empty__'
+
+const createMappedProxy = (sourceRef, key, rawValue, uiValue) => computed({
+  get() {
+    return Object.is(sourceRef.value[key], rawValue) ? uiValue : sourceRef.value[key]
+  },
+  set(value) {
+    sourceRef.value[key] = value === uiValue ? rawValue : value
+  }
+})
+
 // 部门选项
 const departments = [
   { value: 'all', label: '全部部门' },
@@ -548,6 +554,30 @@ const departments = [
 ]
 
 // 计算属性
+const memberStatusFilterOptions = [
+  { value: MEMBER_STATUS_ALL_VALUE, label: '全部状态' },
+  { value: 'true', label: '在职' },
+  { value: 'false', label: '离职' }
+]
+
+const memberGenderOptions = [
+  { value: MEMBER_GENDER_MALE_VALUE, label: '男' },
+  { value: true, label: '女' }
+]
+
+const memberDepartmentOptions = [
+  { value: MEMBER_DEPARTMENT_EMPTY_VALUE, label: '请选择部门' },
+  { value: 'office', label: '办公室部' },
+  { value: 'competition', label: '竞赛部' },
+  { value: 'research', label: '科研部' },
+  { value: 'activity', label: '活动部' }
+]
+
+const memberActiveOptions = [
+  { value: true, label: '在职' },
+  { value: MEMBER_STATUS_INACTIVE_VALUE, label: '离职' }
+]
+
 const filteredMembers = computed(() => {
   if (!members.value) return []
   
@@ -691,6 +721,11 @@ const memberForm = ref({
   skills: ''
 })
 
+const memberStatusFilterValue = createMappedProxy(filters, 'is_active', '', MEMBER_STATUS_ALL_VALUE)
+const memberGenderValue = createMappedProxy(memberForm, 'render', false, MEMBER_GENDER_MALE_VALUE)
+const memberDepartmentValue = createMappedProxy(memberForm, 'department', '', MEMBER_DEPARTMENT_EMPTY_VALUE)
+const memberActiveValue = createMappedProxy(memberForm, 'is_active', false, MEMBER_STATUS_INACTIVE_VALUE)
+
 const showAddMemberModal = () => {
   // 重置表单
   memberForm.value = {
@@ -817,6 +852,63 @@ onMounted(() => {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  --member-filter-control-height: 3rem;
+  --member-form-control-height: 2.875rem;
+  --member-add-btn-bg: var(--accent-color);
+  --member-add-btn-border: transparent;
+  --member-add-btn-text: #ffffff;
+  --member-add-btn-hover-bg: var(--accent-hover);
+  --member-action-view-bg: rgba(59, 130, 246, 0.14);
+  --member-action-view-border: rgba(37, 99, 235, 0.22);
+  --member-action-view-text: #1d4ed8;
+  --member-action-edit-bg: rgba(34, 197, 94, 0.14);
+  --member-action-edit-border: rgba(22, 163, 74, 0.24);
+  --member-action-edit-text: #15803d;
+  --member-action-delete-bg: rgba(239, 68, 68, 0.14);
+  --member-action-delete-border: rgba(220, 38, 38, 0.22);
+  --member-action-delete-text: #b91c1c;
+  --member-action-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.45);
+  --member-status-active-bg: #e8f5e8;
+  --member-status-active-border: rgba(46, 125, 50, 0.16);
+  --member-status-active-text: #2e7d32;
+  --member-status-inactive-bg: #ffebee;
+  --member-status-inactive-border: rgba(198, 40, 40, 0.16);
+  --member-status-inactive-text: #c62828;
+  --member-department-badge-bg: #e3f2fd;
+  --member-department-badge-border: rgba(21, 101, 192, 0.14);
+  --member-department-badge-text: #1565c0;
+  --member-position-badge-bg: #fef3c7;
+  --member-position-badge-border: #fcd34d;
+  --member-position-badge-text: #92400e;
+}
+
+.dark .admin-member-container {
+  --member-add-btn-bg: rgba(59, 130, 246, 0.18);
+  --member-add-btn-border: rgba(96, 165, 250, 0.24);
+  --member-add-btn-text: #bfdbfe;
+  --member-add-btn-hover-bg: rgba(59, 130, 246, 0.24);
+  --member-action-view-bg: rgba(59, 130, 246, 0.18);
+  --member-action-view-border: rgba(96, 165, 250, 0.22);
+  --member-action-view-text: #bfdbfe;
+  --member-action-edit-bg: rgba(34, 197, 94, 0.18);
+  --member-action-edit-border: rgba(74, 222, 128, 0.22);
+  --member-action-edit-text: #bbf7d0;
+  --member-action-delete-bg: rgba(239, 68, 68, 0.18);
+  --member-action-delete-border: rgba(248, 113, 113, 0.22);
+  --member-action-delete-text: #fecaca;
+  --member-action-shadow: 0 10px 24px -20px rgba(2, 6, 23, 0.85);
+  --member-status-active-bg: rgba(34, 197, 94, 0.18);
+  --member-status-active-border: rgba(74, 222, 128, 0.24);
+  --member-status-active-text: #bbf7d0;
+  --member-status-inactive-bg: rgba(239, 68, 68, 0.18);
+  --member-status-inactive-border: rgba(248, 113, 113, 0.24);
+  --member-status-inactive-text: #fecaca;
+  --member-department-badge-bg: rgba(59, 130, 246, 0.18);
+  --member-department-badge-border: rgba(96, 165, 250, 0.24);
+  --member-department-badge-text: #bfdbfe;
+  --member-position-badge-bg: rgba(245, 158, 11, 0.2);
+  --member-position-badge-border: rgba(251, 191, 36, 0.28);
+  --member-position-badge-text: #fde68a;
 }
 
 h2 {
@@ -899,18 +991,59 @@ h2 {
 
 .filter-item input,
 .filter-item select {
-  padding: 0.5rem;
+  min-height: var(--member-filter-control-height);
+  padding: 0 0.875rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--bg-primary);
   color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.filter-item :deep(.p-select) {
+  width: 100%;
+  min-height: var(--member-filter-control-height);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.filter-item :deep(.p-select:not(.p-disabled):hover) {
+  border-color: var(--border-color);
+}
+
+.filter-item :deep(.p-select.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  outline: none;
+}
+
+.filter-item :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--member-filter-control-height) - 2px);
+  padding: 0 0.875rem;
+  color: var(--text-primary);
+}
+
+.filter-item :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.filter-item :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
 }
 
 .add-btn {
-  padding: 0.5rem 1rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
+  min-height: var(--member-filter-control-height);
+  padding: 0 1rem;
+  background: var(--member-add-btn-bg);
+  color: var(--member-add-btn-text);
+  border: 1px solid var(--member-add-btn-border);
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
@@ -921,7 +1054,7 @@ h2 {
 }
 
 .add-btn:hover {
-  background: var(--primary-dark);
+  background: var(--member-add-btn-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -949,42 +1082,36 @@ h2 {
 
 .member-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.member-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-}
-
 .member-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .member-name {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: bold;
   color: var(--text-primary);
-  margin: 0 0 0.25rem 0;
+  margin: 0;
 }
 
 .member-uid {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 .member-status {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
@@ -994,60 +1121,106 @@ h2 {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
+  border: 1px solid transparent;
 }
 
 .status-badge.active {
-  background: #e8f5e8;
-  color: #2e7d32;
+  background: var(--member-status-active-bg);
+  border-color: var(--member-status-active-border);
+  color: var(--member-status-active-text);
 }
 
 .status-badge.inactive {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--member-status-inactive-bg);
+  border-color: var(--member-status-inactive-border);
+  color: var(--member-status-inactive-text);
 }
 
 .position-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
-  background: var(--primary-color);
-  color: white;
+  font-weight: 600;
+  background: var(--member-position-badge-bg);
+  border: 1px solid var(--member-position-badge-border);
+  color: var(--member-position-badge-text);
+}
+
+.department-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--member-department-badge-bg);
+  border: 1px solid var(--member-department-badge-border);
+  color: var(--member-department-badge-text);
 }
 
 .member-actions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .action-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  padding: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--member-action-shadow);
+}
+
+.action-btn i {
+  font-size: 0.96rem;
 }
 
 .action-btn.view {
-  background: #2196f3;
-  color: white;
+  background: var(--member-action-view-bg);
+  border-color: var(--member-action-view-border);
+  color: var(--member-action-view-text);
 }
 
 .action-btn.edit {
-  background: #ff9800;
-  color: white;
+  background: var(--member-action-edit-bg);
+  border-color: var(--member-action-edit-border);
+  color: var(--member-action-edit-text);
 }
 
 .action-btn.delete {
-  background: #f44336;
-  color: white;
+  background: var(--member-action-delete-bg);
+  border-color: var(--member-action-delete-border);
+  color: var(--member-action-delete-text);
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
+  transform: translateY(-1px);
+}
+
+.action-btn.view:hover {
+  background: color-mix(in srgb, var(--member-action-view-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-view-border) 84%, var(--member-action-view-text) 16%);
+}
+
+.action-btn.edit:hover {
+  background: color-mix(in srgb, var(--member-action-edit-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-edit-border) 84%, var(--member-action-edit-text) 16%);
+}
+
+.action-btn.delete:hover {
+  background: color-mix(in srgb, var(--member-action-delete-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-delete-border) 84%, var(--member-action-delete-text) 16%);
+}
+
+.action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 18%, transparent), var(--member-action-shadow);
 }
 
 .member-details {
@@ -1093,7 +1266,7 @@ h2 {
 }
 
 .pagination button:hover:not(:disabled) {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
 }
 
@@ -1174,7 +1347,7 @@ h2 {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1185,7 +1358,7 @@ h2 {
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--accent-hover);
 }
 
 .btn-secondary {
@@ -1205,42 +1378,78 @@ h2 {
 
 /* 详情模态框样式 */
 .detail-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .detail-section h4 {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color);
+  margin-bottom: 0.85rem;
 }
 
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .detail-grid .detail-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
   background: var(--bg-hover);
-  border-radius: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .detail-grid .detail-item label {
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0;
+  font-size: 0.78rem;
 }
 
 .detail-grid .detail-item span {
   color: var(--text-primary);
   font-weight: 500;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.detail-grid .detail-item .status-badge {
+  align-self: flex-start;
+}
+
+.detail-section-basic .detail-item:nth-child(4) {
+  order: 8;
+}
+
+.detail-section-basic .detail-item:nth-child(5) {
+  order: 7;
+}
+
+.detail-section-basic .detail-item:nth-child(6) {
+  order: 9;
+}
+
+.detail-section-basic .detail-item:nth-child(7) {
+  order: 10;
+}
+
+.detail-section-basic .detail-item:nth-child(8) {
+  order: 5;
+}
+
+.detail-section-basic .detail-item:nth-child(9) {
+  order: 6;
+}
+
+.detail-section-basic .detail-item:nth-child(10) {
+  order: 4;
 }
 
 /* 表单样式 */
@@ -1262,7 +1471,7 @@ h2 {
   font-weight: 600;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color);
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .form-grid {
@@ -1299,12 +1508,56 @@ h2 {
   transition: all 0.2s ease;
 }
 
+.form-group input,
+.form-group select {
+  min-height: var(--member-form-control-height);
+  box-sizing: border-box;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.member-form .form-group :deep(.p-select) {
+  width: 100%;
+  min-height: var(--member-form-control-height);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.member-form .form-group :deep(.p-select:not(.p-disabled):hover) {
+  border-color: var(--border-color);
+}
+
+.member-form .form-group :deep(.p-select.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  outline: none;
+}
+
+.member-form .form-group :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--member-form-control-height) - 2px);
+  padding: 0 0.75rem;
+  color: var(--text-primary);
+}
+
+.member-form .form-group :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.member-form .form-group :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
 }
 
 .form-group textarea {
@@ -1334,7 +1587,16 @@ h2 {
     width: 95%;
     margin: 1rem;
   }
-  
+
+  .member-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .member-actions {
+    align-self: flex-start;
+  }
+
   .detail-grid,
   .form-grid {
     grid-template-columns: 1fr;

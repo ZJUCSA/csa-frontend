@@ -1,18 +1,20 @@
 <script setup>
-import { ref, reactive, inject, onMounted } from 'vue';
+import { computed, ref, reactive, inject, onMounted } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
-import { useRouter } from 'vue-router';
+import AdminDateField from '@/components/admin/AdminDateField.vue';
+import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
 const confirm = useConfirm();
 const axios = inject('axios');
-const router = useRouter();
-
 // 数据状态
 const recruits = ref([]);
 const loading = ref(false);
 const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
+const sortField = ref('');
+const sortOrder = ref('asc');
+const first = computed(() => Math.max(0, (currentPage.value - 1) * pageSize.value));
 
 const newDeadline = ref('');
 const currentDeadline = ref('正在加载...');
@@ -214,6 +216,80 @@ const gradeOptions = [
   { value: 25, label: '25级' }
 ];
 
+const DEGREE_ALL_VALUE = '__all_degree__';
+const GRADE_ALL_VALUE = '__all_grade__';
+const TIME_SLOT_ALL_VALUE = '__all_interview_time_slot__';
+const RECOMMENDED_DEPARTMENT_NONE_VALUE = '__no_recommended_department__';
+const INTERVIEW_NOT_COMPLETED_VALUE = '__interview_not_completed__';
+
+const createMappedProxy = (source, key, rawValue, uiValue) => computed({
+  get() {
+    return Object.is(source[key], rawValue) ? uiValue : source[key];
+  },
+  set(value) {
+    source[key] = value === uiValue ? rawValue : value;
+  }
+});
+
+const degreeFilterValue = createMappedProxy(filters, 'degree', '', DEGREE_ALL_VALUE);
+const gradeFilterValue = createMappedProxy(filters, 'grade', '', GRADE_ALL_VALUE);
+const interviewTimeSlotFilterValue = createMappedProxy(filters, 'interview_time_slot', '', TIME_SLOT_ALL_VALUE);
+const evaluationRecommendedDepartmentValue = createMappedProxy(
+  evaluationForm,
+  'recommended_department',
+  '',
+  RECOMMENDED_DEPARTMENT_NONE_VALUE
+);
+const interviewRecommendedDepartmentValue = createMappedProxy(
+  interviewForm,
+  'recommended_department',
+  '',
+  RECOMMENDED_DEPARTMENT_NONE_VALUE
+);
+const interviewCompletedValue = createMappedProxy(
+  interviewForm,
+  'interview_completed',
+  false,
+  INTERVIEW_NOT_COMPLETED_VALUE
+);
+
+const degreeFilterOptions = [{ value: DEGREE_ALL_VALUE, label: '全部' }, ...degreeOptions];
+const gradeFilterOptions = [{ value: GRADE_ALL_VALUE, label: '全部' }, ...gradeOptions];
+const recommendedDepartmentOptions = [
+  { value: RECOMMENDED_DEPARTMENT_NONE_VALUE, label: '未推荐' },
+  { value: 'office', label: '办公室部' },
+  { value: 'competition', label: '竞赛部' },
+  { value: 'research', label: '科研部' },
+  { value: 'activity', label: '活动部' }
+];
+const evaluationResultOptions = [
+  { value: 'pending', label: '待定' },
+  { value: 'pass', label: '通过' },
+  { value: 'fail', label: '不通过' },
+  { value: 'recommended', label: '推荐' }
+];
+const interviewStageOptions = [
+  { value: 'first_round', label: '一面' },
+  { value: 'second_round', label: '二面' }
+];
+const interviewCompletedOptions = [
+  { value: INTERVIEW_NOT_COMPLETED_VALUE, label: '未完成' },
+  { value: true, label: '已完成' }
+];
+const interviewResultOptions = [
+  { value: 'pending', label: '待定' },
+  { value: 'pass', label: '通过' },
+  { value: 'fail', label: '未通过' },
+  { value: 'recommended', label: '推荐' }
+];
+const interviewTimeSlotOptions = computed(() => [
+  { value: TIME_SLOT_ALL_VALUE, label: '全部时间段' },
+  ...interviewTimeSlots.value.map(slot => ({
+    value: slot.id,
+    label: `${slot.name} (${slot.current_count}/${slot.max_capacity})`
+  }))
+]);
+
 // 获取已排班面试时间段列表
 const fetchInterviewTimeSlots = async () => {
   try {
@@ -243,6 +319,11 @@ const fetchRecruits = async () => {
       size: pageSize.value,
       ...filters
     };
+
+    if (sortField.value) {
+      params.sort_field = sortField.value;
+      params.sort_order = sortOrder.value;
+    }
     
     const response = await axios.get('/recruit/recruits', { params });
     recruits.value = response.data.recruits;
@@ -384,17 +465,17 @@ const getDepartmentLabel = (department) => {
 // 获取部门样式
 const getDepartmentStyle = (department) => {
   if (!department) {
-    return { color: '#999', backgroundColor: '#f5f5f5' };
+    return { color: 'var(--recruit-department-empty-text)', backgroundColor: 'var(--recruit-department-empty-bg)' };
   }
   
   const styles = {
-    'office': { color: '#1976d2', backgroundColor: '#e3f2fd' },
-    'competition': { color: '#388e3c', backgroundColor: '#e8f5e8' },
-    'research': { color: '#f57c00', backgroundColor: '#fff3e0' },
-    'activity': { color: '#7b1fa2', backgroundColor: '#f3e5f5' }
+    'office': { color: 'var(--recruit-department-office-text)', backgroundColor: 'var(--recruit-department-office-bg)' },
+    'competition': { color: 'var(--recruit-department-competition-text)', backgroundColor: 'var(--recruit-department-competition-bg)' },
+    'research': { color: 'var(--recruit-department-research-text)', backgroundColor: 'var(--recruit-department-research-bg)' },
+    'activity': { color: 'var(--recruit-department-activity-text)', backgroundColor: 'var(--recruit-department-activity-bg)' }
   };
   
-  return styles[department] || { color: '#666', backgroundColor: '#f5f5f5' };
+  return styles[department] || { color: 'var(--recruit-department-empty-text)', backgroundColor: 'var(--recruit-department-empty-bg)' };
 };
 
 // 计算面试状态
@@ -463,19 +544,19 @@ const isRejectLocked = computed(() => {
 const getStatusStyle = (status) => {
   switch (status) {
     case '待面试':
-      return { color: '#ff9800', backgroundColor: '#fff3e0' };
+      return { color: 'var(--recruit-status-pending-text)', backgroundColor: 'var(--recruit-status-pending-bg)' };
     case '已通过一面':
-      return { color: '#2196f3', backgroundColor: '#e3f2fd' };
+      return { color: 'var(--recruit-status-first-text)', backgroundColor: 'var(--recruit-status-first-bg)' };
     case '已通过二面':
-      return { color: '#9c27b0', backgroundColor: '#f3e5f5' };
+      return { color: 'var(--recruit-status-second-text)', backgroundColor: 'var(--recruit-status-second-bg)' };
     case '待录取':
-      return { color: '#ff5722', backgroundColor: '#fbe9e7' };
+      return { color: 'var(--recruit-status-admit-text)', backgroundColor: 'var(--recruit-status-admit-bg)' };
     case '已录取':
-      return { color: '#4caf50', backgroundColor: '#e8f5e8' };
+      return { color: 'var(--recruit-status-enrolled-text)', backgroundColor: 'var(--recruit-status-enrolled-bg)' };
     case '已拒绝':
-      return { color: '#f44336', backgroundColor: '#ffebee' };
+      return { color: 'var(--recruit-status-rejected-text)', backgroundColor: 'var(--recruit-status-rejected-bg)' };
     default:
-      return { color: '#666', backgroundColor: '#f5f5f5' };
+      return { color: 'var(--recruit-status-default-text)', backgroundColor: 'var(--recruit-status-default-bg)' };
   }
 };
 
@@ -654,17 +735,6 @@ const closeInterviewModal = () => {
   showInterviewModal.value = false;
   selectedRecruit.value = null;
   interviews.value = [];
-};
-
-// 跳转到面试管理页面
-const goToInterviewManagement = () => {
-  console.log('跳转到面试管理页面');
-  try {
-    router.push({ name: 'admin-interview' });
-  } catch (error) {
-    console.error('跳转失败:', error);
-    window.notyf.error('跳转失败：' + error.message);
-  }
 };
 
 // 获取面试列表
@@ -1051,9 +1121,43 @@ const deleteRecruit = async (recruit) => {
 };
 
 // 分页处理
-const handlePageChange = (newPage) => {
-  currentPage.value = newPage;
+const handlePageChange = (event) => {
+  currentPage.value = event.page + 1;
+  pageSize.value = event.rows;
   fetchRecruits();
+};
+
+const toggleSort = (field) => {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+
+  currentPage.value = 1;
+  fetchRecruits();
+};
+
+const getSortIconClass = (field) => {
+  if (sortField.value !== field) {
+    return 'pi-sort-alt';
+  }
+
+  return sortOrder.value === 'asc' ? 'pi-angle-up' : 'pi-angle-down';
+};
+
+const handleHorizontalWheel = (event) => {
+  const container = event.currentTarget;
+
+  if (!(container instanceof HTMLElement)) return;
+  if (container.scrollWidth <= container.clientWidth + 1) return;
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (!delta) return;
+
+  event.preventDefault();
+  container.scrollLeft += delta;
 };
 
 // 监听筛选条件变化
@@ -1081,6 +1185,7 @@ onMounted(async () => {
 
 <template>
   <div class="admin-recruit-container">    
+    <div class="text-3xl font-bold mb-6">纳新管理</div>
     <!-- 筛选条件 -->
     <div class="filter-section">
       <div class="filter-row">
@@ -1094,25 +1199,30 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>学位:</label>
-          <select v-model="filters.degree" @change="handleFilterChange">
-            <option value="">全部</option>
-            <option v-for="option in degreeOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="degreeFilterValue"
+            :options="degreeFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>年级:</label>
-          <select v-model="filters.grade" @change="handleFilterChange">
-            <option value="">全部</option>
-            <option v-for="option in gradeOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="gradeFilterValue"
+            :options="gradeFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>表单截止日期:</label>
-          <input type="date" v-model="newDeadline" @input="handleSetDeadline">
+          <AdminDateField
+            v-model="newDeadline"
+            @update:modelValue="handleSetDeadline"
+          />
         </div>
       </div>
       <div class="filter-row">
@@ -1122,61 +1232,125 @@ onMounted(async () => {
         </div>
         <div class="filter-item">
           <label>状态:</label>
-          <select v-model="filters.status" @change="handleFilterChange">
-            <option v-for="status in interviewStatusOptions" :key="status.value" :value="status.value">
-              {{ status.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.status"
+            :options="interviewStatusOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>部门:</label>
-          <select v-model="filters.department" @change="handleFilterChange">
-            <option v-for="option in departmentOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+          <AdminFilterSelect
+            v-model="filters.department"
+            :options="departmentOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
         <div class="filter-item">
           <label>面试基准日期:</label>
-          <input type="date" v-model="interviewBaseDate" @change="handleBaseDateChange">
+          <AdminDateField
+            v-model="interviewBaseDate"
+            @update:modelValue="handleBaseDateChange"
+          />
         </div>
         <div class="filter-item">
           <label>已排班时间段:</label>
-          <select v-model="filters.interview_time_slot" @change="handleFilterChange">
-            <option value="">全部时间段</option>
-            <option v-for="slot in interviewTimeSlots" :key="slot.id" :value="slot.id">
-              {{ slot.name }} ({{ slot.current_count }}/{{ slot.max_capacity }})
-            </option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <button @click="showExportOptions" class="export-button">导出数据</button>
+          <AdminFilterSelect
+            v-model="interviewTimeSlotFilterValue"
+            :options="interviewTimeSlotOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="handleFilterChange"
+          />
         </div>
       </div>
     </div>
 
     <!-- 批量操作 -->
     <div class="batch-actions">
-      <button @click="batchDeleteRecruits()" class="batch-button delete">批量删除</button>
+      <Button
+        label="导出数据"
+        class="recruit-batch-action recruit-batch-action--export"
+        @click="showExportOptions"
+      ></Button>
+      <Button
+        label="批量删除"
+        class="recruit-batch-action recruit-batch-action--delete"
+        @click="batchDeleteRecruits()"
+      ></Button>
       <!-- <button @click="deleteAllRecruits()" class="batch-button delete-all">全部删除</button> -->
     </div>
 
     <!-- 数据表格 -->
-    <div class="table-container">
+    <div class="table-container" @wheel="handleHorizontalWheel">
       <table class="recruit-table">
         <thead>
           <tr>
             <th><input type="checkbox" @change="selectAll" v-model="selectAllRecruits"></th>
-            <th>姓名</th>
-            <th>学号</th>
-            <th>性别</th>
-            <th>学位</th>
-            <th>年级</th>
-            <th>专业</th>
-            <th>学院</th>
-            <th>部门意愿</th>
-            <th>分配部门</th>
-            <th>状态</th>
+            <th class="col-name">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'name' }" @click="toggleSort('name')">
+                <span>姓名</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('name')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'uid' }" @click="toggleSort('uid')">
+                <span>学号</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('uid')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'render' }" @click="toggleSort('render')">
+                <span>性别</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('render')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'degree' }" @click="toggleSort('degree')">
+                <span>学位</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('degree')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'grade' }" @click="toggleSort('grade')">
+                <span>年级</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('grade')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'major_name' }" @click="toggleSort('major_name')">
+                <span>专业</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('major_name')"></i>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'college_name' }" @click="toggleSort('college_name')">
+                <span>学院</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('college_name')"></i>
+              </button>
+            </th>
+            <th class="col-department-preference">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'department_preference' }" @click="toggleSort('department_preference')">
+                <span>部门意愿</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('department_preference')"></i>
+              </button>
+            </th>
+            <th class="col-assigned-department">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'assigned_department' }" @click="toggleSort('assigned_department')">
+                <span>分配部门</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('assigned_department')"></i>
+              </button>
+            </th>
+            <th class="col-status">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'status' }" @click="toggleSort('status')">
+                <span>状态</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('status')"></i>
+              </button>
+            </th>
             <th>操作</th>
           </tr>
         </thead>
@@ -1185,36 +1359,50 @@ onMounted(async () => {
             <td>
               <input type="checkbox" v-model="recruit.selected">
             </td>
-            <td>{{ recruit.name }}</td>
+            <td class="col-name">{{ recruit.name }}</td>
             <td>{{ recruit.uid }}</td>
             <td>{{ recruit.render ? '女' : '男' }}</td>
             <td>{{ getDegreeLabel(recruit.degree) }}</td>
             <td>{{ recruit.grade }}级</td>
             <td>{{ recruit.major_name }}</td>
             <td>{{ recruit.college_name }}</td>
-            <td>
+            <td class="col-department-preference">
               <div class="department-order">
                 <span v-for="dept in getDepartmentOrder(recruit)" :key="dept.id" class="dept-tag">
-                  {{ dept.name }}({{ dept.score }})
+                  {{ dept.name }}
                 </span>
               </div>
             </td>
-            <td>
+            <td class="col-assigned-department">
               <span class="department-tag" :style="getDepartmentStyle(recruit.assigned_department)">
                 {{ getDepartmentLabel(recruit.assigned_department) }}
               </span>
             </td>
-            <td>
+            <td class="col-status">
               <span class="status-tag" :style="getStatusStyle(calculateInterviewStatus(recruit))">
                 {{ calculateInterviewStatus(recruit) }}
               </span>
             </td>
             <td>
-              <div class="action-buttons">
-                <!-- <button @click="showEvaluationModal(recruit)" class="action-btn evaluate">评价</button> -->
-                <button @click="viewDetails(recruit)" class="action-btn view">详情</button>
-                <button @click="goToInterviewManagement" class="action-btn interview">面试管理</button>
-                <button @click="deleteRecruit(recruit)" class="action-btn delete">删除</button>
+              <div class="recruit-row-actions">
+                <button
+                  type="button"
+                  @click="viewDetails(recruit)"
+                  class="recruit-row-action recruit-row-action--view"
+                  title="查看详情"
+                  aria-label="查看详情"
+                >
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button
+                  type="button"
+                  @click="deleteRecruit(recruit)"
+                  class="recruit-row-action recruit-row-action--delete"
+                  title="删除"
+                  aria-label="删除"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -1223,10 +1411,15 @@ onMounted(async () => {
     </div>
 
     <!-- 分页 -->
-    <div class="pagination">
-      <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage <= 1">上一页</button>
-      <span>第 {{ currentPage }} 页，共 {{ Math.ceil(total / pageSize) }} 页</span>
-      <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage >= Math.ceil(total / pageSize)">下一页</button>
+    <div class="pagination-wrapper">
+      <Paginator
+        :first="first"
+        :rows="pageSize"
+        :totalRecords="total"
+        :rowsPerPageOptions="[10, 20, 30]"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        @page="handlePageChange"
+      ></Paginator>
     </div>
 
     <!-- 评价抽屉 -->
@@ -1595,22 +1788,21 @@ onMounted(async () => {
                 <h4>推荐和部门</h4>
                 <div class="form-group">
                   <label>推荐部门:</label>
-                  <select v-model="evaluationForm.recommended_department">
-                    <option value="">未推荐</option>
-                    <option value="office">办公室部</option>
-                    <option value="competition">竞赛部</option>
-                    <option value="research">科研部</option>
-                    <option value="activity">活动部</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="evaluationRecommendedDepartmentValue"
+                    :options="recommendedDepartmentOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                  />
                 </div>
                 <div class="form-group">
                   <label>评价结果:</label>
-                  <select v-model="evaluationForm.result">
-                    <option value="pending">待定</option>
-                    <option value="pass">通过</option>
-                    <option value="fail">不通过</option>
-                    <option value="recommended">推荐</option>
-                  </select>
+                  <AdminFilterSelect
+                    v-model="evaluationForm.result"
+                    :options="evaluationResultOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                  />
                 </div>
                 <div class="form-group">
                   <label>所属部门:</label>
@@ -1774,10 +1966,12 @@ onMounted(async () => {
             <div class="form-row">
               <div class="form-group">
                 <label>面试阶段 *</label>
-                <select v-model="interviewForm.stage" required>
-                  <option value="first_round">一面</option>
-                  <option value="second_round">二面</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="interviewForm.stage"
+                  :options="interviewStageOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                />
               </div>
               <div class="form-group">
                 <label>面试日期 *</label>
@@ -1788,10 +1982,12 @@ onMounted(async () => {
             <div class="form-row">
               <div class="form-group">
                                   <label>面试完成状态 *</label>
-                <select v-model="interviewForm.interview_completed" required>
-                  <option :value="false">未完成</option>
-                  <option :value="true">已完成</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="interviewCompletedValue"
+                  :options="interviewCompletedOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                />
               </div>
               <div class="form-group">
                 <label>面试时长（分钟）</label>
@@ -1835,23 +2031,22 @@ onMounted(async () => {
             
             <div class="form-group">
               <label>面试结果</label>
-              <select v-model="interviewForm.result">
-                <option value="pending">待定</option>
-                <option value="pass">通过</option>
-                <option value="fail">未通过</option>
-                <option value="recommended">推荐</option>
-              </select>
+              <AdminFilterSelect
+                v-model="interviewForm.result"
+                :options="interviewResultOptions"
+                optionLabel="label"
+                optionValue="value"
+              />
             </div>
             
             <div class="form-group">
               <label>推荐部门</label>
-              <select v-model="interviewForm.recommended_department">
-                <option value="">未推荐</option>
-                <option value="office">办公室部</option>
-                <option value="competition">竞赛部</option>
-                <option value="research">科研部</option>
-                <option value="activity">活动部</option>
-              </select>
+              <AdminFilterSelect
+                v-model="interviewRecommendedDepartmentValue"
+                :options="recommendedDepartmentOptions"
+                optionLabel="label"
+                optionValue="value"
+              />
             </div>
             
             <div class="form-group">
@@ -1966,12 +2161,100 @@ onMounted(async () => {
 
 <style scoped>
 .admin-recruit-container {
+  --recruit-filter-control-height: 2.75rem;
+  --recruit-filter-button-height: 2.75rem;
+  --recruit-btn-export-bg: #4caf50;
+  --recruit-btn-export-bg-hover: #439846;
+  --recruit-btn-export-border: #4caf50;
+  --recruit-btn-export-text: #ffffff;
+  --recruit-btn-export-shadow: none;
+  --recruit-btn-export-shadow-hover: none;
+  --recruit-btn-delete-bg: #ef4444;
+  --recruit-btn-delete-bg-hover: #dc3c3c;
+  --recruit-btn-delete-border: #ef4444;
+  --recruit-btn-delete-text: #ffffff;
+  --recruit-btn-delete-shadow: none;
+  --recruit-btn-delete-shadow-hover: none;
+  --recruit-dept-tag-bg: #e6f1ff;
+  --recruit-dept-tag-border: #bfd8ff;
+  --recruit-dept-tag-text: #2f73da;
+  --recruit-status-default-bg: #f3f4f6;
+  --recruit-status-default-text: #64748b;
+  --recruit-status-pending-bg: #fff3e0;
+  --recruit-status-pending-text: #ff9800;
+  --recruit-status-first-bg: #e3f2fd;
+  --recruit-status-first-text: #2196f3;
+  --recruit-status-second-bg: #f3e5f5;
+  --recruit-status-second-text: #9c27b0;
+  --recruit-status-admit-bg: #fbe9e7;
+  --recruit-status-admit-text: #ff5722;
+  --recruit-status-enrolled-bg: #e8f5e8;
+  --recruit-status-enrolled-text: #4caf50;
+  --recruit-status-rejected-bg: #ffebee;
+  --recruit-status-rejected-text: #f44336;
+  --recruit-department-empty-bg: #f3f4f6;
+  --recruit-department-empty-text: #64748b;
+  --recruit-department-office-bg: #e3f2fd;
+  --recruit-department-office-text: #1976d2;
+  --recruit-department-competition-bg: #e8f5e8;
+  --recruit-department-competition-text: #388e3c;
+  --recruit-department-research-bg: #fff3e0;
+  --recruit-department-research-text: #f57c00;
+  --recruit-department-activity-bg: #f3e5f5;
+  --recruit-department-activity-text: #7b1fa2;
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--bg-secondary);
   color: var(--text-primary);
   min-height: 100vh;
+}
+
+.text-3xl {
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.dark .admin-recruit-container {
+  --recruit-btn-export-bg: rgba(34, 197, 94, 0.22);
+  --recruit-btn-export-bg-hover: rgba(34, 197, 94, 0.3);
+  --recruit-btn-export-border: rgba(74, 222, 128, 0.36);
+  --recruit-btn-export-text: #baf7cb;
+  --recruit-btn-export-shadow: none;
+  --recruit-btn-export-shadow-hover: none;
+  --recruit-btn-delete-bg: rgba(239, 68, 68, 0.2);
+  --recruit-btn-delete-bg-hover: rgba(239, 68, 68, 0.28);
+  --recruit-btn-delete-border: rgba(248, 113, 113, 0.34);
+  --recruit-btn-delete-text: #ffb0b8;
+  --recruit-btn-delete-shadow: none;
+  --recruit-btn-delete-shadow-hover: none;
+  --recruit-dept-tag-bg: rgba(59, 130, 246, 0.2);
+  --recruit-dept-tag-border: rgba(96, 165, 250, 0.34);
+  --recruit-dept-tag-text: #a9cbff;
+  --recruit-status-default-bg: rgba(148, 163, 184, 0.16);
+  --recruit-status-default-text: #cbd5e1;
+  --recruit-status-pending-bg: rgba(245, 158, 11, 0.2);
+  --recruit-status-pending-text: #ffd18a;
+  --recruit-status-first-bg: rgba(59, 130, 246, 0.2);
+  --recruit-status-first-text: #a9cbff;
+  --recruit-status-second-bg: rgba(168, 85, 247, 0.2);
+  --recruit-status-second-text: #d7b6ff;
+  --recruit-status-admit-bg: rgba(249, 115, 22, 0.2);
+  --recruit-status-admit-text: #ffc08a;
+  --recruit-status-enrolled-bg: rgba(34, 197, 94, 0.2);
+  --recruit-status-enrolled-text: #baf7cb;
+  --recruit-status-rejected-bg: rgba(239, 68, 68, 0.2);
+  --recruit-status-rejected-text: #ffb0b8;
+  --recruit-department-empty-bg: rgba(148, 163, 184, 0.16);
+  --recruit-department-empty-text: #cbd5e1;
+  --recruit-department-office-bg: rgba(59, 130, 246, 0.2);
+  --recruit-department-office-text: #a9cbff;
+  --recruit-department-competition-bg: rgba(34, 197, 94, 0.2);
+  --recruit-department-competition-text: #baf7cb;
+  --recruit-department-research-bg: rgba(245, 158, 11, 0.2);
+  --recruit-department-research-text: #ffd18a;
+  --recruit-department-activity-bg: rgba(168, 85, 247, 0.2);
+  --recruit-department-activity-text: #d7b6ff;
 }
 
 .filter-section {
@@ -1984,6 +2267,8 @@ onMounted(async () => {
 
 .filter-row {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -1995,51 +2280,156 @@ onMounted(async () => {
 .filter-item {
   display: flex;
   flex-direction: column;
-  min-width: 150px;
+  flex: 1 1 180px;
+  min-width: 180px;
+  gap: 0.5rem;
 }
 
 .filter-item label {
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
-.filter-item input,
-.filter-item select {
-  padding: 0.5rem;
+.filter-item input {
+  width: 100%;
+  min-height: var(--recruit-filter-control-height);
+  padding: 0 0.875rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--bg-surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.filter-item :deep(.p-datepicker) {
+  width: 100%;
+}
+
+.filter-item :deep(.p-datepicker-input) {
+  width: 100%;
+  min-height: var(--recruit-filter-control-height);
+  padding: 0 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-item :deep(.p-datepicker:not(.p-disabled):hover .p-datepicker-input) {
+  border-color: var(--border-color);
+}
+
+.filter-item :deep(.p-datepicker.p-focus .p-datepicker-input) {
+  border-color: var(--border-color);
+  box-shadow: none;
+  outline: none;
+}
+
+.filter-item :deep(.p-datepicker-input::placeholder) {
+  color: var(--text-secondary);
+}
+
+.filter-item :deep(.p-select) {
+  width: 100%;
+  min-height: var(--recruit-filter-control-height);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-item :deep(.p-select:not(.p-disabled):hover) {
+  border-color: var(--border-color);
+}
+
+.filter-item :deep(.p-select.p-focus) {
+  border-color: var(--border-color);
+  box-shadow: none;
+  outline: none;
+}
+
+.filter-item :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--recruit-filter-control-height) - 2px);
+  padding: 0 0.875rem;
   color: var(--text-primary);
 }
 
-.export-button {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 1.5rem;
+.filter-item :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.filter-item :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
+}
+
+.filter-item :deep(.p-select-dropdown-icon) {
+  font-size: 0.85rem;
 }
 
 .batch-actions {
   margin-bottom: 1rem;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 1rem;
 }
 
-.batch-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
+:deep(.recruit-batch-action.p-button) {
+  min-height: var(--recruit-filter-button-height, 2.875rem);
+  padding: 0 1.2rem !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
+:deep(.recruit-batch-action .p-button-label),
+:deep(.recruit-batch-action .p-button-icon) {
+  color: inherit !important;
+  font-weight: inherit;
+}
 
+:deep(.recruit-batch-action--export.p-button) {
+  background: var(--recruit-btn-export-bg) !important;
+  color: var(--recruit-btn-export-text) !important;
+  border-color: var(--recruit-btn-export-border) !important;
+  box-shadow: var(--recruit-btn-export-shadow) !important;
+}
 
-.batch-button.delete {
-  background: #f44336;
+:deep(.recruit-batch-action--export.p-button:not(:disabled):hover) {
+  background: var(--recruit-btn-export-bg-hover) !important;
+  color: var(--recruit-btn-export-text) !important;
+  border-color: var(--recruit-btn-export-border) !important;
+  box-shadow: var(--recruit-btn-export-shadow-hover) !important;
+}
+
+:deep(.recruit-batch-action--delete.p-button) {
+  background: var(--recruit-btn-delete-bg) !important;
+  color: var(--recruit-btn-delete-text) !important;
+  border-color: var(--recruit-btn-delete-border) !important;
+  box-shadow: var(--recruit-btn-delete-shadow) !important;
+}
+
+:deep(.recruit-batch-action--delete.p-button:not(:disabled):hover) {
+  background: var(--recruit-btn-delete-bg-hover) !important;
+  color: var(--recruit-btn-delete-text) !important;
+  border-color: var(--recruit-btn-delete-border) !important;
+  box-shadow: var(--recruit-btn-delete-shadow-hover) !important;
 }
 
 .batch-button.delete-all {
@@ -2089,6 +2479,65 @@ onMounted(async () => {
   font-weight: bold;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.sort-header {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.32rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sort-header:hover {
+  color: inherit;
+}
+
+.sort-header:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sort-header--active {
+  color: inherit;
+}
+
+.sort-indicator {
+  font-size: 0.66rem;
+  color: var(--text-secondary);
+  opacity: 0.42;
+  transform: translateY(1px);
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.sort-header:hover .sort-indicator {
+  opacity: 0.58;
+}
+
+.sort-header--active .sort-indicator {
+  color: var(--accent-color);
+  opacity: 0.74;
+}
+
+.recruit-table th.col-department-preference,
+.recruit-table th.col-assigned-department,
+.recruit-table th.col-status,
+.recruit-table th.col-name,
+.recruit-table td.col-department-preference,
+.recruit-table td.col-assigned-department,
+.recruit-table td.col-status,
+.recruit-table td.col-name {
+  white-space: nowrap;
 }
 
 .recruit-table tr {
@@ -2109,14 +2558,20 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 7rem;
 }
 
 .dept-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--recruit-dept-tag-bg);
+  color: var(--recruit-dept-tag-text);
+  border: 1px solid var(--recruit-dept-tag-border);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
 }
 
 .status-tag {
@@ -2124,6 +2579,9 @@ onMounted(async () => {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: bold;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
 .department-tag {
@@ -2131,65 +2589,150 @@ onMounted(async () => {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: bold;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
-.action-buttons {
+.recruit-row-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
-.action-btn {
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 4px;
+.recruit-row-action {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.8rem;
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.action-btn.evaluate {
-  background: #2196f3;
+.recruit-row-action i {
+  font-size: 0.95rem;
 }
 
-.action-btn.view {
-  background: #9c27b0;
+.recruit-row-action--view {
+  background: #eaf2ff;
+  color: #2f73da;
+  border-color: #bfd8ff;
 }
 
-.action-btn.interview {
-  background: #ff9800;
+.recruit-row-action--view:hover {
+  background: #dceaff;
+  color: #275fc1;
+  border-color: #a9cbff;
+  transform: translateY(-1px);
 }
 
-.action-btn.delete {
-  background: #f44336;
+.recruit-row-action--delete {
+  background: #ffe8eb;
+  color: #cf415e;
+  border-color: #f6bcc7;
 }
 
-.pagination {
+.recruit-row-action--delete:hover {
+  background: #ffdce1;
+  color: #b7304d;
+  border-color: #f0a9b6;
+  transform: translateY(-1px);
+}
+
+.dark .recruit-row-action--view {
+  background: rgba(59, 130, 246, 0.2);
+  color: #a9cbff;
+  border-color: rgba(96, 165, 250, 0.34);
+}
+
+.dark .recruit-row-action--view:hover {
+  background: rgba(59, 130, 246, 0.28);
+  color: #c3dcff;
+  border-color: rgba(96, 165, 250, 0.46);
+}
+
+.dark .recruit-row-action--delete {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ff9aa5;
+  border-color: rgba(239, 68, 68, 0.34);
+}
+
+.dark .recruit-row-action--delete:hover {
+  background: rgba(239, 68, 68, 0.26);
+  color: #ffb0b8;
+  border-color: rgba(239, 68, 68, 0.46);
+}
+
+.pagination-wrapper {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 30px;
 }
 
-.pagination button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
+:deep(.p-paginator) {
   background: var(--bg-surface);
   color: var(--text-primary);
-  cursor: pointer;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 10px;
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination button:hover:not(:disabled) {
-  background: var(--bg-secondary);
+:deep(.p-paginator-page),
+:deep(.p-paginator-first),
+:deep(.p-paginator-prev),
+:deep(.p-paginator-next),
+:deep(.p-paginator-last) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination button:disabled {
+:deep(.p-paginator-page:hover),
+:deep(.p-paginator-first:hover),
+:deep(.p-paginator-prev:hover),
+:deep(.p-paginator-next:hover),
+:deep(.p-paginator-last:hover) {
   background: var(--bg-secondary);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-  opacity: 0.6;
+  color: var(--text-primary);
+}
+
+:deep(.p-paginator-page.p-paginator-page-selected) {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+:deep(.p-paginator-rpp-dropdown) {
+  min-height: 2.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+:deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+  border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
+}
+
+:deep(.p-paginator-rpp-dropdown.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+:deep(.p-paginator-rpp-dropdown .p-select-label),
+:deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+  color: inherit;
+}
+
+:deep(.p-paginator-current) {
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0 0.25rem;
 }
 
 .modal-overlay {
@@ -2387,7 +2930,6 @@ onMounted(async () => {
   margin-bottom: 0.5rem;
 }
 
-.form-group select,
 .form-group textarea,
 .form-group input {
   width: 100%;
@@ -2398,12 +2940,50 @@ onMounted(async () => {
   font-size: 0.95rem;
 }
 
-.form-group select:focus,
 .form-group textarea:focus,
 .form-group input:focus {
   outline: none;
   border-color: #2196f3;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.evaluation-form .form-group :deep(.p-select) {
+  width: 100%;
+  min-height: 3rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.evaluation-form .form-group :deep(.p-select:not(.p-disabled):hover) {
+  border-color: #e9ecef;
+}
+
+.evaluation-form .form-group :deep(.p-select.p-focus) {
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  outline: none;
+}
+
+.evaluation-form .form-group :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(3rem - 4px);
+  padding: 0 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.evaluation-form .form-group :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.evaluation-form .form-group :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
 }
 
 .form-group textarea {
@@ -3237,7 +3817,6 @@ onMounted(async () => {
 }
 
 .form-group input,
-.form-group select,
 .form-group textarea {
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -3247,11 +3826,49 @@ onMounted(async () => {
 }
 
 .form-group input:focus,
-.form-group select:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #ff9800;
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.interview-form .form-group :deep(.p-select) {
+  width: 100%;
+  min-height: 2.875rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.interview-form .form-group :deep(.p-select:not(.p-disabled):hover) {
+  border-color: #ddd;
+}
+
+.interview-form .form-group :deep(.p-select.p-focus) {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: none;
+}
+
+.interview-form .form-group :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(2.875rem - 2px);
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.interview-form .form-group :deep(.p-select-label.p-placeholder) {
+  color: #666;
+}
+
+.interview-form .form-group :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: #666;
 }
 
 .form-group textarea {

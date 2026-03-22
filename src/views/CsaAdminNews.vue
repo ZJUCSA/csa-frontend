@@ -17,11 +17,59 @@ const show = ref(false)
 const page = ref(1)
 const total = ref(0)
 const size = ref(10)
+const first = computed(() => Math.max(0, (page.value - 1) * size.value))
 
 const operator = ref(null)
 
+const fetchTotal = () => {
+    return axios.get('/news/count').then(res => {
+        total.value = res.data.count
+    })
+}
+
+const refreshContent = () => {
+    return fetchTotal().then(() => {
+        const maxPage = Math.max(1, Math.ceil(total.value / size.value))
+
+        if (page.value > maxPage) {
+            page.value = maxPage
+            return
+        }
+
+        return fetchContent()
+    })
+}
+
+const handlePageChange = event => {
+    page.value = event.page + 1
+    size.value = event.rows
+}
+
+const handleHorizontalWheel = event => {
+    const container = event.currentTarget
+
+    if (!(container instanceof HTMLElement)) return
+
+    const scrollTarget =
+        container.querySelector('.p-datatable-table-container') ?? container
+
+    if (!(scrollTarget instanceof HTMLElement)) return
+    if (scrollTarget.scrollWidth <= scrollTarget.clientWidth + 1) return
+
+    const delta =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+            ? event.deltaX
+            : event.deltaY
+
+    if (!delta) return
+
+    event.preventDefault()
+    scrollTarget.scrollLeft += delta
+}
+
 const ConfirmDelete = (event, nid) => {
     confirm.require({
+        group: 'news-delete',
         target: event.currentTarget,
         message: '确认删除该信息？',
         icon: 'pi pi-exclamation-triangle',
@@ -40,26 +88,30 @@ const ConfirmDelete = (event, nid) => {
                     nid: nid,
                 })
                 .then(() => {
-                    fetchContent()
+                    refreshContent()
                     window.notyf.success('删除成功')
                 })
         },
     })
 }
 
-const ConfirmCleanup = (event) => {
+const ConfirmCleanup = () => {
     confirm.require({
-        target: event.currentTarget,
+        group: 'news-cleanup',
+        modal: true,
+        header: '清理废弃草稿',
         message: '确认清理所有24小时前的废弃草稿？此操作将删除旧草稿及其关联图片，且不可恢复。',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
             label: '取消',
             severity: 'secondary',
             outlined: true,
+            class: 'news-cleanup-cancel',
         },
         acceptProps: {
             label: '清理',
             severity: 'danger',
+            class: 'news-cleanup-confirm',
         },
         accept: () => {
             axios
@@ -69,6 +121,7 @@ const ConfirmCleanup = (event) => {
                         news_deleted: 0,
                         events_deleted: 0
                     }
+                    refreshContent()
                     window.notyf.success(`清理完成: 删除新闻草稿${d.news_deleted}条, 活动草稿${d.events_deleted}条`)
                 })
         },
@@ -76,7 +129,7 @@ const ConfirmCleanup = (event) => {
 }
 
 const fetchContent = () => {
-    axios
+    return axios
         .get('/news/list', {
             params: {
                 page: page.value,
@@ -88,14 +141,7 @@ const fetchContent = () => {
         })
 }
 
-axios
-    .get('/news/count')
-    .then(res => {
-        total.value = res.data.count
-    })
-    .then(() => {
-        fetchContent()
-    })
+refreshContent()
 
 watch([page, size], () => {
     fetchContent()
@@ -105,15 +151,16 @@ watch([page, size], () => {
 <template>
     <csa-edit-news
         v-model:show="show"
-        @finish="fetchContent"
+        @finish="refreshContent"
         :nid="operator"
     ></csa-edit-news>
-    <ConfirmPopup></ConfirmPopup>
-    <div class="main-part-lg mx-auto">
+    <ConfirmPopup group="news-delete"></ConfirmPopup>
+    <ConfirmDialog group="news-cleanup" class="news-cleanup-dialog"></ConfirmDialog>
+    <div class="main-part-lg mx-auto admin-news-page">
         <div class="text-3xl font-bold mb-6">信息管理</div>
         <Button
             label="创建信息"
-            class="mb-4"
+            class="mb-4 news-toolbar-btn news-toolbar-btn--primary"
             @click="
                 () => {
                     show = true
@@ -124,11 +171,11 @@ watch([page, size], () => {
         <Button
             v-if="isManager"
             label="清理废弃草稿"
-            class="mb-4 ml-2"
-            severity="warning"
+            class="mb-4 ml-2 news-toolbar-btn news-toolbar-btn--warning"
             @click="ConfirmCleanup"
         ></Button>
-        <DataTable :value="data" class="mb-4">
+        <div class="overflow-x-auto mb-4 table-scroll-wrap" @wheel="handleHorizontalWheel">
+        <DataTable :value="data" class="mb-4 min-w-full">
             <Column field="nid" header="编号"></Column>
             <Column field="title" header="标题">
                 <template #body="{ data }">
@@ -142,9 +189,9 @@ watch([page, size], () => {
             </Column>
             <Column field="tag" header="标签">
                 <template #body="{ data }">
-                    <div class="flex gap-1" v-if="data.tag">
+                    <div class="flex gap-1 news-tag-list" v-if="data.tag">
                         <div v-for="tag in data.tag.split(' ')" :key="tag">
-                            <Tag :value="tag" class="text-nowrap"></Tag>
+                            <Tag :value="tag" class="text-nowrap news-tag-pill"></Tag>
                         </div>
                     </div>
                 </template>
@@ -162,7 +209,7 @@ watch([page, size], () => {
                         <Button
                             label="编辑"
                             size="small"
-                            class="whitespace-nowrap"
+                            class="whitespace-nowrap news-table-action news-table-action--edit"
                             @click="
                                 () => {
                                     operator = data.nid
@@ -178,20 +225,23 @@ watch([page, size], () => {
                     <div>
                         <Button
                             label="删除"
-                            severity="danger"
                             size="small"
-                            class="whitespace-nowrap"
+                            class="whitespace-nowrap news-table-action news-table-action--delete"
                             @click="$event => ConfirmDelete($event, data.nid)"
                         ></Button>
                     </div>
                 </template>
             </Column>
         </DataTable>
+        </div>
         <div class="pagination-wrapper">
             <Paginator
-                v-model:page="page"
-                v-model:rows="size"
+                :first="first"
+                :rows="size"
                 :totalRecords="total"
+                :rowsPerPageOptions="[10, 20, 30]"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                @page="handlePageChange"
             ></Paginator>
         </div>
     </div>
@@ -204,7 +254,73 @@ watch([page, size], () => {
     transition: color 0.3s ease;
 }
 
-.p-datatable-column-title {
+.admin-news-page {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    --news-tag-bg: #ecfdf3;
+    --news-tag-border: #a7f3d0;
+    --news-tag-text: #0f8a62;
+    --news-btn-primary-bg: var(--accent-color);
+    --news-btn-primary-hover: var(--accent-hover);
+    --news-btn-primary-text: #ffffff;
+    --news-btn-primary-shadow: 0 10px 20px rgba(99, 102, 241, 0.18);
+    --news-btn-primary-shadow-hover: 0 12px 24px rgba(99, 102, 241, 0.24);
+    --news-btn-warning-bg: #7b88b8;
+    --news-btn-warning-bg-hover: #6d7aa8;
+    --news-btn-warning-border: #7b88b8;
+    --news-btn-warning-text: #f8fbff;
+    --news-btn-warning-shadow: 0 10px 20px rgba(123, 136, 184, 0.2);
+    --news-btn-warning-shadow-hover: 0 12px 24px rgba(123, 136, 184, 0.28);
+    --news-btn-edit-bg: #ecfdf3;
+    --news-btn-edit-bg-hover: #ddfbe9;
+    --news-btn-edit-border: #a7f3d0;
+    --news-btn-edit-text: #0f8a62;
+    --news-btn-danger-bg: #ffe5e7;
+    --news-btn-danger-bg-hover: #ffd9dd;
+    --news-btn-danger-border: #f4bcc2;
+    --news-btn-danger-text: #c2415b;
+}
+
+.table-scroll-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.table-scroll-wrap :deep(.p-datatable-table-container) {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.dark .admin-news-page {
+    --news-tag-bg: rgba(16, 185, 129, 0.18);
+    --news-tag-border: rgba(52, 211, 153, 0.34);
+    --news-tag-text: #9ef0cd;
+    --news-btn-primary-bg: #3f8fdf;
+    --news-btn-primary-hover: #58a6ee;
+    --news-btn-primary-text: #f8fbff;
+    --news-btn-primary-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+    --news-btn-primary-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.32);
+    --news-btn-warning-bg: #7389bd;
+    --news-btn-warning-bg-hover: #84a0d8;
+    --news-btn-warning-border: #7389bd;
+    --news-btn-warning-text: #f8fbff;
+    --news-btn-warning-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+    --news-btn-warning-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.32);
+    --news-btn-edit-bg: rgba(16, 185, 129, 0.18);
+    --news-btn-edit-bg-hover: rgba(16, 185, 129, 0.26);
+    --news-btn-edit-border: rgba(52, 211, 153, 0.34);
+    --news-btn-edit-text: #9ef0cd;
+    --news-btn-danger-bg: rgba(239, 68, 68, 0.18);
+    --news-btn-danger-bg-hover: rgba(239, 68, 68, 0.26);
+    --news-btn-danger-border: rgba(239, 68, 68, 0.34);
+    --news-btn-danger-text: #ff9aa5;
+}
+
+:deep(.p-datatable-column-title) {
     white-space: nowrap;
 }
 
@@ -231,6 +347,7 @@ watch([page, size], () => {
     border-bottom: 1px solid var(--border-color);
     padding: 1rem;
     font-weight: 600;
+    white-space: nowrap;
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -255,17 +372,211 @@ watch([page, size], () => {
 }
 
 /* 确保表格内的所有文字都使用正确的颜色 */
-:deep(.p-datatable .p-datatable-tbody > tr > td *) {
-    color: var(--text-primary) !important;
+:deep(.p-datatable .p-datatable-tbody > tr > td > div) {
+    color: inherit;
 }
 
 /* 确保按钮和标签等元素也使用正确的颜色 */
-:deep(.p-datatable .p-datatable-tbody > tr > td .p-button) {
-    color: inherit;
+.news-tag-list {
+    flex-wrap: wrap;
 }
 
-:deep(.p-datatable .p-datatable-tbody > tr > td .p-tag) {
-    color: inherit;
+:deep(.news-tag-pill.p-tag) {
+    background: var(--news-tag-bg) !important;
+    color: var(--news-tag-text) !important;
+    border: 1px solid var(--news-tag-border) !important;
+    border-radius: 999px !important;
+    padding: 0.18rem 0.65rem !important;
+    font-weight: 600;
+    box-shadow: none !important;
+}
+
+:deep(.news-tag-pill .p-tag-label) {
+    color: inherit !important;
+    font-weight: inherit;
+}
+
+:deep(.news-toolbar-btn.p-button),
+:deep(.news-table-action.p-button) {
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    font-weight: 600;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+:deep(.news-toolbar-btn.p-button) {
+    min-height: 2.75rem;
+    padding: 0 1.1rem !important;
+}
+
+:deep(.news-table-action.p-button) {
+    min-height: 2.125rem;
+    padding: 0 0.9rem !important;
+    box-shadow: none !important;
+}
+
+:deep(.news-toolbar-btn .p-button-label),
+:deep(.news-toolbar-btn .p-button-icon),
+:deep(.news-table-action .p-button-label),
+:deep(.news-table-action .p-button-icon) {
+    color: inherit !important;
+    font-weight: inherit;
+}
+
+:deep(.news-toolbar-btn--primary.p-button) {
+    background: var(--news-btn-primary-bg) !important;
+    color: var(--news-btn-primary-text) !important;
+    box-shadow: var(--news-btn-primary-shadow) !important;
+}
+
+:deep(.news-toolbar-btn--primary.p-button:not(:disabled):hover) {
+    background: var(--news-btn-primary-hover) !important;
+    color: var(--news-btn-primary-text) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--news-btn-primary-shadow-hover) !important;
+}
+
+:deep(.news-toolbar-btn--warning.p-button) {
+    background: var(--news-btn-warning-bg) !important;
+    color: var(--news-btn-warning-text) !important;
+    border-color: var(--news-btn-warning-border) !important;
+    box-shadow: var(--news-btn-warning-shadow) !important;
+}
+
+:deep(.news-toolbar-btn--warning.p-button:not(:disabled):hover) {
+    background: var(--news-btn-warning-bg-hover) !important;
+    color: var(--news-btn-warning-text) !important;
+    border-color: var(--news-btn-warning-border) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--news-btn-warning-shadow-hover) !important;
+}
+
+:deep(.news-table-action--edit.p-button) {
+    background: var(--news-btn-edit-bg) !important;
+    color: var(--news-btn-edit-text) !important;
+    border-color: var(--news-btn-edit-border) !important;
+}
+
+:deep(.news-table-action--edit.p-button:not(:disabled):hover) {
+    background: var(--news-btn-edit-bg-hover) !important;
+    color: var(--news-btn-edit-text) !important;
+    border-color: var(--news-btn-edit-border) !important;
+    transform: translateY(-1px);
+}
+
+:deep(.news-table-action--delete.p-button) {
+    background: var(--news-btn-danger-bg) !important;
+    color: var(--news-btn-danger-text) !important;
+    border-color: var(--news-btn-danger-border) !important;
+}
+
+:deep(.news-table-action--delete.p-button:not(:disabled):hover) {
+    background: var(--news-btn-danger-bg-hover) !important;
+    color: var(--news-btn-danger-text) !important;
+    border-color: var(--news-btn-danger-border) !important;
+    transform: translateY(-1px);
+}
+
+:deep(.news-cleanup-dialog.p-confirmdialog) {
+    width: min(28rem, calc(100vw - 2rem));
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.2);
+}
+
+:deep(.news-cleanup-dialog .p-dialog-header) {
+    padding: 1.25rem 1.35rem 0.5rem;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-bottom: none;
+}
+
+:deep(.news-cleanup-dialog .p-dialog-title) {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+:deep(.news-cleanup-dialog .p-dialog-header-actions .p-dialog-header-icon) {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+:deep(.news-cleanup-dialog .p-dialog-header-actions .p-dialog-header-icon:hover) {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+:deep(.news-cleanup-dialog .p-dialog-content) {
+    padding: 0.5rem 1.35rem 0;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    line-height: 1.65;
+}
+
+:deep(.news-cleanup-dialog .p-confirmdialog-icon) {
+    margin-right: 0.9rem;
+    font-size: 1.3rem;
+    color: #f59e0b;
+}
+
+:deep(.news-cleanup-dialog .p-dialog-footer) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.2rem 1.35rem 1.35rem;
+    background: var(--bg-surface);
+    border-top: none;
+}
+
+:deep(.news-cleanup-dialog .p-dialog-footer .p-button) {
+    min-height: 2.7rem;
+    padding: 0 1.1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+:deep(.news-cleanup-dialog .news-cleanup-cancel.p-button) {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+}
+
+:deep(.news-cleanup-dialog .news-cleanup-cancel.p-button:not(:disabled):hover) {
+    background: color-mix(in srgb, var(--bg-secondary) 82%, var(--accent-color) 18%) !important;
+    color: var(--text-primary) !important;
+    border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%) !important;
+}
+
+:deep(.news-cleanup-dialog .news-cleanup-confirm.p-button) {
+    background: #dc2626 !important;
+    color: #fff7f7 !important;
+    border: 1px solid #dc2626 !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18) !important;
+}
+
+:deep(.news-cleanup-dialog .news-cleanup-confirm.p-button:not(:disabled):hover) {
+    background: #c81e1e !important;
+    color: #fff7f7 !important;
+    border-color: #c81e1e !important;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(220, 38, 38, 0.24) !important;
 }
 
 .pagination-wrapper {
@@ -304,13 +615,37 @@ watch([page, size], () => {
     color: var(--text-primary);
 }
 
-.pagination-wrapper :deep(.p-paginator-page.p-highlight) {
+.pagination-wrapper :deep(.p-paginator-page.p-paginator-page-selected) {
     background: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
 }
 
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown) {
+    min-height: 2.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+    border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown.p-focus) {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-label),
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+    color: inherit;
+}
+
 .pagination-wrapper :deep(.p-paginator-current) {
     color: var(--text-primary);
+    font-weight: 600;
+    padding: 0 0.25rem;
 }
 </style>

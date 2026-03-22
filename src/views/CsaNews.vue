@@ -252,17 +252,17 @@ watch([page, size, category], () => {
     --gradient-primary: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
 }
 
-.dark {
-    --color-accent: #42a5f5;
-    --color-accent-hover: #64b5f6;
-    --bg-main: #000000;
-    --bg-secondary: #121212;
-    --bg-card: #1e1e1e;
-    --text-main: #ffffff;
-    --text-secondary: #b0b0b0;
-    --border-color: #333333;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    --skeleton-bg: linear-gradient(90deg, #1e1e1e 25%, #282828 50%, #1e1e1e 75%);
+:global(.dark) .news-container {
+    --color-accent: #60a5fa;
+    --color-accent-hover: #7cb9ff;
+    --bg-main: #0f172a;
+    --bg-secondary: #172335;
+    --bg-card: #233147;
+    --text-main: #f8fafc;
+    --text-secondary: #9eb0c7;
+    --border-color: rgba(148, 163, 184, 0.18);
+    --shadow: 0 24px 48px rgba(2, 6, 23, 0.24);
+    --skeleton-bg: linear-gradient(90deg, #233147 25%, #2d3e57 50%, #233147 75%);
     --gradient-text: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
     --gradient-primary: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
 }
@@ -275,6 +275,12 @@ watch([page, size, category], () => {
     transition: all 0.3s ease;
 }
 
+:global(.dark) .news-container {
+    background:
+        radial-gradient(circle at top center, rgba(96, 165, 250, 0.12) 0%, rgba(96, 165, 250, 0) 30%),
+        linear-gradient(180deg, #0f172a 0%, #172335 22%, #1b2738 100%);
+}
+
 .page-header {
     text-align: center;
     margin-bottom: 40px;
@@ -282,6 +288,10 @@ watch([page, size, category], () => {
     background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
     border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
+}
+
+:global(.dark) .page-header {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(23, 35, 53, 0.9) 100%);
 }
 
 .page-title {
@@ -311,12 +321,23 @@ watch([page, size, category], () => {
     transition: all 0.3s ease;
 }
 
+:global(.dark) .content-wrapper {
+    background: rgba(23, 35, 53, 0.94);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    box-shadow: 0 26px 54px rgba(2, 6, 23, 0.26);
+    backdrop-filter: blur(18px);
+}
+
 .sidebar {
     background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
     border-right: 1px solid var(--border-color);
     padding: 30px 25px;
     height: 100%;
     transition: all 0.3s ease;
+}
+
+:global(.dark) .sidebar {
+    background: linear-gradient(180deg, rgba(31, 44, 63, 0.92) 0%, rgba(23, 35, 53, 0.88) 100%);
 }
 
 .sidebar-header {
@@ -368,6 +389,11 @@ watch([page, size, category], () => {
     box-shadow: 0 5px 15px rgba(66, 165, 245, 0.2);
 }
 
+:global(.dark) .category-button:hover {
+    background: linear-gradient(135deg, rgba(35, 49, 71, 0.96) 0%, rgba(44, 62, 86, 0.92) 100%);
+    box-shadow: 0 12px 26px rgba(2, 6, 23, 0.22);
+}
+
 .category-button.active {
     background: var(--gradient-primary);
     color: white;
@@ -406,8 +432,11 @@ watch([page, size, category], () => {
 
 .category-english {
     font-size: 0.8rem;
-    color: var(--text-secondary);
     opacity: 0.7;
+}
+
+.category-button.active .category-english {
+    opacity: 0.88;
 }
 
 .main-content {
@@ -415,6 +444,10 @@ watch([page, size, category], () => {
     padding: 30px;
     overflow-y: auto;
     transition: all 0.3s ease;
+}
+
+:global(.dark) .main-content {
+    background: rgba(31, 44, 63, 0.82);
 }
 
 .content-header {
@@ -448,6 +481,11 @@ watch([page, size, category], () => {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
     border-radius: 20px;
     transition: all 0.3s ease;
+}
+
+:global(.dark) .stats-text {
+    background: rgba(96, 165, 250, 0.12);
+    color: #bfdbfe;
 }
 
 .news-list {
@@ -565,6 +603,10 @@ watch([page, size, category], () => {
     transform: translateX(5px);
 }
 
+:global(.dark) .news-card:hover {
+    background: linear-gradient(90deg, rgba(96, 165, 250, 0.08) 0%, rgba(96, 165, 250, 0.02) 100%);
+}
+
 .news-image {
     position: relative;
     width: 200px;
@@ -651,6 +693,12 @@ watch([page, size, category], () => {
     font-size: 0.8rem;
     font-weight: 600;
     transition: all 0.3s ease;
+}
+
+:global(.dark) .news-tag {
+    background: rgba(96, 165, 250, 0.12);
+    border: 1px solid rgba(96, 165, 250, 0.14);
+    color: #bfdbfe;
 }
 
 .news-summary {

@@ -49,6 +49,8 @@ const isActiveItem = item => {
     return activeNames.includes(route.name)
 }
 
+const isAdminRoute = computed(() => String(route.name || '').startsWith('admin'))
+
 watch(
     () => route.name,
     () => {
@@ -60,7 +62,7 @@ watch(
 </script>
 
 <template>
-    <div class="fixed-nav">
+    <div class="fixed-nav" :class="{ 'fixed-nav--admin': isAdminRoute }">
         <Menubar :model="items" class="nav-content">
             <template #start>
                 <router-link :to="{ name: 'home' }" class="nav-brand my-3 mx-5 text-xl">
@@ -150,20 +152,39 @@ watch(
     --nav-action-shadow-hover: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
+.fixed-nav.fixed-nav--admin {
+    box-shadow: none;
+}
+
 /* about-nav样式已移除，统一使用fixed-nav */
 
 /* 深色模式下的导航栏样式 */
 .dark .fixed-nav {
-    background-color: rgba(30, 30, 30, 0.95);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    --nav-action-border: rgba(255, 255, 255, 0.12);
-    --nav-action-border-hover: rgba(255, 255, 255, 0.18);
-    --nav-action-bg: rgba(255, 255, 255, 0.06);
-    --nav-action-bg-hover: rgba(255, 255, 255, 0.1);
-    --nav-action-color: var(--text-primary);
-    --nav-action-color-hover: var(--text-primary);
-    --nav-action-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-    --nav-action-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.24);
+    background-color: rgba(15, 23, 42, 0.88);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: 0 10px 28px rgba(2, 6, 23, 0.24);
+    --nav-action-border: rgba(148, 163, 184, 0.18);
+    --nav-action-border-hover: rgba(129, 140, 248, 0.24);
+    --nav-action-bg: rgba(255, 255, 255, 0.04);
+    --nav-action-bg-hover: rgba(255, 255, 255, 0.08);
+    --nav-action-color: #cbd5e1;
+    --nav-action-color-hover: #f8fafc;
+    --nav-action-shadow: none;
+    --nav-action-shadow-hover: none;
+}
+
+.dark .fixed-nav.fixed-nav--admin {
+    background-color: rgba(15, 23, 42, 0.88);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: 0 10px 28px rgba(2, 6, 23, 0.28);
+    --nav-action-border: rgba(148, 163, 184, 0.18);
+    --nav-action-border-hover: rgba(129, 140, 248, 0.24);
+    --nav-action-bg: rgba(255, 255, 255, 0.04);
+    --nav-action-bg-hover: rgba(255, 255, 255, 0.08);
+    --nav-action-color: #cbd5e1;
+    --nav-action-color-hover: #f8fafc;
+    --nav-action-shadow: none;
+    --nav-action-shadow-hover: none;
 }
 
 /* 导航栏文字颜色适配主题 */
@@ -246,6 +267,52 @@ watch(
     background-color: transparent !important;
     border-color: transparent !important;
     font-weight: 500 !important;
+}
+
+.fixed-nav .p-menubar-button {
+    width: var(--nav-action-height);
+    height: var(--nav-action-height);
+    border-radius: var(--nav-action-radius);
+    border: 1px solid var(--nav-action-border);
+    background: var(--nav-action-bg);
+    color: var(--nav-action-color);
+    box-shadow: var(--nav-action-shadow);
+}
+
+.fixed-nav .p-menubar-button:hover {
+    background: var(--nav-action-bg-hover);
+    border-color: var(--nav-action-border-hover);
+    color: var(--nav-action-color-hover);
+    box-shadow: var(--nav-action-shadow-hover);
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list {
+    width: min(22rem, calc(100vw - 2rem));
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 16px;
+    background: rgba(var(--bg-surface-rgb), 0.96);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(16px);
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-content {
+    border-radius: 12px;
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-link.nav-link {
+    width: 100%;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+}
+
+.fixed-nav .p-menubar-mobile .p-menubar-root-list .p-menubar-item-link.nav-link:hover {
+    background-color: var(--bg-secondary) !important;
+}
+
+.dark .fixed-nav .p-menubar-mobile .p-menubar-root-list {
+    box-shadow: 0 20px 44px rgba(2, 6, 23, 0.55);
 }
 
 /*折叠导航栏的按钮*/

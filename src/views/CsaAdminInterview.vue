@@ -5,12 +5,11 @@
       <div class="header-actions">
         <div class="base-time-setting">
           <label>面试基准时间：</label>
-          <input 
-            type="date" 
-            v-model="globalBaseDate" 
-            @change="updateGlobalBaseDate"
-            class="base-date-input"
-          >
+          <AdminDateField
+            v-model="globalBaseDate"
+            class="base-date-field"
+            @update:modelValue="updateGlobalBaseDate"
+          />
         </div>
         <!-- <button @click="openAutoScheduleModal()" class="auto-schedule-btn">
           <i class="pi pi-magic"></i> 一键排班
@@ -31,21 +30,19 @@
       <div class="filter-row">
         <div class="filter-group">
           <label>面试阶段:</label>
-          <select v-model="filters.stage" @change="applyFilters">
-            <option value="">全部</option>
-            <option value="first_round">一面</option>
-            <option value="second_round">二面</option>
-          </select>
+          <AdminFilterSelect
+            v-model="stageFilterValue"
+            :options="stageFilterOptions"
+            @change="applyFilters"
+          />
         </div>
         <div class="filter-group">
           <label>排班状态:</label>
-          <select v-model="filters.status" @change="applyFilters">
-            <option value="">全部</option>
-            <option value="pending">待排班</option>
-            <option value="scheduled">已排班</option>
-            <option value="completed">已完成</option>
-            <option value="cancelled">已取消</option>
-          </select>
+          <AdminFilterSelect
+            v-model="statusFilterValue"
+            :options="scheduleStatusFilterOptions"
+            @change="applyFilters"
+          />
         </div>
         <div class="filter-group">
           <label>搜索学号/姓名:</label>
@@ -60,7 +57,7 @@
     </div>
 
     <!-- 面试记录表格 -->
-    <div class="table-container">
+    <div class="table-container" @wheel="handleHorizontalWheel">
       <div v-if="loading" class="loading">加载中...</div>
       <div v-else-if="recruits.length === 0" class="empty-state">
         <div class="empty-icon">👥</div>
@@ -70,47 +67,92 @@
       <table v-else class="recruits-table">
         <thead>
           <tr>
-            <th>学号</th>
-            <th>姓名</th>
-            <th>专业</th>
-            <th>年级</th>
-            <th>面试阶段</th>
-            <th>面试状态</th>
-            <th>面试时间</th>
-            <th>面试形式</th>
-            <th>是否已通知</th>
+            <th class="col-uid">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'uid' }" @click="toggleSort('uid')">
+                <span>学号</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('uid')"></i>
+              </button>
+            </th>
+            <th class="col-name">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'name' }" @click="toggleSort('name')">
+                <span>姓名</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('name')"></i>
+              </button>
+            </th>
+            <th class="col-major">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'major_name' }" @click="toggleSort('major_name')">
+                <span>专业</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('major_name')"></i>
+              </button>
+            </th>
+            <th class="col-grade">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'grade' }" @click="toggleSort('grade')">
+                <span>年级</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('grade')"></i>
+              </button>
+            </th>
+            <th class="col-stage">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interview_status' }" @click="toggleSort('interview_status')">
+                <span>面试阶段</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interview_status')"></i>
+              </button>
+            </th>
+            <th class="col-status">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'schedule_status' }" @click="toggleSort('schedule_status')">
+                <span>面试状态</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('schedule_status')"></i>
+              </button>
+            </th>
+            <th class="col-interview-time">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interview_date' }" @click="toggleSort('interview_date')">
+                <span>面试时间</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interview_date')"></i>
+              </button>
+            </th>
+            <th class="col-format">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'interviewer' }" @click="toggleSort('interviewer')">
+                <span>面试形式</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('interviewer')"></i>
+              </button>
+            </th>
+            <th class="col-notification">
+              <button type="button" class="sort-header" :class="{ 'sort-header--active': sortField === 'notification_sent' }" @click="toggleSort('notification_sent')">
+                <span>是否已通知</span>
+                <i class="pi sort-indicator" :class="getSortIconClass('notification_sent')"></i>
+              </button>
+            </th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="recruit in paginatedRecruits" :key="recruit.uid">
-            <td>{{ recruit.uid }}</td>
-            <td>{{ recruit.name }}</td>
-            <td>{{ recruit.major_name }}</td>
-            <td>{{ recruit.grade }}级</td>
-            <td>
+            <td class="col-uid">{{ recruit.uid }}</td>
+            <td class="col-name">{{ recruit.name }}</td>
+            <td class="col-major">{{ recruit.major_name }}</td>
+            <td class="col-grade">{{ recruit.grade }}级</td>
+            <td class="col-stage">
               <span class="stage-badge" :class="recruit.interview_status">
                 {{ getStageLabel(recruit.interview_status) }}
               </span>
             </td>
-            <td>
+            <td class="col-status">
               <span class="status-badge" :class="getScheduleStatus(recruit.uid)">
                 {{ getStatusLabel(getScheduleStatus(recruit.uid)) }}
               </span>
             </td>
-            <td>
+            <td class="col-interview-time">
               <span v-if="getScheduleByUid(recruit.uid)">
                 {{ formatDate(getScheduleByUid(recruit.uid).interview_date) }}
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
+            <td class="col-format">
               <span v-if="getScheduleByUid(recruit.uid)">
                 {{ getScheduleByUid(recruit.uid).interviewer }}
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
+            <td class="col-notification">
               <span v-if="getScheduleByUid(recruit.uid)">
                 <span v-if="getScheduleByUid(recruit.uid).notification_sent" class="notification-sent">
                   <i class="pi pi-check-circle"></i> 已通知
@@ -121,19 +163,43 @@
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
-              <div class="action-buttons">
-                <button v-if="getScheduleStatus(recruit.uid) === 'pending'" @click="showScheduleFormModal(recruit)" class="action-btn schedule" title="安排面试">
+            <td class="col-actions">
+              <div class="table-action-buttons">
+                <button
+                  v-if="getScheduleStatus(recruit.uid) === 'pending'"
+                  @click="showScheduleFormModal(recruit)"
+                  class="table-action-btn table-action-btn--schedule"
+                  title="安排面试"
+                  aria-label="安排面试"
+                >
                   <i class="pi pi-calendar-plus"></i>
                 </button>
-                <button v-else @click="showEditScheduleForm(getScheduleByUid(recruit.uid))" class="action-btn edit" title="编辑排班">
+                <button
+                  v-else
+                  @click="showEditScheduleForm(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--edit"
+                  title="编辑排班"
+                  aria-label="编辑排班"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button v-if="getScheduleStatus(recruit.uid) === 'scheduled'" @click="showNotificationConfirm(getScheduleByUid(recruit.uid))" class="action-btn notify" title="发送通知">
-                  <i class="pi pi-bell"></i>
-                </button>
-                <button v-if="getScheduleStatus(recruit.uid) !== 'pending'" @click="deleteSchedule(getScheduleByUid(recruit.uid))" class="action-btn delete" title="删除排班">
+                <button
+                  v-if="getScheduleStatus(recruit.uid) !== 'pending'"
+                  @click="deleteSchedule(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--delete"
+                  title="删除排班"
+                  aria-label="删除排班"
+                >
                   <i class="pi pi-trash"></i>
+                </button>
+                <button
+                  v-if="getScheduleStatus(recruit.uid) === 'scheduled'"
+                  @click="showNotificationConfirm(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--notify"
+                  title="发送通知"
+                  aria-label="发送通知"
+                >
+                  <i class="pi pi-bell"></i>
                 </button>
               </div>
             </td>
@@ -148,30 +214,15 @@
     </div>
 
     <!-- 分页 -->
-    <div class="pagination" v-if="filteredRecruits.length > 0">
-      <div class="pagination-info">
-        显示 {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, filteredRecruits.length) }} 条，共 {{ filteredRecruits.length }} 条记录
-      </div>
-      <div class="pagination-controls" v-if="totalPages > 1">
-        <button 
-          @click="changePage(currentPage - 1)" 
-          :disabled="currentPage <= 1"
-          class="page-btn"
-        >
-          上一页
-        </button>
-        <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-        <button 
-          @click="changePage(currentPage + 1)" 
-          :disabled="currentPage >= totalPages"
-          class="page-btn"
-        >
-          下一页
-        </button>
-      </div>
-      <div class="pagination-controls" v-else>
-        <span class="page-info">共 {{ filteredRecruits.length }} 条记录</span>
-      </div>
+    <div class="pagination-wrapper" v-if="filteredRecruits.length > 0">
+      <Paginator
+        :first="first"
+        :rows="pageSize"
+        :totalRecords="filteredRecruits.length"
+        :rowsPerPageOptions="[10, 20, 30]"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        @page="handlePageChange"
+      ></Paginator>
     </div>
 
     <!-- 时间段排班统计表格 -->
@@ -182,7 +233,7 @@
           <i class="pi pi-refresh"></i> 刷新
         </button>
       </div>
-      <div class="table-container">
+      <div class="table-container" @wheel="handleHorizontalWheel">
         <table class="time-slot-table">
           <thead>
             <tr>
@@ -327,26 +378,30 @@
               </div>
               <div class="form-group">
                 <label>面试阶段 *</label>
-                                  <select v-model="scheduleForm.stage" required>
-                    <option value="first_round">一面</option>
-                    <option value="second_round">二面</option>
-                  </select>
+                <AdminFilterSelect
+                  v-model="scheduleForm.stage"
+                  :options="scheduleStageOptions"
+                  required
+                />
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
                 <label>面试开始基准日期 *</label>
-                <input type="date" v-model="scheduleForm.base_date" required>
+                <AdminDateField
+                  v-model="scheduleForm.base_date"
+                  required
+                />
                 <small class="form-help">选择面试开始的基准日期，系统将根据此日期计算具体的面试时间</small>
               </div>
               <div class="form-group">
                                   <label>面试形式 *</label>
-                <select v-model="scheduleForm.interview_format" required>
-                  <option value="one_to_one">一对一</option>
-                  <option value="one_to_many">一对多</option>
-                  <option value="many_to_many">多对多</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="scheduleForm.interview_format"
+                  :options="interviewFormatOptions"
+                  required
+                />
               </div>
             </div>
             
@@ -354,12 +409,14 @@
             <div v-if="!editingSchedule" class="form-group">
               <label>可面试时间段 *</label>
               <div class="time-slot-selector">
-                <select v-model="scheduleForm.selected_time_slot" @change="onTimeSlotChange" required>
-                  <option value="">请选择可面试时间段</option>
-                  <option v-for="slot in availableTimeSlots" :key="slot" :value="slot">
-                    {{ slot }}
-                  </option>
-                </select>
+                <AdminFilterSelect
+                  v-model="scheduleForm.selected_time_slot"
+                  class="time-slot-select"
+                  :options="availableTimeSlotOptions"
+                  placeholder="请选择可面试时间段"
+                  @change="onTimeSlotChange"
+                  required
+                />
                 <button 
                   v-if="scheduleForm.selected_time_slot" 
                   type="button" 
@@ -384,12 +441,14 @@
             <div v-if="editingSchedule" class="form-group">
               <label>面试时间段 *</label>
               <div class="time-slot-selector">
-                <select v-model="scheduleForm.selected_time_slot" @change="onEditTimeSlotChange" required>
-                  <option value="">请选择面试时间段</option>
-                  <option v-for="slot in editTimeSlots" :key="slot" :value="slot">
-                    {{ slot }}
-                  </option>
-                </select>
+                <AdminFilterSelect
+                  v-model="scheduleForm.selected_time_slot"
+                  class="time-slot-select"
+                  :options="editTimeSlotOptions"
+                  placeholder="请选择面试时间段"
+                  @change="onEditTimeSlotChange"
+                  required
+                />
                 <button 
                   v-if="scheduleForm.selected_time_slot" 
                   type="button" 
@@ -417,11 +476,10 @@
               </div>
               <div class="form-group">
                 <label>排班状态</label>
-                <select v-model="scheduleForm.status">
-                  <option value="scheduled">已排班</option>
-                  <option value="completed">已完成</option>
-                  <option value="cancelled">已取消</option>
-                </select>
+                <AdminFilterSelect
+                  v-model="scheduleForm.status"
+                  :options="scheduleStatusOptions"
+                />
               </div>
             </div>
             
@@ -468,12 +526,11 @@
             <div class="form-section">
               <div class="form-group">
                 <label>基准日期：</label>
-                <input 
-                  type="date" 
-                  v-model="autoScheduleForm.base_date" 
-                  class="form-input"
+                <AdminDateField
+                  v-model="autoScheduleForm.base_date"
+                  class="form-date-field"
                   required
-                >
+                />
                 <small>用于计算具体的面试日期</small>
               </div>
               
@@ -572,7 +629,9 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, inject } from 'vue';
+import AdminDateField from '@/components/admin/AdminDateField.vue';
 import { useConfirm } from 'primevue/useconfirm';
+import AdminFilterSelect from '@/components/admin/AdminFilterSelect.vue';
 
 const confirm = useConfirm();
 const axios = inject('axios');
@@ -584,6 +643,8 @@ const showScheduleForm = ref(false);
 const editingSchedule = ref(null);
 const currentPage = ref(1);
 const pageSize = ref(10); // 修改为每页10个，更容易看到分页效果
+const sortField = ref('');
+const sortOrder = ref('asc');
 const total = ref(0);
 
 // 筛选条件
@@ -592,6 +653,35 @@ const filters = reactive({
   stage: '',
   status: ''
 });
+
+const INTERVIEW_STAGE_ALL_VALUE = '__all_interview_stage__';
+const INTERVIEW_STATUS_ALL_VALUE = '__all_interview_schedule_status__';
+
+const createMappedProxy = (source, key, rawValue, uiValue) => computed({
+  get() {
+    return Object.is(source[key], rawValue) ? uiValue : source[key];
+  },
+  set(value) {
+    source[key] = value === uiValue ? rawValue : value;
+  }
+});
+
+const stageFilterValue = createMappedProxy(filters, 'stage', '', INTERVIEW_STAGE_ALL_VALUE);
+const statusFilterValue = createMappedProxy(filters, 'status', '', INTERVIEW_STATUS_ALL_VALUE);
+
+const stageFilterOptions = [
+  { value: INTERVIEW_STAGE_ALL_VALUE, label: '全部' },
+  { value: 'first_round', label: '一面' },
+  { value: 'second_round', label: '二面' }
+];
+
+const scheduleStatusFilterOptions = [
+  { value: INTERVIEW_STATUS_ALL_VALUE, label: '全部' },
+  { value: 'pending', label: '待排班' },
+  { value: 'scheduled', label: '已排班' },
+  { value: 'completed', label: '已完成' },
+  { value: 'cancelled', label: '已取消' }
+];
 
 // 面试者数据
 const recruits = ref([]);
@@ -612,10 +702,35 @@ const scheduleForm = reactive({
 });
 
 // 可面试时间选项
+const scheduleStageOptions = [
+  { value: 'first_round', label: '一面' },
+  { value: 'second_round', label: '二面' }
+];
+
+const interviewFormatOptions = [
+  { value: 'one_to_one', label: '一对一' },
+  { value: 'one_to_many', label: '一对多' },
+  { value: 'many_to_many', label: '多对多' }
+];
+
+const scheduleStatusOptions = [
+  { value: 'scheduled', label: '已排班' },
+  { value: 'completed', label: '已完成' },
+  { value: 'cancelled', label: '已取消' }
+];
+
 const availableTimeSlots = ref([]);
+const availableTimeSlotOptions = computed(() => availableTimeSlots.value.map((slot) => ({
+  value: slot,
+  label: slot,
+})));
 
 // 编辑模式的时间段选项
 const editTimeSlots = ref([]);
+const editTimeSlotOptions = computed(() => editTimeSlots.value.map((slot) => ({
+  value: slot,
+  label: slot,
+})));
 
 // 纳新者信息缓存
 const recruitsCache = ref({});
@@ -657,6 +772,7 @@ const autoScheduleForm = reactive({
 
 // 计算属性 - 前端分页
 const totalPages = computed(() => Math.ceil(filteredRecruits.value.length / pageSize.value));
+const first = computed(() => Math.max(0, (currentPage.value - 1) * pageSize.value));
 
 const filteredRecruits = computed(() => {
   let filtered = recruits.value;
@@ -680,11 +796,74 @@ const filteredRecruits = computed(() => {
   return filtered;
 });
 
+const compareSortValues = (left, right) => {
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+
+  return String(left ?? '').localeCompare(String(right ?? ''), 'zh-CN', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+};
+
+const getSortableValue = (recruit, field) => {
+  const schedule = getScheduleByUid(recruit.uid);
+  const scheduleStatus = getScheduleStatus(recruit.uid);
+
+  switch (field) {
+    case 'uid':
+      return recruit.uid ?? '';
+    case 'name':
+      return recruit.name ?? '';
+    case 'major_name':
+      return recruit.major_name ?? '';
+    case 'grade':
+      return Number.parseInt(recruit.grade, 10) || 0;
+    case 'interview_status':
+      return {
+        first_round: 1,
+        second_round: 2,
+        completed: 3,
+      }[recruit.interview_status] ?? 99;
+    case 'schedule_status':
+      return {
+        pending: 1,
+        scheduled: 2,
+        completed: 3,
+        cancelled: 4,
+      }[scheduleStatus] ?? 99;
+    case 'interview_date':
+      return schedule?.interview_date ? new Date(schedule.interview_date).getTime() : -1;
+    case 'interviewer':
+      return schedule?.interviewer ?? '';
+    case 'notification_sent':
+      return schedule?.notification_sent ? 1 : 0;
+    default:
+      return recruit[field] ?? '';
+  }
+};
+
+const sortedRecruits = computed(() => {
+  if (!sortField.value) {
+    return filteredRecruits.value;
+  }
+
+  return [...filteredRecruits.value].sort((left, right) => {
+    const result = compareSortValues(
+      getSortableValue(left, sortField.value),
+      getSortableValue(right, sortField.value)
+    );
+
+    return sortOrder.value === 'asc' ? result : -result;
+  });
+});
+
 // 前端分页逻辑
 const paginatedRecruits = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value;
   const endIndex = startIndex + pageSize.value;
-  return filteredRecruits.value.slice(startIndex, endIndex);
+  return sortedRecruits.value.slice(startIndex, endIndex);
 });
 
 // 表格补齐空行：保证每页显示区域高度一致，避免分页时“上下缩放/跳动”
@@ -695,6 +874,51 @@ const recruitTableFillerRows = computed(() => {
 
 const resetPagination = () => {
   currentPage.value = 1;
+};
+
+const handlePageChange = (event) => {
+  currentPage.value = event.page + 1;
+  pageSize.value = event.rows;
+};
+
+const toggleSort = (field) => {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+
+  currentPage.value = 1;
+};
+
+const getSortIconClass = (field) => {
+  if (sortField.value !== field) {
+    return 'pi-sort-alt';
+  }
+
+  return sortOrder.value === 'asc' ? 'pi-angle-up' : 'pi-angle-down';
+};
+
+const handleHorizontalWheel = (event) => {
+  const container = event.currentTarget;
+
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+
+  const hasHorizontalOverflow = container.scrollWidth > container.clientWidth + 1;
+  if (!hasHorizontalOverflow) {
+    return;
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (!delta) {
+    return;
+  }
+
+  event.preventDefault();
+  container.scrollLeft += delta;
 };
 
 // 方法
@@ -1193,10 +1417,6 @@ const applyFilters = () => {
   resetPagination();
 };
 
-const changePage = (page) => {
-  currentPage.value = page;
-};
-
 const refreshData = async () => {
   console.log('开始刷新数据...');
   try {
@@ -1584,12 +1804,54 @@ onMounted(() => {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  --interview-filter-control-height: 3rem;
+  --interview-form-control-height: 2.875rem;
+  --interview-table-action-schedule-bg: rgba(59, 130, 246, 0.14);
+  --interview-table-action-schedule-border: rgba(37, 99, 235, 0.22);
+  --interview-table-action-schedule-text: #1d4ed8;
+  --interview-table-action-edit-bg: rgba(34, 197, 94, 0.14);
+  --interview-table-action-edit-border: rgba(22, 163, 74, 0.24);
+  --interview-table-action-edit-text: #15803d;
+  --interview-table-action-notify-bg: rgba(245, 158, 11, 0.15);
+  --interview-table-action-notify-border: rgba(217, 119, 6, 0.22);
+  --interview-table-action-notify-text: #b45309;
+  --interview-table-action-delete-bg: rgba(239, 68, 68, 0.14);
+  --interview-table-action-delete-border: rgba(220, 38, 38, 0.22);
+  --interview-table-action-delete-text: #b91c1c;
+  --interview-table-action-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.45);
+  --interview-header-toolbar-height: calc(2.5rem + 1rem + 2px);
+  --interview-refresh-bg: #4f7ede;
+  --interview-refresh-bg-hover: #5f8ce7;
+  --interview-refresh-border: #4f7ede;
+  --interview-refresh-text: #ffffff;
+}
+
+.dark .interview-admin {
+  --interview-table-action-schedule-bg: rgba(59, 130, 246, 0.18);
+  --interview-table-action-schedule-border: rgba(96, 165, 250, 0.22);
+  --interview-table-action-schedule-text: #bfdbfe;
+  --interview-table-action-edit-bg: rgba(34, 197, 94, 0.18);
+  --interview-table-action-edit-border: rgba(74, 222, 128, 0.22);
+  --interview-table-action-edit-text: #bbf7d0;
+  --interview-table-action-notify-bg: rgba(245, 158, 11, 0.2);
+  --interview-table-action-notify-border: rgba(251, 191, 36, 0.2);
+  --interview-table-action-notify-text: #fde68a;
+  --interview-table-action-delete-bg: rgba(239, 68, 68, 0.18);
+  --interview-table-action-delete-border: rgba(248, 113, 113, 0.22);
+  --interview-table-action-delete-text: #fecaca;
+  --interview-table-action-shadow: 0 10px 24px -20px rgba(2, 6, 23, 0.85);
+  --interview-refresh-bg: rgba(59, 130, 246, 0.22);
+  --interview-refresh-bg-hover: rgba(59, 130, 246, 0.3);
+  --interview-refresh-border: rgba(96, 165, 250, 0.36);
+  --interview-refresh-text: #bfdbfe;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
   margin-bottom: 2rem;
 }
 
@@ -1598,19 +1860,26 @@ onMounted(() => {
   color: var(--text-primary);
   font-size: 1.8rem;
   font-weight: bold;
+  white-space: nowrap;
+  flex: 0 0 auto;
   transition: color 0.3s ease;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
   gap: 1rem;
+  min-width: fit-content;
 }
 
 .base-time-setting {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: var(--interview-header-toolbar-height);
   background: var(--bg-surface);
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -1627,20 +1896,28 @@ onMounted(() => {
   transition: color 0.3s ease;
 }
 
-.base-date-input {
-  padding: 0.5rem;
+.base-time-setting :deep(.base-date-field) {
+  min-width: 11rem;
+}
+
+.base-time-setting :deep(.base-date-field .p-datepicker-input) {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9rem;
   background: var(--bg-surface);
   color: var(--text-primary);
-  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
 }
 
-.base-date-input:focus {
-  outline: none;
+.base-time-setting :deep(.base-date-field.p-focus .p-datepicker-input) {
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  outline: none;
 }
 
 .add-btn, .refresh-btn, .auto-schedule-btn {
@@ -1667,13 +1944,31 @@ onMounted(() => {
 }
 
 .refresh-btn {
-  background: #2196f3;
-  color: white;
+  min-height: var(--interview-header-toolbar-height);
+  padding: 0 1.1rem;
+  border: 1px solid var(--interview-refresh-border);
+  border-radius: 12px;
+  background: var(--interview-refresh-bg);
+  color: var(--interview-refresh-text);
+  white-space: nowrap;
+  box-shadow: none;
 }
 
 .refresh-btn:hover {
-  background: #1976d2;
+  background: var(--interview-refresh-bg-hover);
+  border-color: var(--interview-refresh-bg-hover);
+  color: var(--interview-refresh-text);
   transform: translateY(-1px);
+}
+
+.refresh-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 14%, transparent);
+}
+
+.refresh-btn i,
+.refresh-btn span {
+  color: inherit;
 }
 
 .auto-schedule-btn {
@@ -1741,13 +2036,16 @@ onMounted(() => {
 .filter-row {
   display: flex;
   gap: 2rem;
-  align-items: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1 1 220px;
+  min-width: 220px;
 }
 
 .filter-group label {
@@ -1759,14 +2057,54 @@ onMounted(() => {
 
 .filter-group select,
 .filter-group input {
-  padding: 0.5rem;
+  padding: 0 0.875rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
   min-width: 150px;
+  min-height: var(--interview-filter-control-height);
   background: var(--bg-surface);
   color: var(--text-primary);
+  box-sizing: border-box;
   transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.filter-group :deep(.p-select) {
+  width: 100%;
+  min-height: var(--interview-filter-control-height);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.filter-group :deep(.p-select:not(.p-disabled):hover) {
+  border-color: var(--border-color);
+}
+
+.filter-group :deep(.p-select.p-focus) {
+  border-color: var(--border-color);
+  box-shadow: none;
+  outline: none;
+}
+
+.filter-group :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--interview-filter-control-height) - 2px);
+  padding: 0 0.875rem;
+  color: var(--text-primary);
+}
+
+.filter-group :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.filter-group :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
 }
 
 /* 表格样式 */
@@ -1774,7 +2112,8 @@ onMounted(() => {
   background: var(--bg-surface);
   border-radius: 12px;
   box-shadow: 0 2px 4px var(--shadow-color);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   transition: background-color 0.3s ease;
 }
 
@@ -1836,26 +2175,43 @@ onMounted(() => {
   background: var(--bg-secondary);
 }
 
-.stage-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+.recruits-table .stage-badge,
+.recruits-table .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-height: 1.85rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 600;
+  line-height: 1;
 }
 
-.stage-badge.screening {
-  background: #e3f2fd;
-  color: #1976d2;
+.recruits-table .stage-badge.screening {
+  background: #eaf2ff;
+  color: #2f73da;
+  border-color: #bfd8ff;
 }
 
-.stage-badge.first_round {
+.recruits-table .stage-badge.first_round {
   background: #fff3e0;
-  color: #f57c00;
+  color: #c97715;
+  border-color: #f7c68f;
 }
 
-.stage-badge.second_round {
-  background: #f3e5f5;
-  color: #7b1fa2;
+.recruits-table .stage-badge.second_round {
+  background: #f3e8ff;
+  color: #7b4ab1;
+  border-color: #dec6fa;
+}
+
+.recruits-table .stage-badge.completed {
+  background: #ecfdf3;
+  color: #0f8a62;
+  border-color: #a7f3d0;
 }
 
 .result-badge {
@@ -1892,6 +2248,89 @@ onMounted(() => {
 
 .no-score {
   color: #999;
+}
+
+.col-actions {
+  min-width: 10rem;
+}
+
+.table-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.table-action-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--interview-table-action-shadow);
+}
+
+.table-action-btn i {
+  font-size: 0.96rem;
+}
+
+.table-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.table-action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 18%, transparent), var(--interview-table-action-shadow);
+}
+
+.table-action-btn--schedule {
+  background: var(--interview-table-action-schedule-bg);
+  border-color: var(--interview-table-action-schedule-border);
+  color: var(--interview-table-action-schedule-text);
+}
+
+.table-action-btn--schedule:hover {
+  background: color-mix(in srgb, var(--interview-table-action-schedule-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-schedule-border) 84%, var(--interview-table-action-schedule-text) 16%);
+}
+
+.table-action-btn--edit {
+  background: var(--interview-table-action-edit-bg);
+  border-color: var(--interview-table-action-edit-border);
+  color: var(--interview-table-action-edit-text);
+}
+
+.table-action-btn--edit:hover {
+  background: color-mix(in srgb, var(--interview-table-action-edit-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-edit-border) 84%, var(--interview-table-action-edit-text) 16%);
+}
+
+.table-action-btn--notify {
+  background: var(--interview-table-action-notify-bg);
+  border-color: var(--interview-table-action-notify-border);
+  color: var(--interview-table-action-notify-text);
+}
+
+.table-action-btn--notify:hover {
+  background: color-mix(in srgb, var(--interview-table-action-notify-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-notify-border) 84%, var(--interview-table-action-notify-text) 16%);
+}
+
+.table-action-btn--delete {
+  background: var(--interview-table-action-delete-bg);
+  border-color: var(--interview-table-action-delete-border);
+  color: var(--interview-table-action-delete-text);
+}
+
+.table-action-btn--delete:hover {
+  background: color-mix(in srgb, var(--interview-table-action-delete-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-delete-border) 84%, var(--interview-table-action-delete-text) 16%);
 }
 
 .action-buttons {
@@ -1933,54 +2372,73 @@ onMounted(() => {
 }
 
 /* 分页 */
-.pagination {
+.pagination-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: var(--bg-surface);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px var(--shadow-color);
+  justify-content: center;
   margin-top: 2rem;
-  transition: background-color 0.3s ease;
 }
 
-.pagination-info {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
+.pagination-wrapper :deep(.p-paginator) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 10px;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.pagination-wrapper :deep(.p-paginator-page),
+.pagination-wrapper :deep(.p-paginator-first),
+.pagination-wrapper :deep(.p-paginator-prev),
+.pagination-wrapper :deep(.p-paginator-next),
+.pagination-wrapper :deep(.p-paginator-last) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.page-btn {
-  padding: 0.5rem 1rem;
+.pagination-wrapper :deep(.p-paginator-page:hover),
+.pagination-wrapper :deep(.p-paginator-first:hover),
+.pagination-wrapper :deep(.p-paginator-prev:hover),
+.pagination-wrapper :deep(.p-paginator-next:hover),
+.pagination-wrapper :deep(.p-paginator-last:hover) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.pagination-wrapper :deep(.p-paginator-page.p-paginator-page-selected) {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown) {
+  min-height: 2.5rem;
+  border-radius: 14px;
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-primary);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: var(--bg-secondary);
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown:not(.p-disabled):hover) {
+  border-color: color-mix(in srgb, var(--border-color) 72%, var(--accent-color) 28%);
 }
 
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown.p-focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.page-info {
-  font-weight: bold;
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-label),
+.pagination-wrapper :deep(.p-paginator-rpp-dropdown .p-select-dropdown) {
+  color: inherit;
+}
+
+.pagination-wrapper :deep(.p-paginator-current) {
   color: var(--text-primary);
-  transition: color 0.3s ease;
+  font-weight: 600;
+  padding: 0 0.25rem;
 }
 
 /* 模态框样式 */
@@ -2181,12 +2639,84 @@ onMounted(() => {
   transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
+.form-group input,
+.form-group select {
+  min-height: var(--interview-form-control-height);
+  box-sizing: border-box;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #ff9800;
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.form-group :deep(.p-select) {
+  width: 100%;
+  min-height: var(--interview-form-control-height);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.form-group :deep(.p-select:not(.p-disabled):hover) {
+  border-color: var(--border-color);
+}
+
+.form-group :deep(.p-select.p-focus) {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: none;
+}
+
+.form-group :deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--interview-form-control-height) - 2px);
+  padding: 0 0.75rem;
+  color: var(--text-primary);
+}
+
+.form-group :deep(.p-select-label.p-placeholder) {
+  color: var(--text-secondary);
+}
+
+.form-group :deep(.p-select-dropdown) {
+  width: 2.75rem;
+  color: var(--text-secondary);
+}
+
+.form-group :deep(.p-datepicker) {
+  width: 100%;
+}
+
+.form-group :deep(.p-datepicker-input) {
+  width: 100%;
+  min-height: var(--interview-form-control-height);
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.form-group :deep(.p-datepicker.p-focus .p-datepicker-input) {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: none;
+}
+
+.form-group :deep(.p-datepicker-input::placeholder) {
+  color: var(--text-secondary);
 }
 
 .form-group textarea {
@@ -2431,6 +2961,10 @@ onMounted(() => {
   flex: 1;
 }
 
+.time-slot-selector :deep(.time-slot-select) {
+  flex: 1;
+}
+
 .info-btn {
   padding: 0.75rem;
   border: 1px solid var(--border-color);
@@ -2502,7 +3036,55 @@ onMounted(() => {
   color: var(--text-primary);
   border-bottom: 2px solid var(--border-color);
   font-size: 0.9rem;
+  white-space: nowrap;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.sort-header {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.32rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sort-header:hover {
+  color: inherit;
+}
+
+.sort-header:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sort-header--active {
+  color: inherit;
+}
+
+.sort-indicator {
+  font-size: 0.66rem;
+  color: var(--text-secondary);
+  opacity: 0.42;
+  transform: translateY(1px);
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.sort-header:hover .sort-indicator {
+  opacity: 0.58;
+}
+
+.sort-header--active .sort-indicator {
+  color: var(--accent-color);
+  opacity: 0.74;
 }
 
 .recruits-table td {
@@ -2510,6 +3092,31 @@ onMounted(() => {
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
   transition: border-color 0.3s ease;
+}
+
+.recruits-table th.col-uid,
+.recruits-table th.col-name,
+.recruits-table th.col-major,
+.recruits-table th.col-grade,
+.recruits-table th.col-stage,
+.recruits-table th.col-status,
+.recruits-table th.col-interview-time,
+.recruits-table th.col-format,
+.recruits-table th.col-notification,
+.recruits-table td.col-uid,
+.recruits-table td.col-name,
+.recruits-table td.col-major,
+.recruits-table td.col-grade,
+.recruits-table td.col-stage,
+.recruits-table td.col-status,
+.recruits-table td.col-interview-time,
+.recruits-table td.col-format,
+.recruits-table td.col-notification {
+  white-space: nowrap;
+}
+
+.recruits-table td.col-name {
+  min-width: 5.5rem;
 }
 
 /* 分页补齐空行：固定每页表格视觉高度，避免最后一页变短导致下方卡片上移 */
@@ -2664,24 +3271,28 @@ onMounted(() => {
 }
 
 /* 状态徽章样式 */
-.status-badge.pending {
-  background: #ff9800;
-  color: white;
+.recruits-table .status-badge.pending {
+  background: #fff7e8;
+  color: #b96b08;
+  border-color: #f3d39c;
 }
 
-.status-badge.scheduled {
-  background: #2196f3;
-  color: white;
+.recruits-table .status-badge.scheduled {
+  background: #eaf2ff;
+  color: #2f73da;
+  border-color: #bfd8ff;
 }
 
-.status-badge.completed {
-  background: #4caf50;
-  color: white;
+.recruits-table .status-badge.completed {
+  background: #ecfdf3;
+  color: #0f8a62;
+  border-color: #a7f3d0;
 }
 
-.status-badge.cancelled {
-  background: #f44336;
-  color: white;
+.recruits-table .status-badge.cancelled {
+  background: #ffe8eb;
+  color: #cf415e;
+  border-color: #f6bcc7;
 }
 
 
@@ -2722,9 +3333,10 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
   
-  .pagination {
-    flex-direction: column;
-    gap: 1rem;
+  .pagination-wrapper :deep(.p-paginator) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
   }
   
   .recruits-table {
@@ -2812,6 +3424,7 @@ onMounted(() => {
   color: var(--text-primary);
   border-bottom: 2px solid var(--border-color);
   font-size: 0.9rem;
+  white-space: nowrap;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -2891,7 +3504,7 @@ onMounted(() => {
 }
 
 .candidates-cell {
-  min-width: 300px;
+  min-width: 240px;
 }
 
 .candidates-list {
@@ -2901,19 +3514,27 @@ onMounted(() => {
 
 .candidate-item {
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-color);
-  transition: border-color 0.3s ease;
-}
-
-.candidate-item:last-child {
-  border-bottom: none;
 }
 
 .candidate-info {
-  display: flex;
+  position: relative;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  max-width: 100%;
+  padding-bottom: 0.45rem;
+}
+
+.candidate-item:not(:last-child) .candidate-info::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(100%, 14rem);
+  height: 1px;
+  background: var(--border-color);
+  transition: background-color 0.3s ease;
 }
 
 .candidate-name {
