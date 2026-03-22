@@ -854,6 +854,29 @@ onMounted(() => {
   margin: 0 auto;
   --member-filter-control-height: 3rem;
   --member-form-control-height: 2.875rem;
+  --member-action-view-bg: rgba(59, 130, 246, 0.14);
+  --member-action-view-border: rgba(37, 99, 235, 0.22);
+  --member-action-view-text: #1d4ed8;
+  --member-action-edit-bg: rgba(34, 197, 94, 0.14);
+  --member-action-edit-border: rgba(22, 163, 74, 0.24);
+  --member-action-edit-text: #15803d;
+  --member-action-delete-bg: rgba(239, 68, 68, 0.14);
+  --member-action-delete-border: rgba(220, 38, 38, 0.22);
+  --member-action-delete-text: #b91c1c;
+  --member-action-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.45);
+}
+
+.dark .admin-member-container {
+  --member-action-view-bg: rgba(59, 130, 246, 0.18);
+  --member-action-view-border: rgba(96, 165, 250, 0.22);
+  --member-action-view-text: #bfdbfe;
+  --member-action-edit-bg: rgba(34, 197, 94, 0.18);
+  --member-action-edit-border: rgba(74, 222, 128, 0.22);
+  --member-action-edit-text: #bbf7d0;
+  --member-action-delete-bg: rgba(239, 68, 68, 0.18);
+  --member-action-delete-border: rgba(248, 113, 113, 0.22);
+  --member-action-delete-text: #fecaca;
+  --member-action-shadow: 0 10px 24px -20px rgba(2, 6, 23, 0.85);
 }
 
 h2 {
@@ -1103,34 +1126,63 @@ h2 {
 }
 
 .action-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  padding: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--member-action-shadow);
+}
+
+.action-btn i {
+  font-size: 0.96rem;
 }
 
 .action-btn.view {
-  background: #2196f3;
-  color: white;
+  background: var(--member-action-view-bg);
+  border-color: var(--member-action-view-border);
+  color: var(--member-action-view-text);
 }
 
 .action-btn.edit {
-  background: #ff9800;
-  color: white;
+  background: var(--member-action-edit-bg);
+  border-color: var(--member-action-edit-border);
+  color: var(--member-action-edit-text);
 }
 
 .action-btn.delete {
-  background: #f44336;
-  color: white;
+  background: var(--member-action-delete-bg);
+  border-color: var(--member-action-delete-border);
+  color: var(--member-action-delete-text);
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
+  transform: translateY(-1px);
+}
+
+.action-btn.view:hover {
+  background: color-mix(in srgb, var(--member-action-view-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-view-border) 84%, var(--member-action-view-text) 16%);
+}
+
+.action-btn.edit:hover {
+  background: color-mix(in srgb, var(--member-action-edit-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-edit-border) 84%, var(--member-action-edit-text) 16%);
+}
+
+.action-btn.delete:hover {
+  background: color-mix(in srgb, var(--member-action-delete-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--member-action-delete-border) 84%, var(--member-action-delete-text) 16%);
+}
+
+.action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 18%, transparent), var(--member-action-shadow);
 }
 
 .member-details {

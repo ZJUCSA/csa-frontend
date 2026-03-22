@@ -163,18 +163,42 @@
               </span>
               <span v-else class="no-schedule">-</span>
             </td>
-            <td>
-              <div class="action-buttons">
-                <button v-if="getScheduleStatus(recruit.uid) === 'pending'" @click="showScheduleFormModal(recruit)" class="action-btn schedule" title="安排面试">
+            <td class="col-actions">
+              <div class="table-action-buttons">
+                <button
+                  v-if="getScheduleStatus(recruit.uid) === 'pending'"
+                  @click="showScheduleFormModal(recruit)"
+                  class="table-action-btn table-action-btn--schedule"
+                  title="安排面试"
+                  aria-label="安排面试"
+                >
                   <i class="pi pi-calendar-plus"></i>
                 </button>
-                <button v-else @click="showEditScheduleForm(getScheduleByUid(recruit.uid))" class="action-btn edit" title="编辑排班">
+                <button
+                  v-else
+                  @click="showEditScheduleForm(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--edit"
+                  title="编辑排班"
+                  aria-label="编辑排班"
+                >
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button v-if="getScheduleStatus(recruit.uid) === 'scheduled'" @click="showNotificationConfirm(getScheduleByUid(recruit.uid))" class="action-btn notify" title="发送通知">
+                <button
+                  v-if="getScheduleStatus(recruit.uid) === 'scheduled'"
+                  @click="showNotificationConfirm(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--notify"
+                  title="发送通知"
+                  aria-label="发送通知"
+                >
                   <i class="pi pi-bell"></i>
                 </button>
-                <button v-if="getScheduleStatus(recruit.uid) !== 'pending'" @click="deleteSchedule(getScheduleByUid(recruit.uid))" class="action-btn delete" title="删除排班">
+                <button
+                  v-if="getScheduleStatus(recruit.uid) !== 'pending'"
+                  @click="deleteSchedule(getScheduleByUid(recruit.uid))"
+                  class="table-action-btn table-action-btn--delete"
+                  title="删除排班"
+                  aria-label="删除排班"
+                >
                   <i class="pi pi-trash"></i>
                 </button>
               </div>
@@ -1782,6 +1806,35 @@ onMounted(() => {
   margin: 0 auto;
   --interview-filter-control-height: 3rem;
   --interview-form-control-height: 2.875rem;
+  --interview-table-action-schedule-bg: rgba(59, 130, 246, 0.14);
+  --interview-table-action-schedule-border: rgba(37, 99, 235, 0.22);
+  --interview-table-action-schedule-text: #1d4ed8;
+  --interview-table-action-edit-bg: rgba(34, 197, 94, 0.14);
+  --interview-table-action-edit-border: rgba(22, 163, 74, 0.24);
+  --interview-table-action-edit-text: #15803d;
+  --interview-table-action-notify-bg: rgba(245, 158, 11, 0.15);
+  --interview-table-action-notify-border: rgba(217, 119, 6, 0.22);
+  --interview-table-action-notify-text: #b45309;
+  --interview-table-action-delete-bg: rgba(239, 68, 68, 0.14);
+  --interview-table-action-delete-border: rgba(220, 38, 38, 0.22);
+  --interview-table-action-delete-text: #b91c1c;
+  --interview-table-action-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.45);
+}
+
+.dark .interview-admin {
+  --interview-table-action-schedule-bg: rgba(59, 130, 246, 0.18);
+  --interview-table-action-schedule-border: rgba(96, 165, 250, 0.22);
+  --interview-table-action-schedule-text: #bfdbfe;
+  --interview-table-action-edit-bg: rgba(34, 197, 94, 0.18);
+  --interview-table-action-edit-border: rgba(74, 222, 128, 0.22);
+  --interview-table-action-edit-text: #bbf7d0;
+  --interview-table-action-notify-bg: rgba(245, 158, 11, 0.2);
+  --interview-table-action-notify-border: rgba(251, 191, 36, 0.2);
+  --interview-table-action-notify-text: #fde68a;
+  --interview-table-action-delete-bg: rgba(239, 68, 68, 0.18);
+  --interview-table-action-delete-border: rgba(248, 113, 113, 0.22);
+  --interview-table-action-delete-text: #fecaca;
+  --interview-table-action-shadow: 0 10px 24px -20px rgba(2, 6, 23, 0.85);
 }
 
 .page-header {
@@ -2159,6 +2212,89 @@ onMounted(() => {
 
 .no-score {
   color: #999;
+}
+
+.col-actions {
+  min-width: 10rem;
+}
+
+.table-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.table-action-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--interview-table-action-shadow);
+}
+
+.table-action-btn i {
+  font-size: 0.96rem;
+}
+
+.table-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.table-action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 18%, transparent), var(--interview-table-action-shadow);
+}
+
+.table-action-btn--schedule {
+  background: var(--interview-table-action-schedule-bg);
+  border-color: var(--interview-table-action-schedule-border);
+  color: var(--interview-table-action-schedule-text);
+}
+
+.table-action-btn--schedule:hover {
+  background: color-mix(in srgb, var(--interview-table-action-schedule-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-schedule-border) 84%, var(--interview-table-action-schedule-text) 16%);
+}
+
+.table-action-btn--edit {
+  background: var(--interview-table-action-edit-bg);
+  border-color: var(--interview-table-action-edit-border);
+  color: var(--interview-table-action-edit-text);
+}
+
+.table-action-btn--edit:hover {
+  background: color-mix(in srgb, var(--interview-table-action-edit-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-edit-border) 84%, var(--interview-table-action-edit-text) 16%);
+}
+
+.table-action-btn--notify {
+  background: var(--interview-table-action-notify-bg);
+  border-color: var(--interview-table-action-notify-border);
+  color: var(--interview-table-action-notify-text);
+}
+
+.table-action-btn--notify:hover {
+  background: color-mix(in srgb, var(--interview-table-action-notify-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-notify-border) 84%, var(--interview-table-action-notify-text) 16%);
+}
+
+.table-action-btn--delete {
+  background: var(--interview-table-action-delete-bg);
+  border-color: var(--interview-table-action-delete-border);
+  color: var(--interview-table-action-delete-text);
+}
+
+.table-action-btn--delete:hover {
+  background: color-mix(in srgb, var(--interview-table-action-delete-bg) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--interview-table-action-delete-border) 84%, var(--interview-table-action-delete-text) 16%);
 }
 
 .action-buttons {
