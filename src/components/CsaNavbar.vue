@@ -173,7 +173,17 @@ watch(
 }
 
 .dark .fixed-nav.fixed-nav--admin {
-    box-shadow: none;
+    background-color: rgba(15, 23, 42, 0.88);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: 0 10px 28px rgba(2, 6, 23, 0.28);
+    --nav-action-border: rgba(148, 163, 184, 0.18);
+    --nav-action-border-hover: rgba(129, 140, 248, 0.24);
+    --nav-action-bg: rgba(255, 255, 255, 0.04);
+    --nav-action-bg-hover: rgba(255, 255, 255, 0.08);
+    --nav-action-color: #cbd5e1;
+    --nav-action-color-hover: #f8fafc;
+    --nav-action-shadow: none;
+    --nav-action-shadow-hover: none;
 }
 
 /* 导航栏文字颜色适配主题 */

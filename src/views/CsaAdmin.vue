@@ -142,9 +142,18 @@ const menuItems = computed(() =>
 }
 
 .admin-layout.dark {
-    --admin-sidebar-bg: #202938;
-    --admin-content-bg: #172030;
-    background: #111827;
+    --bg-primary: #162131;
+    --bg-secondary: #1b2738;
+    --bg-surface: #243246;
+    --text-primary: #f8fafc;
+    --text-secondary: #9eb0c7;
+    --border-color: rgba(148, 163, 184, 0.18);
+    --shadow-color: rgba(2, 6, 23, 0.42);
+    --accent-color: #66a8ff;
+    --accent-hover: #8bbcff;
+    --admin-sidebar-bg: #1d2a3c;
+    --admin-content-bg: #131c2b;
+    background: #0f172a;
 }
 
 .admin-sidebar {
@@ -157,7 +166,9 @@ const menuItems = computed(() =>
     height: calc(100vh - var(--admin-sticky-offset));
     display: flex;
     flex-direction: column;
-    box-shadow: inset -1px 0 0 rgba(148, 163, 184, 0.08);
+    box-shadow:
+        inset -1px 0 0 rgba(148, 163, 184, 0.08),
+        18px 0 40px -36px rgba(15, 23, 42, 0.48);
     transition:
         width 0.28s ease,
         min-width 0.28s ease,
@@ -174,6 +185,10 @@ const menuItems = computed(() =>
 
 .admin-content {
     min-height: calc(100vh - var(--admin-sticky-offset));
+}
+
+.admin-layout.dark .admin-content {
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.06);
 }
 
 .admin-sidebar__header {
