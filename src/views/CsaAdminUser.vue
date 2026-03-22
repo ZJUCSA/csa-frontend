@@ -343,12 +343,10 @@ watch([page, size], () => {
     border: 1px solid var(--user-btn-search-border) !important;
     background: var(--user-btn-search-bg) !important;
     color: var(--user-btn-search-text) !important;
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.18) !important;
     transition:
         background 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease,
-        box-shadow 0.2s ease,
         transform 0.2s ease;
 }
 
@@ -362,7 +360,6 @@ watch([page, size], () => {
     color: var(--user-btn-search-text) !important;
     border-color: var(--user-btn-search-border) !important;
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.24) !important;
 }
 
 :deep(.p-datatable-column-title) {

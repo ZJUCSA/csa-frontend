@@ -57,7 +57,7 @@
     </div>
 
     <!-- 面试记录表格 -->
-    <div class="table-container">
+    <div class="table-container" @wheel="handleHorizontalWheel">
       <div v-if="loading" class="loading">加载中...</div>
       <div v-else-if="recruits.length === 0" class="empty-state">
         <div class="empty-icon">👥</div>
@@ -209,7 +209,7 @@
           <i class="pi pi-refresh"></i> 刷新
         </button>
       </div>
-      <div class="table-container">
+      <div class="table-container" @wheel="handleHorizontalWheel">
         <table class="time-slot-table">
           <thead>
             <tr>
@@ -874,6 +874,27 @@ const getSortIconClass = (field) => {
   }
 
   return sortOrder.value === 'asc' ? 'pi-angle-up' : 'pi-angle-down';
+};
+
+const handleHorizontalWheel = (event) => {
+  const container = event.currentTarget;
+
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+
+  const hasHorizontalOverflow = container.scrollWidth > container.clientWidth + 1;
+  if (!hasHorizontalOverflow) {
+    return;
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (!delta) {
+    return;
+  }
+
+  event.preventDefault();
+  container.scrollLeft += delta;
 };
 
 // 方法
@@ -2002,7 +2023,8 @@ onMounted(() => {
   background: var(--bg-surface);
   border-radius: 12px;
   box-shadow: 0 2px 4px var(--shadow-color);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   transition: background-color 0.3s ease;
 }
 

@@ -2148,7 +2148,7 @@ onMounted(async () => {
 <style scoped>
 .admin-recruit-container {
   --recruit-filter-control-height: 2.75rem;
-  --recruit-filter-button-height: 2.875rem;
+  --recruit-filter-button-height: 2.75rem;
   --recruit-btn-export-bg: #4caf50;
   --recruit-btn-export-bg-hover: #439846;
   --recruit-btn-export-border: #4caf50;
