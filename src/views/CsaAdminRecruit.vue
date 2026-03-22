@@ -2147,18 +2147,20 @@ onMounted(async () => {
 
 <style scoped>
 .admin-recruit-container {
+  --recruit-filter-control-height: 2.75rem;
+  --recruit-filter-button-height: 2.875rem;
   --recruit-btn-export-bg: #4caf50;
   --recruit-btn-export-bg-hover: #439846;
   --recruit-btn-export-border: #4caf50;
   --recruit-btn-export-text: #ffffff;
-  --recruit-btn-export-shadow: 0 10px 22px rgba(76, 175, 80, 0.18);
-  --recruit-btn-export-shadow-hover: 0 12px 28px rgba(76, 175, 80, 0.24);
+  --recruit-btn-export-shadow: none;
+  --recruit-btn-export-shadow-hover: none;
   --recruit-btn-delete-bg: #ef4444;
   --recruit-btn-delete-bg-hover: #dc3c3c;
   --recruit-btn-delete-border: #ef4444;
   --recruit-btn-delete-text: #ffffff;
-  --recruit-btn-delete-shadow: 0 10px 22px rgba(239, 68, 68, 0.18);
-  --recruit-btn-delete-shadow-hover: 0 12px 28px rgba(239, 68, 68, 0.24);
+  --recruit-btn-delete-shadow: none;
+  --recruit-btn-delete-shadow-hover: none;
   --recruit-dept-tag-bg: #e6f1ff;
   --recruit-dept-tag-border: #bfd8ff;
   --recruit-dept-tag-text: #2f73da;
@@ -2199,14 +2201,14 @@ onMounted(async () => {
   --recruit-btn-export-bg-hover: rgba(34, 197, 94, 0.3);
   --recruit-btn-export-border: rgba(74, 222, 128, 0.36);
   --recruit-btn-export-text: #baf7cb;
-  --recruit-btn-export-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
-  --recruit-btn-export-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.26);
+  --recruit-btn-export-shadow: none;
+  --recruit-btn-export-shadow-hover: none;
   --recruit-btn-delete-bg: rgba(239, 68, 68, 0.2);
   --recruit-btn-delete-bg-hover: rgba(239, 68, 68, 0.28);
   --recruit-btn-delete-border: rgba(248, 113, 113, 0.34);
   --recruit-btn-delete-text: #ffb0b8;
-  --recruit-btn-delete-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
-  --recruit-btn-delete-shadow-hover: 0 14px 32px rgba(15, 23, 42, 0.26);
+  --recruit-btn-delete-shadow: none;
+  --recruit-btn-delete-shadow-hover: none;
   --recruit-dept-tag-bg: rgba(59, 130, 246, 0.2);
   --recruit-dept-tag-border: rgba(96, 165, 250, 0.34);
   --recruit-dept-tag-text: #a9cbff;
@@ -2237,8 +2239,6 @@ onMounted(async () => {
 }
 
 .filter-section {
-  --recruit-filter-control-height: 2.75rem;
-  --recruit-filter-button-height: 3.5rem;
   background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
@@ -2364,7 +2364,7 @@ onMounted(async () => {
 }
 
 :deep(.recruit-batch-action.p-button) {
-  min-height: var(--recruit-filter-button-height);
+  min-height: var(--recruit-filter-button-height, 2.875rem);
   padding: 0 1.2rem !important;
   border-radius: 10px !important;
   border: 1px solid transparent !important;
@@ -2397,7 +2397,6 @@ onMounted(async () => {
   color: var(--recruit-btn-export-text) !important;
   border-color: var(--recruit-btn-export-border) !important;
   box-shadow: var(--recruit-btn-export-shadow-hover) !important;
-  transform: translateY(-1px);
 }
 
 :deep(.recruit-batch-action--delete.p-button) {
@@ -2412,7 +2411,6 @@ onMounted(async () => {
   color: var(--recruit-btn-delete-text) !important;
   border-color: var(--recruit-btn-delete-border) !important;
   box-shadow: var(--recruit-btn-delete-shadow-hover) !important;
-  transform: translateY(-1px);
 }
 
 .batch-button.delete-all {
