@@ -245,6 +245,11 @@ watch([page, size, category], () => {
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
+:global(.dark) .page-title {
+    color: #e7eef9;
+    text-shadow: 0 1px 0 rgba(9, 14, 24, 0.65);
+}
+
 .page-subtitle {
     font-size: 1.2rem;
     color: #516887;
@@ -253,7 +258,7 @@ watch([page, size, category], () => {
 }
 
 :global(.dark) .page-subtitle {
-    color: #9eb0c7;
+    color: #b7c6d9;
     opacity: 1;
 }
 
