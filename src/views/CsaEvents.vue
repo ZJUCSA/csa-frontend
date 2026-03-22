@@ -231,7 +231,7 @@ watch([page, size, category], () => {
 .page-header {
     text-align: center;
     margin-bottom: 40px;
-    color: white;
+    color: #17345f;
 }
 
 :global(.dark) .page-header {
@@ -242,12 +242,13 @@ watch([page, size, category], () => {
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 10px 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .page-subtitle {
     font-size: 1.2rem;
-    opacity: 0.9;
+    color: #516887;
+    opacity: 1;
     margin: 0;
 }
 
