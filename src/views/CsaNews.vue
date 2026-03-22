@@ -432,8 +432,11 @@ watch([page, size, category], () => {
 
 .category-english {
     font-size: 0.8rem;
-    color: var(--text-secondary);
     opacity: 0.7;
+}
+
+.category-button.active .category-english {
+    opacity: 0.88;
 }
 
 .main-content {
