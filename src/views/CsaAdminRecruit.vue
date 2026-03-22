@@ -1282,7 +1282,7 @@ onMounted(async () => {
             <td class="col-department-preference">
               <div class="department-order">
                 <span v-for="dept in getDepartmentOrder(recruit)" :key="dept.id" class="dept-tag">
-                  {{ dept.name }}({{ dept.score }})
+                  {{ dept.name }}
                 </span>
               </div>
             </td>
