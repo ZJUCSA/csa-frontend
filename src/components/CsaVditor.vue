@@ -348,6 +348,7 @@ let toolbarEnhancementFrameId = 0
 let toolbarEnhancementTimeoutId = 0
 let codeLanguageObserver = null
 let fullscreenClassObserver = null
+let fullscreenScopeElement = null
 const inlineCodeThemeStyleId = 'csa-vditor-hljs-style'
 const contentThemeRootClassPrefix = 'csa-vditor--content-theme-'
 
@@ -382,6 +383,8 @@ const getCurrentContentTheme = () =>
     editor.value?.vditor?.options?.preview?.theme?.current || 'light'
 const getCurrentCodeTheme = () =>
     editor.value?.vditor?.options?.preview?.hljs?.style || 'github'
+const findDialogFullscreenScope = (element) =>
+    element?.closest('.p-dialog-content') || element?.closest('.p-dialog') || null
 
 const findFullscreenContainingBlock = (element) => {
     let current = element?.parentElement
@@ -413,6 +416,11 @@ const findFullscreenContainingBlock = (element) => {
     return null
 }
 
+const clearFullscreenScope = () => {
+    fullscreenScopeElement?.classList.remove('csa-vditor-fullscreen-scope')
+    fullscreenScopeElement = null
+}
+
 const clearFullscreenOverrides = () => {
     const root = editorElement.value
 
@@ -420,7 +428,9 @@ const clearFullscreenOverrides = () => {
         return
     }
 
-    ;['top', 'left', 'width', 'height', 'max-width'].forEach((property) => {
+    clearFullscreenScope()
+
+    ;['position', 'top', 'right', 'bottom', 'left', 'width', 'height', 'max-width'].forEach((property) => {
         root.style.removeProperty(property)
     })
 }
@@ -437,11 +447,35 @@ const syncFullscreenPosition = () => {
         return
     }
 
+    const dialogScope = findDialogFullscreenScope(root)
+
+    if (dialogScope instanceof HTMLElement) {
+        if (fullscreenScopeElement && fullscreenScopeElement !== dialogScope) {
+            fullscreenScopeElement.classList.remove('csa-vditor-fullscreen-scope')
+        }
+
+        fullscreenScopeElement = dialogScope
+        fullscreenScopeElement.classList.add('csa-vditor-fullscreen-scope')
+
+        root.style.setProperty('position', 'absolute', 'important')
+        root.style.setProperty('top', '0', 'important')
+        root.style.setProperty('right', '0', 'important')
+        root.style.setProperty('bottom', '0', 'important')
+        root.style.setProperty('left', '0', 'important')
+        root.style.setProperty('width', 'auto', 'important')
+        root.style.setProperty('height', 'auto', 'important')
+        root.style.setProperty('max-width', 'none', 'important')
+        return
+    }
+
+    clearFullscreenScope()
+
     const containingBlock = findFullscreenContainingBlock(root)
     const rect = containingBlock?.getBoundingClientRect()
     const offsetTop = rect ? -rect.top : 0
     const offsetLeft = rect ? -rect.left : 0
 
+    root.style.setProperty('position', 'fixed', 'important')
     root.style.setProperty('top', `${offsetTop}px`, 'important')
     root.style.setProperty('left', `${offsetLeft}px`, 'important')
     root.style.setProperty('width', '100vw', 'important')
@@ -977,6 +1011,14 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+:deep(.p-dialog-content) {
+    position: relative;
+}
+
+:deep(.p-dialog-content.csa-vditor-fullscreen-scope) {
+    overflow: hidden;
+}
+
 :deep(.csa-vditor-theme-option) {
     position: relative;
     display: block;
