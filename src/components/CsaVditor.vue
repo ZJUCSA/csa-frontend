@@ -92,6 +92,8 @@ const extendedCodeLanguages = [
 ]
 
 const codeLanguageOptions = [...new Set([...commonCodeLanguages, ...extendedCodeLanguages])]
+const codeLanguageOrder = new Map(codeLanguageOptions.map((language, index) => [language, index]))
+const codeLanguageSet = new Set(codeLanguageOptions)
 
 const toolbarModes = {
     simple: [
@@ -385,6 +387,38 @@ const getCurrentCodeTheme = () =>
     editor.value?.vditor?.options?.preview?.hljs?.style || 'github'
 const findDialogFullscreenScope = (element) =>
     element?.closest('.p-dialog-content') || element?.closest('.p-dialog') || null
+const isCodeLanguageHintData = (data) =>
+    Array.isArray(data) &&
+    data.length > 0 &&
+    data.every(
+        (item) =>
+            typeof item?.value === 'string' && codeLanguageSet.has(item.value.toLowerCase())
+    )
+
+const normalizeCodeLanguageHintData = (data) => {
+    if (!isCodeLanguageHintData(data)) {
+        return data
+    }
+
+    return Array.from(
+        new Map(
+            data.map((item) => {
+                const value = item.value.toLowerCase()
+
+                return [value, { ...item, value, html: item.html || value }]
+            })
+        ).values()
+    ).sort((left, right) => {
+        const leftOrder = codeLanguageOrder.get(left.value) ?? Number.MAX_SAFE_INTEGER
+        const rightOrder = codeLanguageOrder.get(right.value) ?? Number.MAX_SAFE_INTEGER
+
+        if (leftOrder !== rightOrder) {
+            return leftOrder - rightOrder
+        }
+
+        return left.value.localeCompare(right.value)
+    })
+}
 
 const findFullscreenContainingBlock = (element) => {
     let current = element?.parentElement
@@ -502,6 +536,20 @@ const setupFullscreenObserver = () => {
     window.addEventListener('resize', syncFullscreenPosition)
 }
 
+const patchCodeLanguageHints = () => {
+    const hint = editor.value?.vditor?.hint
+
+    if (!hint || hint.__csaCodeLanguagePatched) {
+        return
+    }
+
+    const originalGenHTML = hint.genHTML.bind(hint)
+
+    hint.genHTML = (data, key, vditorState) =>
+        originalGenHTML(normalizeCodeLanguageHintData(data), key, vditorState)
+    hint.__csaCodeLanguagePatched = true
+}
+
 const isCodeLanguageInput = (input) => {
     if (!(input instanceof HTMLInputElement)) {
         return false
@@ -525,13 +573,14 @@ const renderCodeLanguageHints = (input) => {
 
     const cursorIndex = input.selectionStart ?? input.value.length
     const key = input.value.substring(0, cursorIndex).trim().toLowerCase()
-    const matchLangData = codeLanguageOptions
-        .filter((language) => key === '' || language.includes(key))
-        .slice(0, 8)
-        .map((language) => ({
-            html: language,
-            value: language,
-        }))
+    const matchLangData = normalizeCodeLanguageHintData(
+        codeLanguageOptions
+            .filter((language) => key === '' || language.includes(key))
+            .map((language) => ({
+                html: language,
+                value: language,
+            }))
+    ).slice(0, 8)
 
     if (matchLangData.length === 0) {
         vditorState.hint.element.style.display = 'none'
@@ -949,6 +998,7 @@ onMounted(() => {
         value: props.modelValue ?? '',
         after() {
             syncContentThemeRootClass()
+            patchCodeLanguageHints()
             setupCodeLanguageObserver()
             setupFullscreenObserver()
             scheduleToolbarEnhancements()
@@ -983,6 +1033,7 @@ onMounted(() => {
     })
 
     syncContentThemeRootClass()
+    patchCodeLanguageHints()
     setupCodeLanguageObserver()
     setupFullscreenObserver()
     scheduleToolbarEnhancements()
