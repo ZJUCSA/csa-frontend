@@ -999,6 +999,24 @@ const bindToolbarDismissBehavior = () => {
         })
     }
 
+    const suppressToolbarTooltip = (triggerButton) => {
+        if (!triggerButton.classList.contains('vditor-tooltipped')) {
+            return
+        }
+
+        triggerButton.classList.add('csa-vditor-tooltipped--suppress')
+        triggerButton.blur?.()
+
+        if (triggerButton.dataset.tooltipSuppressBound === 'true') {
+            return
+        }
+
+        triggerButton.dataset.tooltipSuppressBound = 'true'
+        triggerButton.addEventListener('mouseleave', () => {
+            triggerButton.classList.remove('csa-vditor-tooltipped--suppress')
+        })
+    }
+
     toolbarElement.dataset.dismissBound = 'true'
     toolbarElement.addEventListener(
         'click',
@@ -1008,6 +1026,8 @@ const bindToolbarDismissBehavior = () => {
             if (!(triggerButton instanceof HTMLElement)) {
                 return
             }
+
+            suppressToolbarTooltip(triggerButton)
 
             const itemContainer = triggerButton.parentElement
             const hasNestedPanel = Array.from(itemContainer?.children || []).some(
@@ -1169,6 +1189,13 @@ onBeforeUnmount(() => {
 
 :deep(.p-dialog-content.csa-vditor-fullscreen-scope) {
     overflow: hidden;
+}
+
+:deep(.vditor-tooltipped.csa-vditor-tooltipped--suppress::before),
+:deep(.vditor-tooltipped.csa-vditor-tooltipped--suppress::after) {
+    display: none !important;
+    opacity: 0 !important;
+    animation: none !important;
 }
 
 :deep(.csa-vditor-theme-option) {
