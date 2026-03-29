@@ -17,83 +17,93 @@ const codeThemeStyles = Object.fromEntries(
     ])
 )
 
-const commonCodeLanguages = [
-    'javascript',
-    'js',
-    'typescript',
-    'ts',
-    'python',
-    'java',
-    'go',
-    'rust',
-    'cpp',
-    'c',
-    'csharp',
-    'php',
-    'ruby',
-    'swift',
-    'kotlin',
-    'dart',
-    'lua',
-    'sql',
-    'bash',
-    'shell',
-    'powershell',
-    'html',
-    'css',
-    'json',
-    'yaml',
-    'xml',
-    'makefile',
-    'diff',
-    'http',
-    'nginx',
-    'ini',
-    'properties',
-    'plaintext',
-    'markdown',
+const codeLanguageEntries = [
+    { value: 'javascript', label: 'JavaScript', aliases: ['js'] },
+    { value: 'typescript', label: 'TypeScript', aliases: ['ts'] },
+    { value: 'python', label: 'Python', aliases: ['py', 'python-repl'] },
+    { value: 'java', label: 'Java' },
+    { value: 'go', label: 'Go' },
+    { value: 'rust', label: 'Rust' },
+    { value: 'cpp', label: 'C++', aliases: ['c++'] },
+    { value: 'c', label: 'C' },
+    { value: 'csharp', label: 'C#', aliases: ['c#', 'cs'] },
+    { value: 'php', label: 'PHP', aliases: ['php-template'] },
+    { value: 'ruby', label: 'Ruby' },
+    { value: 'swift', label: 'Swift' },
+    { value: 'kotlin', label: 'Kotlin' },
+    { value: 'dart', label: 'Dart' },
+    { value: 'lua', label: 'Lua' },
+    { value: 'objectivec', label: 'Objective-C', aliases: ['objective-c', 'objc'] },
+    { value: 'perl', label: 'Perl' },
+    { value: 'r', label: 'R' },
+    { value: 'haskell', label: 'Haskell' },
+    { value: 'clojure', label: 'Clojure' },
+    { value: 'julia', label: 'Julia', aliases: ['julia-repl'] },
+    { value: 'matlab', label: 'MATLAB' },
+    { value: 'vbnet', label: 'VB.NET', aliases: ['vb', 'vb.net'] },
+    { value: 'ada', label: 'Ada' },
+    { value: 'fortran', label: 'Fortran' },
+    { value: 'lisp', label: 'Lisp' },
+    { value: 'solidity', label: 'Solidity' },
+    { value: 'yul', label: 'Yul' },
+    { value: 'bash', label: 'Bash', aliases: ['shell', 'sh'] },
+    { value: 'powershell', label: 'PowerShell', aliases: ['ps1'] },
+    { value: 'sql', label: 'SQL', aliases: ['pgsql', 'sql_more'] },
+    { value: 'html', label: 'HTML' },
+    { value: 'css', label: 'CSS' },
+    { value: 'scss', label: 'SCSS' },
+    { value: 'less', label: 'Less' },
+    { value: 'json', label: 'JSON' },
+    { value: 'yaml', label: 'YAML' },
+    { value: 'xml', label: 'XML' },
+    { value: 'http', label: 'HTTP' },
+    { value: 'diff', label: 'Diff' },
+    { value: 'nginx', label: 'Nginx' },
+    { value: 'apache', label: 'Apache' },
+    { value: 'ini', label: 'INI' },
+    { value: 'properties', label: 'Properties' },
+    { value: 'makefile', label: 'Makefile' },
+    { value: 'cmake', label: 'CMake' },
+    { value: 'gradle', label: 'Gradle' },
+    { value: 'markdown', label: 'Markdown', aliases: ['md'] },
+    { value: 'plaintext', label: 'Plain Text', aliases: ['text', 'txt'] },
+    { value: 'coffeescript', label: 'CoffeeScript' },
+    { value: 'erb', label: 'ERB' },
+    { value: 'stata', label: 'Stata' },
+    { value: 'mathematica', label: 'Mathematica' },
+    { value: 'mermaid', label: 'Mermaid' },
+    { value: 'echarts', label: 'ECharts' },
+    { value: 'mindmap', label: 'Mindmap' },
+    { value: 'plantuml', label: 'PlantUML', aliases: ['uml'] },
+    { value: 'graphviz', label: 'Graphviz' },
+    { value: 'flowchart', label: 'Flowchart' },
+    { value: 'abc', label: 'ABC Notation' },
 ]
 
-const extendedCodeLanguages = [
-    'mermaid',
-    'echarts',
-    'mindmap',
-    'plantuml',
-    'abc',
-    'graphviz',
-    'flowchart',
-    'apache',
-    'coffeescript',
-    'less',
-    'objectivec',
-    'php-template',
-    'perl',
-    'python-repl',
-    'r',
-    'scss',
-    'vbnet',
-    'ada',
-    'clojure',
-    'erb',
-    'fortran',
-    'haskell',
-    'julia',
-    'julia-repl',
-    'lisp',
-    'matlab',
-    'pgsql',
-    'sql_more',
-    'stata',
-    'cmake',
-    'mathematica',
-    'solidity',
-    'yul',
-    'gradle',
-]
-
-const codeLanguageOptions = [...new Set([...commonCodeLanguages, ...extendedCodeLanguages])]
+const codeLanguageOptions = codeLanguageEntries.map(({ value }) => value)
+const codeLanguageEntryMap = new Map(
+    codeLanguageEntries.map((entry, index) => [
+        entry.value,
+        {
+            ...entry,
+            index,
+            searchTerms: Array.from(
+                new Set([
+                    entry.value.toLowerCase(),
+                    entry.label.toLowerCase(),
+                    ...(entry.aliases || []).map((alias) => alias.toLowerCase()),
+                ])
+            ),
+        },
+    ])
+)
 const codeLanguageOrder = new Map(codeLanguageOptions.map((language, index) => [language, index]))
-const codeLanguageSet = new Set(codeLanguageOptions)
+const codeLanguageLookup = new Map(
+    Array.from(codeLanguageEntryMap.values()).flatMap((entry) => [
+        [entry.value.toLowerCase(), entry.value],
+        ...(entry.aliases || []).map((alias) => [alias.toLowerCase(), entry.value]),
+    ])
+)
 
 const toolbarModes = {
     simple: [
@@ -390,13 +400,16 @@ const getCurrentCodeTheme = () =>
     editor.value?.vditor?.options?.preview?.hljs?.style || 'github'
 const findDialogFullscreenScope = (element) =>
     element?.closest('.p-dialog-content') || element?.closest('.p-dialog') || null
+const resolveCodeLanguageValue = (value) =>
+    typeof value === 'string' ? codeLanguageLookup.get(value.toLowerCase()) || null : null
+const getCodeLanguageEntry = (value) => {
+    const normalizedValue = resolveCodeLanguageValue(value)
+    return normalizedValue ? codeLanguageEntryMap.get(normalizedValue) || null : null
+}
 const isCodeLanguageHintData = (data) =>
     Array.isArray(data) &&
     data.length > 0 &&
-    data.every(
-        (item) =>
-            typeof item?.value === 'string' && codeLanguageSet.has(item.value.toLowerCase())
-    )
+    data.every((item) => Boolean(getCodeLanguageEntry(item?.value)))
 
 const normalizeCodeLanguageHintData = (data) => {
     if (!isCodeLanguageHintData(data)) {
@@ -405,11 +418,17 @@ const normalizeCodeLanguageHintData = (data) => {
 
     return Array.from(
         new Map(
-            data.map((item) => {
-                const value = item.value.toLowerCase()
+            data
+                .map((item) => {
+                    const entry = getCodeLanguageEntry(item.value)
 
-                return [value, { ...item, value, html: item.html || value }]
-            })
+                    if (!entry) {
+                        return null
+                    }
+
+                    return [entry.value, { ...item, value: entry.value, html: entry.label }]
+                })
+                .filter(Boolean)
         ).values()
     ).sort((left, right) => {
         const leftOrder = codeLanguageOrder.get(left.value) ?? Number.MAX_SAFE_INTEGER
@@ -421,6 +440,48 @@ const normalizeCodeLanguageHintData = (data) => {
 
         return left.value.localeCompare(right.value)
     })
+}
+
+const scoreCodeLanguageEntry = (entry, key) => {
+    if (!key) {
+        return 0
+    }
+
+    if (entry.searchTerms.some((term) => term === key)) {
+        return 0
+    }
+
+    if (entry.searchTerms.some((term) => term.startsWith(key))) {
+        return 1
+    }
+
+    if (entry.searchTerms.some((term) => term.includes(key))) {
+        return 2
+    }
+
+    return Number.MAX_SAFE_INTEGER
+}
+
+const getMatchedCodeLanguageData = (key) => {
+    const normalizedKey = key.trim().toLowerCase()
+
+    return Array.from(codeLanguageEntryMap.values())
+        .map((entry) => ({
+            entry,
+            score: scoreCodeLanguageEntry(entry, normalizedKey),
+        }))
+        .filter(({ score }) => normalizedKey === '' || score !== Number.MAX_SAFE_INTEGER)
+        .sort((left, right) => {
+            if (left.score !== right.score) {
+                return left.score - right.score
+            }
+
+            return left.entry.index - right.entry.index
+        })
+        .map(({ entry }) => ({
+            html: entry.label,
+            value: entry.value,
+        }))
 }
 
 const findFullscreenContainingBlock = (element) => {
@@ -586,6 +647,66 @@ const setupFullscreenObserver = () => {
     window.addEventListener('resize', syncFullscreenPosition)
 }
 
+const renderCodeLanguageHintPanel = (hint, data, key, vditorState, originalGenHTML) => {
+    const normalizedData = normalizeCodeLanguageHintData(data)
+
+    if (!isCodeLanguageHintData(normalizedData)) {
+        hint.element.classList.remove('csa-vditor-code-language-hint')
+        originalGenHTML(data, key, vditorState)
+        return
+    }
+
+    if (normalizedData.length === 0) {
+        hint.element.classList.remove('csa-vditor-code-language-hint')
+        hint.element.style.display = 'none'
+        return
+    }
+
+    originalGenHTML(normalizedData.slice(0, 8), key, vditorState)
+    hint.element.classList.add('csa-vditor-code-language-hint')
+
+    hint.element.innerHTML = normalizedData
+        .map((hintData, index) => {
+            let html = hintData.html
+
+            if (key !== '') {
+                const lowerHtml = html.toLowerCase()
+                const matchIndex = lowerHtml.indexOf(key.toLowerCase())
+
+                if (matchIndex > -1) {
+                    html =
+                        html.slice(0, matchIndex) +
+                        '<b>' +
+                        html.slice(matchIndex, matchIndex + key.length) +
+                        '</b>' +
+                        html.slice(matchIndex + key.length)
+                }
+            }
+
+            return `<button data-value="${encodeURIComponent(hintData.value)} "${
+                index === 0 ? " class='vditor-hint--current'" : ''
+            }>${html}</button>`
+        })
+        .join('')
+
+    hint.element.querySelectorAll('button').forEach((element) => {
+        element.addEventListener('click', (event) => {
+            hint.fillEmoji(element, vditorState)
+            event.preventDefault()
+        })
+    })
+
+    requestAnimationFrame(() => {
+        const hintRect = hint.element.getBoundingClientRect()
+
+        if (hintRect.bottom > window.innerHeight - 8) {
+            const currentTop = parseFloat(hint.element.style.top || '0')
+            const overflowOffset = hintRect.bottom - (window.innerHeight - 8)
+            hint.element.style.top = `${Math.max(8, currentTop - overflowOffset)}px`
+        }
+    })
+}
+
 const patchCodeLanguageHints = () => {
     const hint = editor.value?.vditor?.hint
 
@@ -596,7 +717,7 @@ const patchCodeLanguageHints = () => {
     const originalGenHTML = hint.genHTML.bind(hint)
 
     hint.genHTML = (data, key, vditorState) =>
-        originalGenHTML(normalizeCodeLanguageHintData(data), key, vditorState)
+        renderCodeLanguageHintPanel(hint, data, key, vditorState, originalGenHTML)
     hint.__csaCodeLanguagePatched = true
 }
 
@@ -623,16 +744,10 @@ const renderCodeLanguageHints = (input) => {
 
     const cursorIndex = input.selectionStart ?? input.value.length
     const key = input.value.substring(0, cursorIndex).trim().toLowerCase()
-    const matchLangData = normalizeCodeLanguageHintData(
-        codeLanguageOptions
-            .filter((language) => key === '' || language.includes(key))
-            .map((language) => ({
-                html: language,
-                value: language,
-            }))
-    ).slice(0, 8)
+    const matchLangData = getMatchedCodeLanguageData(key)
 
     if (matchLangData.length === 0) {
+        vditorState.hint.element.classList.remove('csa-vditor-code-language-hint')
         vditorState.hint.element.style.display = 'none'
         return
     }
@@ -1196,6 +1311,13 @@ onBeforeUnmount(() => {
     display: none !important;
     opacity: 0 !important;
     animation: none !important;
+}
+
+:deep(.vditor-hint.csa-vditor-code-language-hint) {
+    min-width: 180px;
+    max-height: min(320px, calc(100vh - 1rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 :deep(.csa-vditor-theme-option) {
