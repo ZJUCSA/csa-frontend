@@ -1,4 +1,5 @@
 <script setup>
+import CsaVditor from '@/components/CsaVditor.vue'
 import { eventCategory } from '@/const'
 import { processMarkdownImages, processImageUrl } from '@/utils/imageUtils'
 
@@ -250,12 +251,12 @@ watch(visible, value => {
 
                 <div class="flex flex-col gap-4 mb-4">
                     <label>描述</label>
-                    <vue-vditor
+                    <CsaVditor
                         v-model="data.description"
                         :options="options"
                         class="editor"
                         @after="rendering = false"
-                    ></vue-vditor>
+                    ></CsaVditor>
                     <Skeleton
                         v-if="rendering"
                         width="100%"
