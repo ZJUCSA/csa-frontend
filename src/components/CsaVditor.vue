@@ -987,31 +987,43 @@ const bindToolbarDismissBehavior = () => {
         return false
     }
 
-    toolbarElement.dataset.dismissBound = 'true'
-    toolbarElement.addEventListener('click', (event) => {
-        const triggerButton = event.target?.closest?.('button[data-type]')
-
-        if (!(triggerButton instanceof HTMLButtonElement)) {
-            return
-        }
-
-        const itemContainer = triggerButton.parentElement
-        const hasNestedPanel = Array.from(itemContainer?.children || []).some(
-            (element) => element.classList?.contains('vditor-hint')
-        )
-
-        if (hasNestedPanel) {
-            return
-        }
-
-        requestAnimationFrame(() => {
-            toolbarElement.querySelectorAll('.vditor-hint').forEach((panel) => {
-                if (panel instanceof HTMLElement) {
-                    panel.style.display = 'none'
-                }
-            })
+    const dismissToolbarPanels = () => {
+        toolbarElement.querySelectorAll('.vditor-hint').forEach((panel) => {
+            if (panel instanceof HTMLElement) {
+                panel.style.display = 'none'
+            }
         })
-    })
+
+        toolbarElement.querySelectorAll('.vditor-hint--current').forEach((item) => {
+            item.classList.remove('vditor-hint--current')
+        })
+    }
+
+    toolbarElement.dataset.dismissBound = 'true'
+    toolbarElement.addEventListener(
+        'click',
+        (event) => {
+            const triggerButton = event.target?.closest?.('[data-type]')
+
+            if (!(triggerButton instanceof HTMLElement)) {
+                return
+            }
+
+            const itemContainer = triggerButton.parentElement
+            const hasNestedPanel = Array.from(itemContainer?.children || []).some(
+                (element) => element.classList?.contains('vditor-hint')
+            )
+
+            if (hasNestedPanel) {
+                return
+            }
+
+            requestAnimationFrame(() => {
+                dismissToolbarPanels()
+            })
+        },
+        true
+    )
 
     return true
 }
