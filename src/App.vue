@@ -3,14 +3,20 @@
     <div class="main-content-area">
         <router-view />
     </div>
-    <csa-footer />
+    <csa-footer v-if="!hideFooter" />
     <ConfirmDialog />
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 import CsaNavbar from './components/CsaNavbar.vue'
 import CsaFooter from './components/CsaFooter.vue'
 import ConfirmDialog from 'primevue/confirmdialog'
+
+const route = useRoute()
+const hideFooter = computed(() => Boolean(route.meta?.hideFooter))
 </script>
 
 <style>
