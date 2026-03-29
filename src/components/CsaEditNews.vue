@@ -1,5 +1,4 @@
 <script setup>
-import CsaVditor from '@/components/CsaVditor.vue'
 import { newsCategory } from '@/const'
 import { processMarkdownImages, processImageUrl } from '@/utils/imageUtils'
 
@@ -235,12 +234,12 @@ watch(visible, value => {
                 </div>
 
                 <div class="flex flex-col gap-4 mb-4">
-                    <CsaVditor
+                    <vue-vditor
                         v-model="data.content"
                         :options="options"
                         class="editor"
                         @after="rendering = false"
-                    ></CsaVditor>
+                    ></vue-vditor>
                     <Skeleton
                         v-if="rendering"
                         width="100%"
