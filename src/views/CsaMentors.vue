@@ -127,7 +127,13 @@ onMounted(() => {
             </div>
 
             <div v-else class="mentors-grid">
-                <article v-for="mentor in visibleMentors" :key="mentor.id" class="mentor-card">
+                <router-link
+                    v-for="mentor in visibleMentors"
+                    :key="mentor.id"
+                    :to="{ name: 'mentor_detail', params: { id: mentor.id } }"
+                    class="mentor-card mentor-card--link"
+                    :aria-label="`查看${mentor.name}教师详情`"
+                >
                     <div class="mentor-card__avatar" aria-hidden="true">
                         <img
                             v-if="mentor.avatar_url"
@@ -171,8 +177,13 @@ onMounted(() => {
                                 {{ mentor.source_status === 'manual_seed' ? '临时 seed' : mentor.source_status }}
                             </span>
                         </div>
+
+                        <div class="mentor-card__action">
+                            <span>查看详情</span>
+                            <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                        </div>
                     </div>
-                </article>
+                </router-link>
             </div>
         </section>
     </main>
@@ -307,10 +318,20 @@ onMounted(() => {
         box-shadow 0.2s ease;
 }
 
+.mentor-card--link {
+    color: inherit;
+    text-decoration: none;
+}
+
 .mentor-card:hover {
     transform: translateY(-2px);
     border-color: rgba(102, 126, 234, 0.26);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.075);
+}
+
+.mentor-card:focus-visible {
+    outline: 2px solid rgba(102, 126, 234, 0.28);
+    outline-offset: 3px;
 }
 
 :global(.dark) .mentor-card {
@@ -424,6 +445,20 @@ onMounted(() => {
 .mentor-card__meta i {
     color: var(--accent-color);
     font-size: 0.82rem;
+}
+
+.mentor-card__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: var(--accent-color);
+    font-size: 0.86rem;
+    font-weight: 650;
+}
+
+.mentor-card__action i {
+    font-size: 0.78rem;
 }
 
 .mentor-card--skeleton {
@@ -543,4 +578,3 @@ onMounted(() => {
     }
 }
 </style>
-

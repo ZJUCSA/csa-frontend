@@ -33,7 +33,7 @@ const items = ref([
         label: 'Mentors',
         icon: 'pi pi-users',
         jump: 'mentors',
-        activeNames: ['mentors'],
+        activeNames: ['mentors', 'mentor_detail'],
     },
     {
         label: 'Contact',

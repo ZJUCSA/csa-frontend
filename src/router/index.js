@@ -82,6 +82,14 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'mentors/:id',
+                    name: 'mentor_detail',
+                    component: () => import('../views/CsaMentorDetail.vue'),
+                    meta: {
+                        title: '教师详情',
+                    },
+                },
+                {
                     path: 'events',
                     name: 'event_list',
                     component: () => import('../views/CsaEvents.vue'),
