@@ -134,7 +134,7 @@ onMounted(() => {
                     class="mentor-card mentor-card--link"
                     :aria-label="`查看${mentor.name}教师详情`"
                 >
-                    <div class="mentor-card__avatar" aria-hidden="true">
+                    <div class="mentor-card__avatar">
                         <img
                             v-if="mentor.avatar_url"
                             :src="mentor.avatar_url"
