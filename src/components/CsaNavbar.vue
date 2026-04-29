@@ -30,6 +30,12 @@ const items = ref([
         activeNames: ['event_list', 'event'],
     },
     {
+        label: 'Mentors',
+        icon: 'pi pi-users',
+        jump: 'mentors',
+        activeNames: ['mentors'],
+    },
+    {
         label: 'Contact',
         icon: 'pi pi-envelope',
         jump: 'recruit',

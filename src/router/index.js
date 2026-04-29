@@ -74,6 +74,14 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'mentors',
+                    name: 'mentors',
+                    component: () => import('../views/CsaMentors.vue'),
+                    meta: {
+                        title: '教师介绍',
+                    },
+                },
+                {
                     path: 'events',
                     name: 'event_list',
                     component: () => import('../views/CsaEvents.vue'),
