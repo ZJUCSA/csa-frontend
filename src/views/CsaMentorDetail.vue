@@ -1,15 +1,14 @@
 <!--
-职责范围：渲染教师介绍页 `/mentors/:id` 的单位教师详情、联系方式、来源状态和空字段说明。
+职责范围：渲染教师介绍页 `/mentors/:id` 的教师详情、联系方式、来源状态和空字段说明。
 功能边界：本页面只负责详情页展示结构和状态处理，不负责正式资料审校、后端同步或教师数据编辑。
 -->
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { getMentorDetailResponse } from '@/assets/data/mentors'
-
 const route = useRoute()
+const axios = inject('axios')
 
 const loading = ref(true)
 const errorMessage = ref('')
@@ -58,16 +57,20 @@ const sourceUrl = computed(() => mentor.value?.source_url || syncMeta.value?.sou
 
 const getInitial = name => (name ? name.slice(0, 1) : '?')
 
-const loadMentor = id => {
+const loadMentor = async id => {
     loading.value = true
     errorMessage.value = ''
 
     try {
-        const response = getMentorDetailResponse(id)
-        mentor.value = response.item
-        syncMeta.value = response.meta
+        const response = await axios.get('/teachers/detail', {
+            params: {
+                id,
+            },
+        })
+        mentor.value = response.data.item
+        syncMeta.value = response.data.meta || {}
 
-        if (!response.item) {
+        if (!response.data.item) {
             errorMessage.value = '未找到对应教师资料。'
         }
     } catch (error) {
@@ -686,4 +689,3 @@ watch(
     }
 }
 </style>
-

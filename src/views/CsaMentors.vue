@@ -1,17 +1,23 @@
 <!--
-职责范围：渲染教师介绍页 `/mentors` 的列表主页、同步状态说明和本地数据状态。
+职责范围：渲染教师介绍页 `/mentors` 的列表主页、同步状态说明和 API 数据状态。
 功能边界：本页面只展示四位白名单教师的主页概览，不承载详情页布局、正式资料审校或后端同步逻辑。
 -->
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 
-import { mentorsListResponse } from '@/assets/data/mentors'
+const DEFAULT_SYNC_META = {
+    last_synced_at: '',
+    source_status: '',
+    source_url: '',
+    sync_note: '',
+}
 
+const axios = inject('axios')
 const loading = ref(true)
 const errorMessage = ref('')
 const mentors = ref([])
-const syncMeta = ref(mentorsListResponse.meta)
+const syncMeta = ref(DEFAULT_SYNC_META)
 
 const visibleMentors = computed(() => mentors.value)
 
@@ -47,17 +53,19 @@ const lastSyncedText = computed(() => {
 
 const getInitial = name => name.slice(0, 1)
 
-const loadMentors = () => {
+const loadMentors = async () => {
     loading.value = true
     errorMessage.value = ''
 
     try {
-        mentors.value = mentorsListResponse.items
-        syncMeta.value = mentorsListResponse.meta
+        const response = await axios.get('/teachers/list')
+        mentors.value = response.data.items || []
+        syncMeta.value = response.data.meta || DEFAULT_SYNC_META
     } catch (error) {
         console.error('加载教师数据失败:', error)
         errorMessage.value = '教师数据暂时不可用，请稍后再试。'
         mentors.value = []
+        syncMeta.value = DEFAULT_SYNC_META
     } finally {
         loading.value = false
     }
