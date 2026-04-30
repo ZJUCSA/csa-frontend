@@ -79,6 +79,8 @@ const notify = (type, message) => {
     }
 }
 
+const cleanText = value => String(value || '').trim()
+
 const fetchRecords = async () => {
     loading.value = true
 
@@ -125,6 +127,11 @@ const openEdit = record => {
 }
 
 const saveRecord = async () => {
+    if (!cleanText(form.value.name)) {
+        notify('error', '请先填写教师姓名')
+        return
+    }
+
     saving.value = true
 
     try {
@@ -145,9 +152,9 @@ const saveRecord = async () => {
 const buildSavePayload = () => {
     const cleanedLinks = form.value.links
         .map(link => ({
-            label: String(link.label || '').trim(),
-            url: String(link.url || '').trim(),
-            type: String(link.type || 'profile').trim() || 'profile',
+            label: cleanText(link.label),
+            url: cleanText(link.url),
+            type: cleanText(link.type || 'profile') || 'profile',
         }))
         .filter(link => link.url)
     const fieldSources = {
@@ -158,29 +165,32 @@ const buildSavePayload = () => {
         fieldSources[field] = 'manual'
     }
 
+    const teacherId = cleanText(form.value.id)
+    const standardHomepageUrl = cleanText(form.value.standard_homepage_url)
+
     return {
-        id: form.value.id,
+        id: teacherId,
         enabled: form.value.enabled,
         sort_order: Number(form.value.sort_order) || records.value.length + 1,
         published: {
-            id: form.value.id || 'teacher-temp',
-            name: form.value.name,
-            title: form.value.title,
-            affiliation: form.value.affiliation,
-            email: form.value.email,
-            avatar_url: form.value.avatar_url,
+            id: teacherId,
+            name: cleanText(form.value.name),
+            title: cleanText(form.value.title),
+            affiliation: cleanText(form.value.affiliation),
+            email: cleanText(form.value.email),
+            avatar_url: cleanText(form.value.avatar_url),
             research_areas: parseResearchAreas(form.value.research_areas_text),
-            summary: form.value.summary,
-            bio: form.value.bio,
+            summary: cleanText(form.value.summary),
+            bio: cleanText(form.value.bio),
             homepage_urls: cleanedLinks,
-            source_url: form.value.standard_homepage_url || cleanedLinks[0]?.url || '',
+            source_url: standardHomepageUrl || cleanedLinks[0]?.url || '',
             source_status: 'published',
             last_synced_at: editingRecord.value?.published?.last_synced_at || '',
             sync_note: editingRecord.value?.published?.sync_note || '',
             profile_sections: editingRecord.value?.published?.profile_sections || [],
         },
         source_config: {
-            standard_homepage_url: form.value.standard_homepage_url,
+            standard_homepage_url: standardHomepageUrl,
             external_links: cleanedLinks,
         },
         field_sources: fieldSources,
@@ -508,11 +518,15 @@ onMounted(() => {
                                 @click="openReview(data)"
                             />
                             <router-link
+                                v-if="data.enabled"
                                 class="mentor-preview-link"
                                 :to="{ name: 'mentor_detail', params: { id: data.id } }"
                             >
                                 预览
                             </router-link>
+                            <span v-else class="mentor-preview-link mentor-preview-link--disabled">
+                                未公开
+                            </span>
                             <Button
                                 label="删除"
                                 size="small"
@@ -813,6 +827,14 @@ onMounted(() => {
 
 .mentor-preview-link:hover {
     background: rgba(102, 126, 234, 0.08);
+}
+
+.mentor-preview-link--disabled,
+.mentor-preview-link--disabled:hover {
+    cursor: default;
+    border-color: var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
 }
 
 .mentor-editor-dialog {
