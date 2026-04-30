@@ -159,6 +159,14 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'mentors',
+                    name: 'admin-mentors',
+                    component: () => import('../views/CsaAdminMentors.vue'),
+                    meta: {
+                        title: '教师介绍管理',
+                    },
+                },
+                {
                     path: 'user',
                     name: 'admin-users',
                     component: () => import('../views/CsaAdminUser.vue'),

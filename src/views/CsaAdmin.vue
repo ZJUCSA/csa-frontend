@@ -40,6 +40,7 @@ const createMenuItem = (label, icon, routeName) => ({
 const dataManagementEntries = [
     ['信息管理', 'pi pi-file-edit', 'admin-news'],
     ['活动管理', 'pi pi-calendar', 'admin-event'],
+    ['教师介绍管理', 'pi pi-id-card', 'admin-mentors'],
 ]
 
 const userManagementEntries = [

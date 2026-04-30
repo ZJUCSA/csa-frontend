@@ -1,5 +1,5 @@
 <!--
-职责范围：渲染教师介绍页 `/mentors` 的列表主页、同步状态说明和 API 数据状态。
+职责范围：渲染教师介绍页 `/mentors` 的公开列表主页、资料更新时间和教师卡片入口。
 功能边界：本页面只展示四位白名单教师的主页概览，不承载详情页布局、正式资料审校或后端同步逻辑。
 -->
 
@@ -8,9 +8,7 @@ import { computed, inject, onMounted, ref } from 'vue'
 
 const DEFAULT_SYNC_META = {
     last_synced_at: '',
-    source_status: '',
     source_url: '',
-    sync_note: '',
 }
 
 const axios = inject('axios')
@@ -21,53 +19,27 @@ const syncMeta = ref(DEFAULT_SYNC_META)
 
 const visibleMentors = computed(() => mentors.value)
 
-const syncStatusLabel = computed(() => {
-    if (syncMeta.value.source_status === 'manual_seed') {
-        return '临时数据'
+const formatPublicDate = value => {
+    if (!value) return '资料更新时间待确认'
+
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+        return value
     }
 
-    if (syncMeta.value.source_status === 'synced') {
-        return '数据已同步'
-    }
-
-    if (syncMeta.value.source_status === 'failed') {
-        return '同步异常'
-    }
-
-    return '待同步'
-})
-
-const lastSyncedText = computed(() => {
-    if (!syncMeta.value.last_synced_at) {
-        return '待后端同步接入'
-    }
-
-    return new Date(syncMeta.value.last_synced_at).toLocaleString('zh-CN', {
+    return date.toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
     })
+}
+
+const lastSyncedText = computed(() => {
+    return formatPublicDate(syncMeta.value.last_synced_at)
 })
 
 const getInitial = name => name.slice(0, 1)
-
-const getSourceStatusText = status => {
-    if (status === 'manual_seed') {
-        return '临时数据'
-    }
-
-    if (status === 'synced') {
-        return '已同步'
-    }
-
-    if (status === 'failed') {
-        return '同步异常'
-    }
-
-    return '待同步'
-}
 
 const loadMentors = async () => {
     loading.value = true
@@ -103,21 +75,15 @@ onMounted(() => {
                 </p>
             </div>
 
-            <aside class="mentors-sync" aria-label="数据来源状态">
-                <div class="mentors-sync__status">
-                    <span class="mentors-sync__dot" aria-hidden="true"></span>
-                    <span>{{ syncStatusLabel }}</span>
+            <aside class="mentors-update" aria-label="资料更新时间">
+                <div class="mentors-update__icon" aria-hidden="true">
+                    <i class="pi pi-clock"></i>
                 </div>
-                <dl>
-                    <div>
-                        <dt>更新时间</dt>
-                        <dd>{{ lastSyncedText }}</dd>
-                    </div>
-                    <div>
-                        <dt>来源</dt>
-                        <dd>{{ syncMeta.source_url || '公开资料整理中' }}</dd>
-                    </div>
-                </dl>
+                <div>
+                    <p>资料更新于</p>
+                    <strong>{{ lastSyncedText }}</strong>
+                    <span>招生和项目安排以教师本人及学院发布信息为准。</span>
+                </div>
             </aside>
         </section>
 
@@ -196,10 +162,6 @@ onMounted(() => {
                                 <i class="pi pi-building" aria-hidden="true"></i>
                                 {{ mentor.affiliation || '单位信息待补充' }}
                             </span>
-                            <span>
-                                <i class="pi pi-database" aria-hidden="true"></i>
-                                {{ getSourceStatusText(mentor.source_status) }}
-                            </span>
                         </div>
 
                         <div class="mentor-card__action">
@@ -267,7 +229,10 @@ onMounted(() => {
     line-height: 1.75;
 }
 
-.mentors-sync {
+.mentors-update {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 14px;
     padding: 20px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -275,47 +240,42 @@ onMounted(() => {
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
-:global(.dark) .mentors-sync {
+:global(.dark) .mentors-update {
     background: rgba(35, 49, 71, 0.62);
     box-shadow: none;
 }
 
-.mentors-sync__status {
-    display: inline-flex;
+.mentors-update__icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 650;
+    justify-content: center;
+    border: 1px solid rgba(102, 126, 234, 0.16);
+    border-radius: 8px;
+    background: rgba(102, 126, 234, 0.08);
+    color: var(--accent-color);
 }
 
-.mentors-sync__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: #10b981;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
-}
-
-.mentors-sync dl {
-    display: grid;
-    gap: 12px;
-    margin: 0;
-}
-
-.mentors-sync dt {
-    margin-bottom: 2px;
+.mentors-update p {
+    margin: 0 0 4px;
     color: var(--text-secondary);
     font-size: 0.78rem;
 }
 
-.mentors-sync dd {
-    margin: 0;
+.mentors-update strong {
+    display: block;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 1rem;
     line-height: 1.5;
-    overflow-wrap: anywhere;
+}
+
+.mentors-update span {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
 }
 
 .mentors-content {
@@ -552,7 +512,7 @@ onMounted(() => {
         align-items: start;
     }
 
-    .mentors-sync {
+    .mentors-update {
         max-width: 520px;
     }
 

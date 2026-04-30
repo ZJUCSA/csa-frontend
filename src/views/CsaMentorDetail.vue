@@ -1,5 +1,5 @@
 <!--
-职责范围：渲染教师介绍页 `/mentors/:id` 的教师详情、联系方式、来源状态和空字段说明。
+职责范围：渲染教师介绍页 `/mentors/:id` 的公开教师详情、联系方式、外部主页和来源入口。
 功能边界：本页面只负责详情页展示结构和状态处理，不负责正式资料审校、后端同步或教师数据编辑。
 -->
 
@@ -15,38 +15,28 @@ const errorMessage = ref('')
 const mentor = ref(null)
 const syncMeta = ref({})
 
-const sourceStatusText = computed(() => {
-    const status = mentor.value?.source_status || syncMeta.value?.source_status
-
-    if (status === 'manual_seed') {
-        return '临时数据'
+const formatPublicDate = value => {
+    if (!value) {
+        return '资料更新时间待确认'
     }
 
-    if (status === 'synced') {
-        return '数据已同步'
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+        return value
     }
 
-    if (status === 'failed') {
-        return '同步异常'
-    }
-
-    return '待同步'
-})
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    })
+}
 
 const lastSyncedText = computed(() => {
     const value = mentor.value?.last_synced_at || syncMeta.value?.last_synced_at
 
-    if (!value) {
-        return '待后端同步接入'
-    }
-
-    return new Date(value).toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    })
+    return formatPublicDate(value)
 })
 
 const homepageLinks = computed(() => mentor.value?.homepage_urls || [])
@@ -160,11 +150,6 @@ watch(
                             <dd>{{ lastSyncedText }}</dd>
                         </div>
                     </dl>
-
-                    <div class="mentor-summary__status">
-                        <span class="mentor-summary__dot" aria-hidden="true"></span>
-                        {{ sourceStatusText }}
-                    </div>
                 </aside>
 
                 <section class="mentor-detail-main" aria-label="教师详情内容">
@@ -236,33 +221,25 @@ watch(
 
                     <section class="mentor-section mentor-source">
                         <div class="mentor-section__heading">
-                            <i class="pi pi-database" aria-hidden="true"></i>
-                            <h3>来源说明</h3>
+                            <i class="pi pi-info-circle" aria-hidden="true"></i>
+                            <h3>资料说明</h3>
                         </div>
-                        <dl>
-                            <div>
-                                <dt>主要来源</dt>
-                                <dd>
-                                    <a
-                                        v-if="sourceUrl"
-                                        :href="sourceUrl"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {{ sourceUrl }}
-                                    </a>
-                                    <span v-else>公开资料整理中</span>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt>状态</dt>
-                                <dd>{{ sourceStatusText }}</dd>
-                            </div>
-                            <div>
-                                <dt>说明</dt>
-                                <dd>{{ mentor.sync_note || syncMeta.sync_note || '暂无补充说明。' }}</dd>
-                            </div>
-                        </dl>
+                        <p>
+                            本页资料更新于 {{ lastSyncedText }}。招生、项目安排和联系方式变更请以教师本人及学院发布信息为准。
+                        </p>
+                        <a
+                            v-if="sourceUrl"
+                            class="mentor-source__link"
+                            :href="sourceUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>查看主要来源</span>
+                            <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                        </a>
+                        <p v-else class="mentor-section__muted">
+                            主要来源入口待补充。
+                        </p>
                     </section>
                 </section>
             </div>
@@ -399,26 +376,6 @@ watch(
     font-size: 0.92rem;
     line-height: 1.5;
     overflow-wrap: anywhere;
-}
-
-.mentor-summary__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 8px 10px;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 6px;
-    background: rgba(16, 185, 129, 0.08);
-    color: var(--text-primary);
-    font-size: 0.84rem;
-}
-
-.mentor-summary__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: #10b981;
 }
 
 .mentor-detail-main {
@@ -562,24 +519,35 @@ watch(
     letter-spacing: 0;
 }
 
-.mentor-source dl {
-    display: grid;
-    gap: 12px;
+.mentor-source p {
     margin: 0;
-}
-
-.mentor-source dt {
-    margin-bottom: 4px;
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
 }
 
-.mentor-source dd {
-    margin: 0;
+.mentor-source__link {
+    width: fit-content;
+    max-width: 100%;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: 0.92rem;
-    line-height: 1.55;
-    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mentor-source__link:hover,
+.mentor-source__link:focus-visible {
+    border-color: rgba(102, 126, 234, 0.3);
+    color: var(--accent-color);
 }
 
 .mentor-state {
