@@ -1,36 +1,64 @@
 <!--
-职责范围：提供后台 `/admin/mentors` 教师介绍管理页，用于查看公开缓存、来源状态并手动触发同步。
-功能边界：本页面不提供任意新增教师、删除教师或人工编辑资料；同步写入与权限校验由后端教师 API 负责。
+职责范围：提供后台 `/admin/mentors` 教师介绍管理页，用于维护教师公开资料、来源配置和待审核同步建议。
+功能边界：本页面不直接解析远程主页、不展示服务器内部异常，也不绕过后端权限和审核发布流程。
 -->
 
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 
-const DEFAULT_META = {
-    last_synced_at: '',
-    source_status: '',
-    source_url: '',
-    sync_note: '',
+const EMPTY_FORM = {
+    id: '',
+    enabled: true,
+    sort_order: 1,
+    name: '',
+    title: '',
+    affiliation: '',
+    email: '',
+    avatar_url: '',
+    research_areas_text: '',
+    summary: '',
+    bio: '',
+    standard_homepage_url: '',
+    links: [],
 }
+
+const MANUAL_FIELDS = [
+    'name',
+    'title',
+    'affiliation',
+    'research_areas',
+    'summary',
+    'bio',
+    'email',
+    'avatar_url',
+]
 
 const axios = inject('axios')
 const confirm = useConfirm()
 
-const teachers = ref([])
-const meta = ref({ ...DEFAULT_META })
+const records = ref([])
+const meta = ref({})
 const loading = ref(false)
-const syncing = ref(false)
-const actionNotice = ref(null)
+const saving = ref(false)
+const syncingId = ref('')
+const editorVisible = ref(false)
+const reviewVisible = ref(false)
+const editingRecord = ref(null)
+const reviewRecord = ref(null)
+const selectedFields = ref([])
+const form = ref({ ...EMPTY_FORM })
+
+const sortedRecords = computed(() => records.value)
+const hasPendingDrafts = computed(() =>
+    records.value.some(record => record.draft?.status === 'pending')
+)
 
 const formatDateTime = value => {
     if (!value) return '暂无记录'
 
     const date = new Date(value)
-
-    if (Number.isNaN(date.getTime())) {
-        return value
-    }
+    if (Number.isNaN(date.getTime())) return value
 
     return date.toLocaleString('zh-CN', {
         year: 'numeric',
@@ -41,96 +69,182 @@ const formatDateTime = value => {
     })
 }
 
-const getStatusLabel = status => {
-    if (status === 'synced') return '已同步'
-    if (status === 'failed') return '同步失败'
-    if (status === 'manual_seed') return '临时种子'
-    if (status) return status
-    return '未知'
-}
-
-const getStatusSeverity = status => {
-    if (status === 'synced') return 'success'
-    if (status === 'failed') return 'danger'
-    if (status === 'manual_seed') return 'warning'
-    return 'secondary'
-}
-
-const teacherCountText = computed(() => `${teachers.value.length} 位`)
-const lastSyncedText = computed(() => formatDateTime(meta.value.last_synced_at))
-const primarySourceText = computed(() => meta.value.source_url || '未配置主源站')
-const statusText = computed(() => getStatusLabel(meta.value.source_status))
-
-const getAreaPreview = teacher => {
-    const areas = teacher.research_areas || []
-
-    if (areas.length <= 5) return areas
-
-    return [...areas.slice(0, 5), `+${areas.length - 5}`]
-}
-
-const getProfileLinks = teacher =>
-    (teacher.homepage_urls || []).filter(link => link.type === 'profile')
-
 const notify = (type, message) => {
     if (!window.notyf) return
 
     if (type === 'success') {
         window.notyf.success(message)
-        return
-    }
-
-    if (type === 'error') {
+    } else {
         window.notyf.error(message)
-        return
     }
-
-    window.notyf.open({ type, message })
 }
 
-const loadMentors = async ({ silent = false } = {}) => {
-    if (!silent) {
-        loading.value = true
-    }
+const fetchRecords = async () => {
+    loading.value = true
 
     try {
-        const response = await axios.get('/teachers/list')
-        teachers.value = response.data.items || []
-        meta.value = {
-            ...DEFAULT_META,
-            ...(response.data.meta || {}),
-        }
-
-        if (!silent) {
-            actionNotice.value = null
-        }
+        const response = await axios.get('/teachers/admin/list')
+        records.value = response.data.items || []
+        meta.value = response.data.meta || {}
     } catch (error) {
-        console.error('加载教师缓存失败:', error)
-        actionNotice.value = {
-            type: 'error',
-            title: '缓存状态读取失败',
-            message: '暂时无法读取教师介绍缓存，请稍后重试。',
-        }
+        console.error('读取教师管理数据失败:', error)
+        notify('error', '教师管理数据读取失败')
     } finally {
         loading.value = false
     }
 }
 
-const refreshMentors = async () => {
-    await loadMentors()
+const openCreate = () => {
+    editingRecord.value = null
+    form.value = {
+        ...EMPTY_FORM,
+        sort_order: records.value.length + 1,
+        links: [],
+    }
+    editorVisible.value = true
+}
 
-    if (!actionNotice.value) {
-        notify('success', '教师缓存状态已刷新')
+const openEdit = record => {
+    editingRecord.value = record
+    form.value = {
+        id: record.id,
+        enabled: record.enabled,
+        sort_order: record.sort_order,
+        name: record.published.name,
+        title: record.published.title,
+        affiliation: record.published.affiliation,
+        email: record.published.email,
+        avatar_url: record.published.avatar_url,
+        research_areas_text: (record.published.research_areas || []).join('\n'),
+        summary: record.published.summary,
+        bio: record.published.bio,
+        standard_homepage_url: record.source_config?.standard_homepage_url || '',
+        links: (record.source_config?.external_links || []).map(link => ({ ...link })),
+    }
+    editorVisible.value = true
+}
+
+const saveRecord = async () => {
+    saving.value = true
+
+    try {
+        const payload = buildSavePayload()
+        const response = await axios.post('/teachers/admin/save', payload)
+        records.value = response.data.items || []
+        meta.value = response.data.meta || {}
+        editorVisible.value = false
+        notify('success', '教师资料已保存')
+    } catch (error) {
+        console.error('保存教师资料失败:', error)
+        notify('error', '教师资料保存失败')
+    } finally {
+        saving.value = false
     }
 }
 
-const confirmSync = () => {
+const buildSavePayload = () => {
+    const cleanedLinks = form.value.links
+        .map(link => ({
+            label: String(link.label || '').trim(),
+            url: String(link.url || '').trim(),
+            type: String(link.type || 'profile').trim() || 'profile',
+        }))
+        .filter(link => link.url)
+    const fieldSources = {
+        ...(editingRecord.value?.field_sources || {}),
+    }
+
+    for (const field of MANUAL_FIELDS) {
+        fieldSources[field] = 'manual'
+    }
+
+    return {
+        id: form.value.id,
+        enabled: form.value.enabled,
+        sort_order: Number(form.value.sort_order) || records.value.length + 1,
+        published: {
+            id: form.value.id || 'teacher-temp',
+            name: form.value.name,
+            title: form.value.title,
+            affiliation: form.value.affiliation,
+            email: form.value.email,
+            avatar_url: form.value.avatar_url,
+            research_areas: parseResearchAreas(form.value.research_areas_text),
+            summary: form.value.summary,
+            bio: form.value.bio,
+            homepage_urls: cleanedLinks,
+            source_url: form.value.standard_homepage_url || cleanedLinks[0]?.url || '',
+            source_status: 'published',
+            last_synced_at: editingRecord.value?.published?.last_synced_at || '',
+            sync_note: editingRecord.value?.published?.sync_note || '',
+            profile_sections: editingRecord.value?.published?.profile_sections || [],
+        },
+        source_config: {
+            standard_homepage_url: form.value.standard_homepage_url,
+            external_links: cleanedLinks,
+        },
+        field_sources: fieldSources,
+    }
+}
+
+const parseResearchAreas = value =>
+    String(value || '')
+        .split(/\n|[、，,;；]/)
+        .map(item => item.trim())
+        .filter(Boolean)
+
+const addLink = () => {
+    form.value.links.push({
+        label: '',
+        url: '',
+        type: 'profile',
+    })
+}
+
+const removeLink = index => {
+    form.value.links.splice(index, 1)
+}
+
+const confirmDelete = record => {
     confirm.require({
-        group: 'mentor-sync',
+        group: 'mentor-admin-actions',
         modal: true,
-        header: '从源站同步教师资料',
-        message: '确认访问学院教师队伍页和已配置个人主页，并把结果写入本站教师缓存？同步失败时会继续使用旧缓存。',
+        header: '删除教师资料',
+        message: `确认删除「${record.published.name}」？删除后前台不再展示该教师。`,
         icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: '取消',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptProps: {
+            label: '删除',
+            severity: 'danger',
+        },
+        accept: () => deleteRecord(record),
+    })
+}
+
+const deleteRecord = async record => {
+    try {
+        await axios.delete(`/teachers/admin/${record.id}`)
+        await fetchRecords()
+        notify('success', '教师资料已删除')
+    } catch (error) {
+        console.error('删除教师资料失败:', error)
+        notify('error', '教师资料删除失败')
+    }
+}
+
+const confirmSync = record => {
+    confirm.require({
+        group: 'mentor-admin-actions',
+        modal: true,
+        header: record ? '同步单个教师' : '同步全部教师',
+        message: record
+            ? `确认读取「${record.published.name}」的标准浙大个人主页？同步结果只会进入待审核变更，不会直接发布。`
+            : '确认读取所有已配置的标准浙大个人主页？同步结果只会进入待审核变更，不会直接发布。',
+        icon: 'pi pi-info-circle',
         rejectProps: {
             label: '取消',
             severity: 'secondary',
@@ -140,465 +254,506 @@ const confirmSync = () => {
             label: '开始同步',
             severity: 'primary',
         },
-        accept: syncMentors,
+        accept: () => syncRecords(record),
     })
 }
 
-const syncMentors = async () => {
-    syncing.value = true
-    actionNotice.value = {
-        type: 'info',
-        title: '正在访问源站',
-        message: '同步过程中请保持页面打开，完成后会自动刷新缓存状态。',
-    }
+const syncRecords = async record => {
+    syncingId.value = record?.id || '__all__'
 
     try {
-        const response = await axios.post('/teachers/sync')
-        teachers.value = response.data.items || []
-        meta.value = {
-            ...DEFAULT_META,
-            ...(response.data.meta || {}),
-        }
-
-        if (response.data.ok) {
-            actionNotice.value = {
-                type: 'success',
-                title: '同步完成',
-                message: '教师资料已写入新缓存，公开页会读取最新缓存。',
-            }
-            notify('success', '教师资料同步完成')
-        } else {
-            actionNotice.value = {
-                type: 'error',
-                title: '同步失败',
-                message: '未写入新缓存，公开页继续使用最近一次成功缓存。',
-            }
-            notify('error', '教师资料同步失败，已保留旧缓存')
-        }
+        const response = await axios.post('/teachers/admin/sync', {
+            id: record?.id || '',
+        })
+        records.value = response.data.items || []
+        meta.value = response.data.meta || {}
+        notify('success', '同步完成，请查看待审核变更')
     } catch (error) {
         console.error('同步教师资料失败:', error)
-        const forbidden = error.response?.status === 403
-        actionNotice.value = {
-            type: 'error',
-            title: forbidden ? '无权执行同步' : '同步请求失败',
-            message: forbidden
-                ? '当前角色无权执行该操作。'
-                : '同步请求未完成，公开页继续使用旧缓存。',
-        }
+        notify('error', '同步请求失败')
     } finally {
-        syncing.value = false
+        syncingId.value = ''
     }
 }
 
+const openReview = record => {
+    reviewRecord.value = record
+    selectedFields.value = (record.draft?.changes || []).map(change => change.field)
+    reviewVisible.value = true
+}
+
+const toggleSelectedField = field => {
+    if (selectedFields.value.includes(field)) {
+        selectedFields.value = selectedFields.value.filter(item => item !== field)
+    } else {
+        selectedFields.value = [...selectedFields.value, field]
+    }
+}
+
+const publishDraft = async () => {
+    if (!reviewRecord.value || selectedFields.value.length === 0) {
+        notify('error', '请至少选择一项变更')
+        return
+    }
+
+    try {
+        const response = await axios.post('/teachers/admin/publish', {
+            id: reviewRecord.value.id,
+            fields: selectedFields.value,
+        })
+        records.value = response.data.items || []
+        meta.value = response.data.meta || {}
+        reviewVisible.value = false
+        notify('success', '同步建议已发布')
+    } catch (error) {
+        console.error('发布同步建议失败:', error)
+        notify('error', '同步建议发布失败')
+    }
+}
+
+const discardDraft = async record => {
+    try {
+        const response = await axios.post('/teachers/admin/discard', {
+            id: record.id,
+        })
+        records.value = response.data.items || []
+        meta.value = response.data.meta || {}
+        reviewVisible.value = false
+        notify('success', '同步建议已忽略')
+    } catch (error) {
+        console.error('忽略同步建议失败:', error)
+        notify('error', '同步建议忽略失败')
+    }
+}
+
+const getDraftLabel = status => {
+    const labels = {
+        idle: '未同步',
+        pending: '待审核',
+        no_change: '无变化',
+        no_source: '人工维护',
+        unsupported: '人工维护',
+        failed: '读取失败',
+        applied: '已发布',
+        ignored: '已忽略',
+    }
+    return labels[status] || '未知'
+}
+
+const getDraftSeverity = status => {
+    if (status === 'pending') return 'warning'
+    if (status === 'failed') return 'danger'
+    if (['no_source', 'unsupported'].includes(status)) return 'secondary'
+    if (['no_change', 'applied'].includes(status)) return 'success'
+    return 'info'
+}
+
+const getSourceLabel = record => {
+    if (record.source_config?.standard_homepage_url) {
+        return '标准主页'
+    }
+
+    return '人工维护'
+}
+
+const formatValue = value => {
+    if (Array.isArray(value)) {
+        return value.length ? value.join('、') : '空'
+    }
+
+    return value || '空'
+}
+
 onMounted(() => {
-    loadMentors()
+    fetchRecords()
 })
 </script>
 
 <template>
-    <div class="admin-mentors-page">
-        <ConfirmDialog group="mentor-sync" />
+    <ConfirmDialog group="mentor-admin-actions" />
 
-        <header class="admin-mentors-header">
-            <div>
-                <p class="admin-mentors-eyebrow">Data Management</p>
-                <h1>教师介绍管理</h1>
-                <p>
-                    查看当前公开页读取的四位教师缓存数据，并按权限从源站手动同步。
-                </p>
-            </div>
+    <div class="main-part-lg mx-auto admin-mentors-page">
+        <div class="text-3xl font-bold mb-6">教师介绍管理</div>
 
-            <div class="admin-mentors-actions">
-                <Button
-                    label="刷新缓存状态"
-                    icon="pi pi-refresh"
-                    severity="secondary"
-                    outlined
-                    :loading="loading && !syncing"
-                    :disabled="syncing"
-                    @click="refreshMentors"
-                />
-                <Button
-                    label="从源站同步教师资料"
-                    icon="pi pi-sync"
-                    :loading="syncing"
-                    :disabled="loading"
-                    @click="confirmSync"
-                />
-            </div>
-        </header>
+        <div class="mentor-toolbar mb-4">
+            <Button
+                label="新增教师"
+                icon="pi pi-plus"
+                class="mentor-toolbar-btn mentor-toolbar-btn--primary"
+                @click="openCreate"
+            />
+            <Button
+                label="同步全部"
+                icon="pi pi-sync"
+                class="mentor-toolbar-btn"
+                :loading="syncingId === '__all__'"
+                @click="confirmSync(null)"
+            />
+            <Button
+                label="刷新"
+                icon="pi pi-refresh"
+                severity="secondary"
+                outlined
+                :loading="loading"
+                @click="fetchRecords"
+            />
+        </div>
 
-        <section
-            v-if="actionNotice"
-            class="admin-mentors-notice"
-            :class="`admin-mentors-notice--${actionNotice.type}`"
-            role="status"
-        >
-            <i
-                :class="{
-                    'pi pi-info-circle': actionNotice.type === 'info',
-                    'pi pi-check-circle': actionNotice.type === 'success',
-                    'pi pi-exclamation-circle': actionNotice.type === 'error',
-                }"
-                aria-hidden="true"
-            ></i>
-            <div>
-                <strong>{{ actionNotice.title }}</strong>
-                <p>{{ actionNotice.message }}</p>
-            </div>
-        </section>
+        <div v-if="meta.sync_note || hasPendingDrafts" class="mentor-admin-note mb-4">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            <span>
+                {{ meta.sync_note || '存在待审核同步变更，请进入对应教师的审核入口确认后再发布。' }}
+            </span>
+        </div>
 
-        <section class="admin-mentors-stats" aria-label="教师缓存状态">
-            <article class="admin-mentors-stat">
-                <span>教师数量</span>
-                <strong>{{ teacherCountText }}</strong>
-            </article>
-            <article class="admin-mentors-stat">
-                <span>缓存状态</span>
-                <strong>{{ statusText }}</strong>
-            </article>
-            <article class="admin-mentors-stat">
-                <span>最近同步</span>
-                <strong>{{ lastSyncedText }}</strong>
-            </article>
-            <article class="admin-mentors-stat admin-mentors-stat--source">
-                <span>主源站</span>
-                <a
-                    v-if="meta.source_url"
-                    :href="meta.source_url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {{ primarySourceText }}
-                </a>
-                <strong v-else>{{ primarySourceText }}</strong>
-            </article>
-        </section>
-
-        <section v-if="meta.sync_note" class="admin-mentors-meta-note">
-            <i class="pi pi-database" aria-hidden="true"></i>
-            <span>{{ meta.sync_note }}</span>
-        </section>
-
-        <section class="admin-mentors-table-panel" aria-label="教师缓存数据">
+        <div class="overflow-x-auto mb-4 table-scroll-wrap">
             <DataTable
-                :value="teachers"
+                :value="sortedRecords"
                 :loading="loading"
                 dataKey="id"
-                responsiveLayout="scroll"
-                class="admin-mentors-table"
+                class="min-w-full"
             >
-                <Column field="name" header="教师">
+                <Column field="sort_order" header="排序">
                     <template #body="{ data }">
-                        <div class="admin-mentor-teacher">
-                            <img
-                                v-if="data.avatar_url"
-                                :src="data.avatar_url"
-                                :alt="`${data.name}头像`"
+                        <div class="mentor-order-cell">{{ data.sort_order }}</div>
+                    </template>
+                </Column>
+
+                <Column header="状态">
+                    <template #body="{ data }">
+                        <div class="mentor-status-cell">
+                            <Tag
+                                :value="data.enabled ? '公开' : '停用'"
+                                :severity="data.enabled ? 'success' : 'secondary'"
                             />
-                            <span v-else class="admin-mentor-avatar-fallback">
-                                {{ data.name.slice(0, 1) }}
-                            </span>
+                            <Tag
+                                :value="getDraftLabel(data.draft?.status)"
+                                :severity="getDraftSeverity(data.draft?.status)"
+                            />
+                        </div>
+                    </template>
+                </Column>
+
+                <Column header="教师">
+                    <template #body="{ data }">
+                        <div class="mentor-teacher-cell">
+                            <img
+                                v-if="data.published.avatar_url"
+                                :src="data.published.avatar_url"
+                                :alt="`${data.published.name}头像`"
+                            />
+                            <div v-else class="mentor-avatar-fallback">
+                                {{ data.published.name.slice(0, 1) || '?' }}
+                            </div>
                             <div>
-                                <strong>{{ data.name }}</strong>
-                                <span>{{ data.id }}</span>
+                                <strong>{{ data.published.name || '未命名教师' }}</strong>
+                                <span>{{ data.published.title || '职称待补充' }}</span>
+                                <small>{{ data.published.affiliation || '单位待补充' }}</small>
                             </div>
                         </div>
                     </template>
                 </Column>
 
-                <Column header="职称 / 单位">
+                <Column header="标准主页">
                     <template #body="{ data }">
-                        <div class="admin-mentor-text-stack">
-                            <strong>{{ data.title || '职称待补充' }}</strong>
-                            <span>{{ data.affiliation || '单位待补充' }}</span>
-                        </div>
-                    </template>
-                </Column>
-
-                <Column header="研究方向">
-                    <template #body="{ data }">
-                        <div class="admin-mentor-tags">
-                            <Tag
-                                v-for="area in getAreaPreview(data)"
-                                :key="area"
-                                :value="area"
-                                severity="info"
-                            />
-                            <span
-                                v-if="!data.research_areas || data.research_areas.length === 0"
-                                class="admin-mentor-muted"
-                            >
-                                待补充
-                            </span>
-                        </div>
-                    </template>
-                </Column>
-
-                <Column field="email" header="邮箱">
-                    <template #body="{ data }">
-                        <a v-if="data.email" :href="`mailto:${data.email}`">
-                            {{ data.email }}
-                        </a>
-                        <span v-else class="admin-mentor-muted">未配置</span>
-                    </template>
-                </Column>
-
-                <Column header="同步状态">
-                    <template #body="{ data }">
-                        <div class="admin-mentor-text-stack">
-                            <Tag
-                                :value="getStatusLabel(data.source_status)"
-                                :severity="getStatusSeverity(data.source_status)"
-                            />
-                            <span>{{ formatDateTime(data.last_synced_at) }}</span>
-                        </div>
-                    </template>
-                </Column>
-
-                <Column header="主来源">
-                    <template #body="{ data }">
-                        <a
-                            v-if="data.source_url"
-                            :href="data.source_url"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            打开来源
-                        </a>
-                        <span v-else class="admin-mentor-muted">未配置</span>
-                    </template>
-                </Column>
-
-                <Column header="同步备注">
-                    <template #body="{ data }">
-                        <div class="admin-mentor-note">
-                            {{ data.sync_note || '无' }}
-                        </div>
-                    </template>
-                </Column>
-
-                <Column header="公开页">
-                    <template #body="{ data }">
-                        <router-link
-                            class="admin-mentor-preview"
-                            :to="{ name: 'mentor_detail', params: { id: data.id } }"
-                        >
-                            预览
-                        </router-link>
-                    </template>
-                </Column>
-            </DataTable>
-        </section>
-
-        <section class="admin-mentors-source-panel" aria-label="教师源站列表">
-            <div class="admin-mentors-source-header">
-                <h2>已配置源站</h2>
-                <p>学院教师队伍页为主源；个人主页仅作为白名单教师的补充源。</p>
-            </div>
-
-            <div class="admin-mentors-source-grid">
-                <article
-                    v-for="teacher in teachers"
-                    :key="teacher.id"
-                    class="admin-mentors-source-card"
-                >
-                    <div>
-                        <strong>{{ teacher.name }}</strong>
-                        <span>{{ teacher.source_url ? '主来源已配置' : '主来源未配置' }}</span>
-                    </div>
-                    <a
-                        v-if="teacher.source_url"
-                        :href="teacher.source_url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        主来源
-                    </a>
-                    <span v-else class="admin-mentor-muted">主来源未配置</span>
-                    <div class="admin-mentors-source-profiles">
-                        <template v-if="getProfileLinks(teacher).length > 0">
+                        <div class="mentor-source-cell">
+                            <Tag :value="getSourceLabel(data)" severity="info" />
                             <a
-                                v-for="link in getProfileLinks(teacher)"
-                                :key="link.url"
-                                :href="link.url"
+                                v-if="data.source_config?.standard_homepage_url"
+                                :href="data.source_config.standard_homepage_url"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                {{ link.label || '个人主页' }}
+                                打开主页
                             </a>
-                        </template>
-                        <span v-else>个人主页未配置</span>
-                    </div>
-                </article>
+                            <span v-else>未配置自动同步来源</span>
+                        </div>
+                    </template>
+                </Column>
+
+                <Column header="待审核变更">
+                    <template #body="{ data }">
+                        <div class="mentor-draft-cell">
+                            <strong>{{ data.draft?.changes?.length || 0 }} 项</strong>
+                            <span>{{ data.draft?.message || '暂无同步建议。' }}</span>
+                            <small v-if="data.draft?.fetched_at">
+                                {{ formatDateTime(data.draft.fetched_at) }}
+                            </small>
+                        </div>
+                    </template>
+                </Column>
+
+                <Column header="操作">
+                    <template #body="{ data }">
+                        <div class="mentor-actions-cell">
+                            <Button
+                                label="编辑"
+                                size="small"
+                                class="mentor-table-action mentor-table-action--edit"
+                                @click="openEdit(data)"
+                            />
+                            <Button
+                                label="同步"
+                                size="small"
+                                severity="secondary"
+                                outlined
+                                :loading="syncingId === data.id"
+                                @click="confirmSync(data)"
+                            />
+                            <Button
+                                label="审核"
+                                size="small"
+                                severity="warning"
+                                :disabled="data.draft?.status !== 'pending'"
+                                @click="openReview(data)"
+                            />
+                            <router-link
+                                class="mentor-preview-link"
+                                :to="{ name: 'mentor_detail', params: { id: data.id } }"
+                            >
+                                预览
+                            </router-link>
+                            <Button
+                                label="删除"
+                                size="small"
+                                severity="danger"
+                                outlined
+                                @click="confirmDelete(data)"
+                            />
+                        </div>
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+
+        <Dialog
+            v-model:visible="editorVisible"
+            modal
+            :header="editingRecord ? '编辑教师资料' : '新增教师'"
+            class="mentor-editor-dialog"
+        >
+            <div class="mentor-editor-grid">
+                <label>
+                    <span>教师 ID</span>
+                    <input
+                        v-model="form.id"
+                        class="mentor-input"
+                        :disabled="Boolean(editingRecord)"
+                        placeholder="留空则自动生成"
+                    />
+                </label>
+                <label>
+                    <span>排序</span>
+                    <input v-model="form.sort_order" class="mentor-input" type="number" min="1" />
+                </label>
+                <label class="mentor-checkbox-row">
+                    <input v-model="form.enabled" type="checkbox" />
+                    <span>在前台公开展示</span>
+                </label>
+                <label>
+                    <span>姓名</span>
+                    <input v-model="form.name" class="mentor-input" />
+                </label>
+                <label>
+                    <span>职称</span>
+                    <input v-model="form.title" class="mentor-input" />
+                </label>
+                <label>
+                    <span>所属单位</span>
+                    <input v-model="form.affiliation" class="mentor-input" />
+                </label>
+                <label>
+                    <span>邮箱</span>
+                    <input v-model="form.email" class="mentor-input" />
+                </label>
+                <label>
+                    <span>头像 URL</span>
+                    <input v-model="form.avatar_url" class="mentor-input" />
+                </label>
+                <label class="mentor-editor-wide">
+                    <span>研究方向</span>
+                    <textarea
+                        v-model="form.research_areas_text"
+                        class="mentor-textarea"
+                        rows="4"
+                        placeholder="每行一个方向，也支持顿号或逗号分隔"
+                    ></textarea>
+                </label>
+                <label class="mentor-editor-wide">
+                    <span>一句话简介</span>
+                    <textarea v-model="form.summary" class="mentor-textarea" rows="3"></textarea>
+                </label>
+                <label class="mentor-editor-wide">
+                    <span>详细简介</span>
+                    <textarea v-model="form.bio" class="mentor-textarea" rows="4"></textarea>
+                </label>
+                <label class="mentor-editor-wide">
+                    <span>标准浙大个人主页 URL</span>
+                    <input
+                        v-model="form.standard_homepage_url"
+                        class="mentor-input"
+                        placeholder="例如 https://person.zju.edu.cn/flin"
+                    />
+                    <small>只有标准浙大个人主页会参与自动同步；其他主页请放在外部链接中。</small>
+                </label>
             </div>
-        </section>
+
+            <div class="mentor-link-editor">
+                <div class="mentor-link-editor__header">
+                    <strong>外部链接</strong>
+                    <Button label="添加链接" size="small" icon="pi pi-plus" @click="addLink" />
+                </div>
+                <div
+                    v-for="(link, index) in form.links"
+                    :key="index"
+                    class="mentor-link-row"
+                >
+                    <input v-model="link.label" class="mentor-input" placeholder="名称" />
+                    <input v-model="link.url" class="mentor-input" placeholder="URL" />
+                    <input v-model="link.type" class="mentor-input" placeholder="类型" />
+                    <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        text
+                        rounded
+                        aria-label="删除链接"
+                        @click="removeLink(index)"
+                    />
+                </div>
+                <p v-if="form.links.length === 0" class="mentor-empty-hint">
+                    暂无外部链接。
+                </p>
+            </div>
+
+            <template #footer>
+                <Button label="取消" severity="secondary" outlined @click="editorVisible = false" />
+                <Button label="保存" :loading="saving" @click="saveRecord" />
+            </template>
+        </Dialog>
+
+        <Dialog
+            v-model:visible="reviewVisible"
+            modal
+            header="审核同步建议"
+            class="mentor-review-dialog"
+        >
+            <div v-if="reviewRecord" class="mentor-review-content">
+                <p class="mentor-review-summary">
+                    同步建议来自
+                    <a
+                        v-if="reviewRecord.draft?.source_url"
+                        :href="reviewRecord.draft.source_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        标准浙大个人主页
+                    </a>
+                    <span v-else>标准浙大个人主页</span>
+                    ，请确认后再发布到前台。
+                </p>
+
+                <div
+                    v-for="change in reviewRecord.draft?.changes || []"
+                    :key="change.field"
+                    class="mentor-review-change"
+                >
+                    <label class="mentor-checkbox-row">
+                        <input
+                            type="checkbox"
+                            :checked="selectedFields.includes(change.field)"
+                            @change="toggleSelectedField(change.field)"
+                        />
+                        <strong>{{ change.label || change.field }}</strong>
+                    </label>
+                    <div class="mentor-review-diff">
+                        <div>
+                            <span>当前公开值</span>
+                            <p>{{ formatValue(change.current) }}</p>
+                        </div>
+                        <div>
+                            <span>同步建议值</span>
+                            <p>{{ formatValue(change.proposed) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <Button
+                    label="忽略建议"
+                    severity="secondary"
+                    outlined
+                    @click="discardDraft(reviewRecord)"
+                />
+                <Button label="发布选中项" @click="publishDraft" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
 <style scoped>
 .admin-mentors-page {
-    width: min(100%, 1480px);
+    padding: 2rem;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+.text-3xl {
     color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
-.admin-mentors-header {
+.mentor-toolbar {
     display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 22px;
-}
-
-.admin-mentors-eyebrow {
-    margin: 0 0 8px;
-    color: var(--accent-color);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0;
-}
-
-.admin-mentors-header h1 {
-    margin: 0;
-    font-size: 2rem;
-    line-height: 1.25;
-    letter-spacing: 0;
-}
-
-.admin-mentors-header p {
-    max-width: 680px;
-    margin: 10px 0 0;
-    color: var(--text-secondary);
-    line-height: 1.7;
-}
-
-.admin-mentors-actions {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
     flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.admin-mentors-notice {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-bottom: 18px;
-    padding: 14px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-surface);
-}
-
-.admin-mentors-notice i {
-    margin-top: 3px;
-    color: var(--accent-color);
-}
-
-.admin-mentors-notice strong {
-    display: block;
-    font-size: 0.95rem;
-}
-
-.admin-mentors-notice p {
-    margin: 3px 0 0;
-    color: var(--text-secondary);
-    line-height: 1.55;
-}
-
-.admin-mentors-notice--success {
-    border-color: rgba(16, 185, 129, 0.24);
-}
-
-.admin-mentors-notice--success i {
-    color: #10b981;
-}
-
-.admin-mentors-notice--error {
-    border-color: rgba(239, 68, 68, 0.26);
-}
-
-.admin-mentors-notice--error i {
-    color: #ef4444;
-}
-
-.admin-mentors-stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.admin-mentors-stat {
-    min-height: 104px;
-    padding: 18px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-surface);
-}
-
-.admin-mentors-stat span {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-}
-
-.admin-mentors-stat strong,
-.admin-mentors-stat a {
-    color: var(--text-primary);
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.55;
-    overflow-wrap: anywhere;
-}
-
-.admin-mentors-stat a:hover {
-    color: var(--accent-color);
-}
-
-.admin-mentors-stat--source {
-    grid-column: span 1;
-}
-
-.admin-mentors-meta-note,
-.admin-mentors-table-panel,
-.admin-mentors-source-panel {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-surface);
-}
-
-.admin-mentors-meta-note {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-bottom: 18px;
-    padding: 14px 16px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.admin-mentors-meta-note i {
-    margin-top: 4px;
-    color: var(--accent-color);
-}
-
-.admin-mentors-table-panel {
-    overflow: hidden;
-    margin-bottom: 18px;
-}
-
-.admin-mentor-teacher {
-    display: flex;
+    gap: 0.75rem;
     align-items: center;
-    gap: 12px;
-    min-width: 150px;
 }
 
-.admin-mentor-teacher img,
-.admin-mentor-avatar-fallback {
+.mentor-toolbar-btn--primary {
+    background: var(--gradient-primary) !important;
+    border: none !important;
+}
+
+.mentor-admin-note {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+
+.mentor-admin-note i {
+    margin-top: 0.2rem;
+    color: var(--accent-color);
+}
+
+.mentor-order-cell {
+    min-width: 3rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.mentor-status-cell,
+.mentor-actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.mentor-teacher-cell {
+    min-width: 18rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.mentor-teacher-cell img,
+.mentor-avatar-fallback {
     width: 48px;
     height: 60px;
     flex: 0 0 auto;
@@ -608,176 +763,189 @@ onMounted(() => {
     object-fit: cover;
 }
 
-.admin-mentor-avatar-fallback {
+.mentor-avatar-fallback {
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent-color);
-    font-size: 1.2rem;
     font-weight: 700;
 }
 
-.admin-mentor-teacher strong,
-.admin-mentor-text-stack strong {
+.mentor-teacher-cell strong,
+.mentor-draft-cell strong {
     display: block;
     color: var(--text-primary);
     line-height: 1.4;
 }
 
-.admin-mentor-teacher span,
-.admin-mentor-text-stack span,
-.admin-mentor-muted {
+.mentor-teacher-cell span,
+.mentor-teacher-cell small,
+.mentor-source-cell span,
+.mentor-draft-cell span,
+.mentor-draft-cell small,
+.mentor-empty-hint,
+.mentor-editor-grid small {
     display: block;
     color: var(--text-secondary);
-    font-size: 0.84rem;
-    line-height: 1.45;
+    font-size: 0.85rem;
+    line-height: 1.5;
 }
 
-.admin-mentor-text-stack {
-    min-width: 180px;
+.mentor-source-cell,
+.mentor-draft-cell {
+    min-width: 12rem;
     display: grid;
-    gap: 6px;
+    gap: 0.35rem;
 }
 
-.admin-mentor-tags {
-    min-width: 220px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.admin-mentor-note {
-    min-width: 220px;
-    max-width: 300px;
-    color: var(--text-secondary);
-    font-size: 0.86rem;
-    line-height: 1.55;
-}
-
-.admin-mentor-preview {
+.mentor-preview-link {
     display: inline-flex;
     align-items: center;
-    min-height: 34px;
-    padding: 6px 10px;
+    min-height: 32px;
+    padding: 0.35rem 0.6rem;
     border: 1px solid rgba(102, 126, 234, 0.22);
     border-radius: 6px;
     color: var(--accent-color);
-    font-size: 0.86rem;
+    font-size: 0.85rem;
     font-weight: 650;
     text-decoration: none;
 }
 
-.admin-mentor-preview:hover {
-    border-color: rgba(102, 126, 234, 0.36);
+.mentor-preview-link:hover {
     background: rgba(102, 126, 234, 0.08);
 }
 
-.admin-mentors-source-panel {
-    padding: 20px;
+.mentor-editor-dialog {
+    width: min(920px, calc(100vw - 32px));
 }
 
-.admin-mentors-source-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 16px;
+.mentor-review-dialog {
+    width: min(760px, calc(100vw - 32px));
 }
 
-.admin-mentors-source-header h2 {
-    margin: 0;
-    font-size: 1.15rem;
-    letter-spacing: 0;
-}
-
-.admin-mentors-source-header p {
-    max-width: 560px;
-    margin: 0;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.admin-mentors-source-grid {
+.mentor-editor-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 1rem;
 }
 
-.admin-mentors-source-card {
+.mentor-editor-grid label,
+.mentor-link-editor {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px 14px;
-    padding: 14px;
+    gap: 0.4rem;
+}
+
+.mentor-editor-grid label > span,
+.mentor-link-editor__header strong {
+    color: var(--text-primary);
+    font-weight: 650;
+}
+
+.mentor-editor-wide {
+    grid-column: 1 / -1;
+}
+
+.mentor-input,
+.mentor-textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.mentor-textarea {
+    resize: vertical;
+}
+
+.mentor-input:focus,
+.mentor-textarea:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.18);
+    border-color: rgba(102, 126, 234, 0.42);
+}
+
+.mentor-checkbox-row {
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-direction: row;
+    gap: 0.5rem !important;
+    align-items: center;
+}
+
+.mentor-checkbox-row input {
+    width: 1rem;
+    height: 1rem;
+}
+
+.mentor-link-editor {
+    margin-top: 1.25rem;
+}
+
+.mentor-link-editor__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+.mentor-link-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 0.8fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.mentor-review-summary {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.mentor-review-change {
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.mentor-review-diff {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.mentor-review-diff div {
+    padding: 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: var(--bg-secondary);
 }
 
-.admin-mentors-source-card strong {
+.mentor-review-diff span {
     display: block;
-    line-height: 1.4;
-}
-
-.admin-mentors-source-card span,
-.admin-mentors-source-profiles {
+    margin-bottom: 0.35rem;
     color: var(--text-secondary);
-    font-size: 0.84rem;
-    line-height: 1.5;
+    font-size: 0.82rem;
 }
 
-.admin-mentors-source-profiles {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.admin-mentors-source-card a,
-.admin-mentors-source-profiles a {
+.mentor-review-diff p {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
-::v-deep(.admin-mentors-table .p-datatable-thead > tr > th) {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-::v-deep(.admin-mentors-table .p-datatable-tbody > tr),
-::v-deep(.admin-mentors-table .p-datatable-tbody > tr > td) {
-    background: var(--bg-surface);
-    color: var(--text-primary);
-}
-
-::v-deep(.admin-mentors-table .p-datatable-tbody > tr > td),
-::v-deep(.admin-mentors-table .p-datatable-thead > tr > th) {
-    border-color: var(--border-color);
-}
-
-@media (max-width: 1180px) {
-    .admin-mentors-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .admin-mentors-header {
-        flex-direction: column;
-    }
-
-    .admin-mentors-actions {
-        justify-content: flex-start;
-    }
-}
-
-@media (max-width: 760px) {
+@media (max-width: 780px) {
     .admin-mentors-page {
-        width: 100%;
+        padding: 1.25rem;
     }
 
-    .admin-mentors-stats,
-    .admin-mentors-source-grid {
+    .mentor-editor-grid,
+    .mentor-review-diff,
+    .mentor-link-row {
         grid-template-columns: 1fr;
-    }
-
-    .admin-mentors-source-header {
-        flex-direction: column;
     }
 }
 </style>
