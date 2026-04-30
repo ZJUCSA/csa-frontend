@@ -53,6 +53,22 @@ const lastSyncedText = computed(() => {
 
 const getInitial = name => name.slice(0, 1)
 
+const getSourceStatusText = status => {
+    if (status === 'manual_seed') {
+        return '临时数据'
+    }
+
+    if (status === 'synced') {
+        return '已同步'
+    }
+
+    if (status === 'failed') {
+        return '同步异常'
+    }
+
+    return '待同步'
+}
+
 const loadMentors = async () => {
     loading.value = true
     errorMessage.value = ''
@@ -172,7 +188,7 @@ onMounted(() => {
                         </div>
 
                         <p class="mentor-card__summary">
-                            {{ mentor.summary || '公开资料将在内容审校阶段单独补充。' }}
+                            {{ mentor.summary || '公开资料待补充。' }}
                         </p>
 
                         <div class="mentor-card__meta">
@@ -182,7 +198,7 @@ onMounted(() => {
                             </span>
                             <span>
                                 <i class="pi pi-database" aria-hidden="true"></i>
-                                {{ mentor.source_status === 'manual_seed' ? '临时 seed' : mentor.source_status }}
+                                {{ getSourceStatusText(mentor.source_status) }}
                             </span>
                         </div>
 

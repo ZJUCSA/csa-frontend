@@ -172,7 +172,7 @@ watch(
                         <p class="mentor-detail-header__label">教师主页</p>
                         <h2>{{ mentor.name }}的公开资料</h2>
                         <p>
-                            本页用于汇总教师方向、联系方式和外部主页入口。正式内容将在资料审校阶段单独补充。
+                            本页汇总公开资料中的研究方向、联系方式和外部主页入口；具体招生与项目安排请以教师本人及学院发布信息为准。
                         </p>
                     </header>
 
@@ -197,7 +197,7 @@ watch(
                             </span>
                         </div>
                         <p v-else class="mentor-section__muted">
-                            研究方向将在正式资料填充阶段补充。
+                            公开研究方向待补充。
                         </p>
                     </section>
 
