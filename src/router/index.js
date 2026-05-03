@@ -74,6 +74,22 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'mentors',
+                    name: 'mentors',
+                    component: () => import('../views/CsaMentors.vue'),
+                    meta: {
+                        title: '教师介绍',
+                    },
+                },
+                {
+                    path: 'mentors/:id',
+                    name: 'mentor_detail',
+                    component: () => import('../views/CsaMentorDetail.vue'),
+                    meta: {
+                        title: '教师详情',
+                    },
+                },
+                {
                     path: 'events',
                     name: 'event_list',
                     component: () => import('../views/CsaEvents.vue'),
@@ -140,6 +156,14 @@ const router = createRouter({
                     component: () => import('../views/CsaAdminEvent.vue'),
                     meta: {
                         title: '活动管理',
+                    },
+                },
+                {
+                    path: 'mentors',
+                    name: 'admin-mentors',
+                    component: () => import('../views/CsaAdminMentors.vue'),
+                    meta: {
+                        title: '教师介绍管理',
                     },
                 },
                 {
