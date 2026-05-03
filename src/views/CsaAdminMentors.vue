@@ -699,6 +699,7 @@ onMounted(() => {
                 <label>
                     <span>头像 URL</span>
                     <input v-model="form.avatar_url" class="mentor-input" type="url" />
+                    <small>请填写已上传到图床的公开图片 URL。</small>
                 </label>
                 <label class="mentor-editor-wide">
                     <span>研究方向</span>

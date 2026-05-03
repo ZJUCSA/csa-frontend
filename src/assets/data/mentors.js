@@ -22,7 +22,7 @@ export const mentors = [
         summary: '研究方向包括程序分析、漏洞挖掘和应用安全，学院教师队伍页同时列出网络安全、系统安全方向。',
         bio: '李松为浙江大学百人计划研究员、博士生导师。公开主页介绍其研究工作聚焦程序分析、漏洞挖掘与应用安全；学院教师队伍页列出的方向包括漏洞挖掘、网络安全、系统安全和程序分析。',
         email: 'songli@zju.edu.cn',
-        avatar_url: '/mentors/li-song/avatar.png',
+        avatar_url: 'https://pub-aec7330d95c0405db0a31a5d67a35ae6.r2.dev/li-song-avatar.png',
         homepage_urls: [
             {
                 label: '个人主页',
@@ -55,7 +55,7 @@ export const mentors = [
         summary: '浙大个人主页列出网络空间安全、系统安全和网络仿真方向，学院教师队伍页补充网络系统仿真、互联网、无线移动网、车联网、工控网。',
         bio: '杜文亮为浙江大学求是讲席教授、博士生导师。浙大个人主页列出研究方向为网络空间安全、系统安全和网络仿真；学院教师队伍页列出网络系统仿真、互联网、无线移动网、车联网、工控网等方向。',
         email: 'wenliangdu@zju.edu.cn',
-        avatar_url: '/mentors/du-wenliang/avatar.jpg',
+        avatar_url: 'https://pub-aec7330d95c0405db0a31a5d67a35ae6.r2.dev/du-wenliang-avatar.jpg',
         homepage_urls: [
             {
                 label: '浙大个人主页',
@@ -88,7 +88,7 @@ export const mentors = [
         summary: '浙大个人主页列出智能网联车安全、物联网安全、人工智能安全、无线感知攻防和生物识别身份认证等方向。',
         bio: '林峰为浙江大学百人计划研究员、博士生导师。浙大个人主页列出研究方向为智能网联车安全、物联网安全、人工智能安全、无线感知攻防和生物识别身份认证；其公开主页也列出 IoT Security、Smart Vehicle Security、Deepfake Detection、Artificial Intelligence Security 等兴趣方向。',
         email: 'flin@zju.edu.cn',
-        avatar_url: '/mentors/lin-feng/avatar.jpg',
+        avatar_url: 'https://pub-aec7330d95c0405db0a31a5d67a35ae6.r2.dev/lin-feng-avatar.jpg',
         homepage_urls: [
             {
                 label: '浙大个人主页',
@@ -121,7 +121,7 @@ export const mentors = [
         summary: '学院教师队伍页列为研究员，研究方向为系统安全、IoT 安全和软件供应链。',
         bio: '申大坤为浙江大学网络空间安全学院教师队伍页列出的研究员。当前公开来源列出的研究方向为系统安全、IoT 安全和软件供应链；个人主页、邮箱等字段在本阶段暂未确认。',
         email: '',
-        avatar_url: '/mentors/shen-dakun/avatar.png',
+        avatar_url: 'https://pub-aec7330d95c0405db0a31a5d67a35ae6.r2.dev/shen-dakun-avatar.png',
         homepage_urls: [
             {
                 label: '学院教师队伍页',
