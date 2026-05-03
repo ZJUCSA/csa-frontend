@@ -48,6 +48,7 @@ const editingRecord = ref(null)
 const reviewRecord = ref(null)
 const selectedFields = ref([])
 const form = ref({ ...EMPTY_FORM })
+const failedAvatarIds = ref(new Set())
 
 const sortedRecords = computed(() => records.value)
 const hasPendingDrafts = computed(() =>
@@ -80,6 +81,119 @@ const notify = (type, message) => {
 }
 
 const cleanText = value => String(value || '').trim()
+
+const isHttpUrl = value => {
+    try {
+        const parsedUrl = new URL(value)
+        return ['http:', 'https:'].includes(parsedUrl.protocol) && Boolean(parsedUrl.hostname)
+    } catch {
+        return false
+    }
+}
+
+const isAvatarUrl = value => {
+    const cleanedValue = cleanText(value)
+    if (!cleanedValue) return true
+
+    if (cleanedValue.startsWith('/')) {
+        return !/\s/.test(cleanedValue)
+    }
+
+    return isHttpUrl(cleanedValue)
+}
+
+const isValidEmail = value => !cleanText(value) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(value))
+const isStandardHomepageUrl = value =>
+    !cleanText(value) || /^https?:\/\/person\.zju\.edu\.cn\/[^/?#]+\/?$/.test(cleanText(value))
+
+const normalizeLinkUrl = value => cleanText(value).replace(/\/+$/, '')
+
+const findDuplicateLinkUrl = links => {
+    const seenUrls = new Set()
+
+    for (const link of links) {
+        const url = cleanText(link.url)
+        if (!url) continue
+
+        const normalizedUrl = normalizeLinkUrl(url)
+        if (seenUrls.has(normalizedUrl)) {
+            return url
+        }
+
+        seenUrls.add(normalizedUrl)
+    }
+
+    return ''
+}
+
+const validateForm = () => {
+    if (!cleanText(form.value.name)) {
+        return '请先填写教师姓名'
+    }
+
+    const sortOrder = Number(form.value.sort_order)
+    if (!Number.isInteger(sortOrder) || sortOrder < 1) {
+        return '排序值必须是大于 0 的整数'
+    }
+
+    const sortConflict = records.value.find(
+        record =>
+            record.id !== editingRecord.value?.id &&
+            Number(record.sort_order) === sortOrder
+    )
+    if (sortConflict) {
+        return `排序值已被「${sortConflict.published.name}」使用，请调整排序`
+    }
+
+    if (!isValidEmail(form.value.email)) {
+        return '邮箱格式不正确，请填写形如 name@example.com 的公开邮箱'
+    }
+
+    if (!isAvatarUrl(form.value.avatar_url)) {
+        return '头像 URL 必须是 http(s) 地址，或以 / 开头的站内资源路径'
+    }
+
+    if (!isStandardHomepageUrl(form.value.standard_homepage_url)) {
+        return '标准浙大个人主页 URL 必须形如 https://person.zju.edu.cn/<slug>'
+    }
+
+    for (const link of form.value.links) {
+        const url = cleanText(link.url)
+        if (url && !isHttpUrl(url)) {
+            return `外部链接 URL 格式不正确：${url}`
+        }
+    }
+
+    const duplicateUrl = findDuplicateLinkUrl(form.value.links)
+    if (duplicateUrl) {
+        return `外部链接重复：${duplicateUrl}`
+    }
+
+    return ''
+}
+
+const getApiErrorMessage = (error, fallback) => {
+    const detail = error?.response?.data?.detail
+
+    if (typeof detail === 'string') {
+        return detail
+    }
+
+    if (Array.isArray(detail) && detail.length > 0) {
+        return detail.map(item => item.msg || item.message || String(item)).join('；')
+    }
+
+    return fallback
+}
+
+const shouldShowRecordAvatar = record =>
+    Boolean(record.published?.avatar_url) && !failedAvatarIds.value.has(record.id)
+
+const markRecordAvatarFailed = id => {
+    const nextFailedIds = new Set(failedAvatarIds.value)
+    nextFailedIds.add(id)
+    failedAvatarIds.value = nextFailedIds
+}
 
 const fetchRecords = async () => {
     loading.value = true
@@ -127,8 +241,9 @@ const openEdit = record => {
 }
 
 const saveRecord = async () => {
-    if (!cleanText(form.value.name)) {
-        notify('error', '请先填写教师姓名')
+    const validationMessage = validateForm()
+    if (validationMessage) {
+        notify('error', validationMessage)
         return
     }
 
@@ -143,7 +258,7 @@ const saveRecord = async () => {
         notify('success', '教师资料已保存')
     } catch (error) {
         console.error('保存教师资料失败:', error)
-        notify('error', '教师资料保存失败')
+        notify('error', getApiErrorMessage(error, '教师资料保存失败'))
     } finally {
         saving.value = false
     }
@@ -448,9 +563,10 @@ onMounted(() => {
                     <template #body="{ data }">
                         <div class="mentor-teacher-cell">
                             <img
-                                v-if="data.published.avatar_url"
+                                v-if="shouldShowRecordAvatar(data)"
                                 :src="data.published.avatar_url"
                                 :alt="`${data.published.name}头像`"
+                                @error="markRecordAvatarFailed(data.id)"
                             />
                             <div v-else class="mentor-avatar-fallback">
                                 {{ data.published.name.slice(0, 1) || '?' }}
@@ -578,11 +694,11 @@ onMounted(() => {
                 </label>
                 <label>
                     <span>邮箱</span>
-                    <input v-model="form.email" class="mentor-input" />
+                    <input v-model="form.email" class="mentor-input" type="email" />
                 </label>
                 <label>
                     <span>头像 URL</span>
-                    <input v-model="form.avatar_url" class="mentor-input" />
+                    <input v-model="form.avatar_url" class="mentor-input" type="url" />
                 </label>
                 <label class="mentor-editor-wide">
                     <span>研究方向</span>
@@ -606,6 +722,7 @@ onMounted(() => {
                     <input
                         v-model="form.standard_homepage_url"
                         class="mentor-input"
+                        type="url"
                         placeholder="例如 https://person.zju.edu.cn/flin"
                     />
                     <small>只有标准浙大个人主页会参与自动同步；其他主页请放在外部链接中。</small>
@@ -623,7 +740,7 @@ onMounted(() => {
                     class="mentor-link-row"
                 >
                     <input v-model="link.label" class="mentor-input" placeholder="名称" />
-                    <input v-model="link.url" class="mentor-input" placeholder="URL" />
+                    <input v-model="link.url" class="mentor-input" type="url" placeholder="URL" />
                     <input v-model="link.type" class="mentor-input" placeholder="类型" />
                     <Button
                         icon="pi pi-trash"

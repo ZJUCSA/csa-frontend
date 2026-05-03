@@ -1,6 +1,6 @@
 <!--
 职责范围：渲染教师介绍页 `/mentors` 的公开列表主页、资料更新时间和教师卡片入口。
-功能边界：本页面只展示四位白名单教师的主页概览，不承载详情页布局、正式资料审校或后端同步逻辑。
+功能边界：本页面展示当前公开的重点对接教师主页概览，不承载详情页布局、后台审校或后端同步逻辑。
 -->
 
 <script setup>
@@ -16,6 +16,7 @@ const loading = ref(true)
 const errorMessage = ref('')
 const mentors = ref([])
 const syncMeta = ref(DEFAULT_SYNC_META)
+const failedAvatarIds = ref(new Set())
 
 const visibleMentors = computed(() => mentors.value)
 
@@ -40,6 +41,15 @@ const lastSyncedText = computed(() => {
 })
 
 const getInitial = name => name.slice(0, 1)
+
+const shouldShowAvatar = mentor =>
+    Boolean(mentor.avatar_url) && !failedAvatarIds.value.has(mentor.id)
+
+const markAvatarFailed = id => {
+    const nextFailedIds = new Set(failedAvatarIds.value)
+    nextFailedIds.add(id)
+    failedAvatarIds.value = nextFailedIds
+}
 
 const loadMentors = async () => {
     loading.value = true
@@ -126,10 +136,11 @@ onMounted(() => {
                 >
                     <div class="mentor-card__avatar">
                         <img
-                            v-if="mentor.avatar_url"
+                            v-if="shouldShowAvatar(mentor)"
                             :src="mentor.avatar_url"
                             :alt="`${mentor.name}头像`"
                             loading="lazy"
+                            @error="markAvatarFailed(mentor.id)"
                         />
                         <span v-else>{{ getInitial(mentor.name) }}</span>
                     </div>

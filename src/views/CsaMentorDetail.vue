@@ -14,6 +14,7 @@ const loading = ref(true)
 const errorMessage = ref('')
 const mentor = ref(null)
 const syncMeta = ref({})
+const failedAvatarIds = ref(new Set())
 
 const formatPublicDate = value => {
     if (!value) {
@@ -47,9 +48,23 @@ const sourceUrl = computed(() => mentor.value?.source_url || syncMeta.value?.sou
 
 const getInitial = name => (name ? name.slice(0, 1) : '?')
 
+const updateDocumentTitle = name => {
+    document.title = name ? `${name} - 教师介绍 - ZJUCSA` : '教师详情 - ZJUCSA'
+}
+
+const shouldShowAvatar = item =>
+    Boolean(item?.avatar_url) && !failedAvatarIds.value.has(item.id)
+
+const markAvatarFailed = id => {
+    const nextFailedIds = new Set(failedAvatarIds.value)
+    nextFailedIds.add(id)
+    failedAvatarIds.value = nextFailedIds
+}
+
 const loadMentor = async id => {
     loading.value = true
     errorMessage.value = ''
+    updateDocumentTitle('')
 
     try {
         const response = await axios.get('/teachers/detail', {
@@ -60,13 +75,16 @@ const loadMentor = async id => {
         mentor.value = response.data.item
         syncMeta.value = response.data.meta || {}
 
-        if (!response.data.item) {
+        if (response.data.item) {
+            updateDocumentTitle(response.data.item.name)
+        } else {
             errorMessage.value = '未找到对应教师资料。'
         }
     } catch (error) {
         console.error('加载教师详情失败:', error)
         mentor.value = null
         errorMessage.value = '教师详情暂时不可用，请稍后再试。'
+        updateDocumentTitle('')
     } finally {
         loading.value = false
     }
@@ -118,9 +136,10 @@ watch(
                 <aside class="mentor-summary" aria-label="教师身份摘要">
                     <div class="mentor-summary__avatar">
                         <img
-                            v-if="mentor.avatar_url"
+                            v-if="shouldShowAvatar(mentor)"
                             :src="mentor.avatar_url"
                             :alt="`${mentor.name}头像`"
+                            @error="markAvatarFailed(mentor.id)"
                         />
                         <span v-else>{{ getInitial(mentor.name) }}</span>
                     </div>
